@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Plus, CalendarDays, Menu } from "lucide-react";
 
 export default function MirrorHeader() {
@@ -8,38 +9,14 @@ export default function MirrorHeader() {
       {/* Logo */}
       <div className="flex items-center gap-2.5">
         <div className="relative w-10 h-10 lg:w-12 lg:h-12">
-          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            <defs>
-              <linearGradient id="logo-grad" x1="0" y1="0" x2="48" y2="48">
-                <stop offset="0%" stopColor="#3B82F6" />
-                <stop offset="50%" stopColor="#6366F1" />
-                <stop offset="100%" stopColor="#8B5CF6" />
-              </linearGradient>
-            </defs>
-            <rect width="48" height="48" rx="12" fill="url(#logo-grad)" />
-            <path
-              d="M12 36V12L24 28L36 12V36"
-              stroke="white"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-            <path
-              d="M12 12L18 20"
-              stroke="white"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              opacity="0.6"
-            />
-            <path
-              d="M36 12L30 20"
-              stroke="white"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              opacity="0.6"
-            />
-          </svg>
+          <Image
+            src="/logo.png"
+            alt="Active Mirror"
+            width={48}
+            height={48}
+            className="w-full h-full object-contain"
+            priority
+          />
         </div>
         <span className="text-lg lg:text-xl font-semibold text-gray-900 tracking-tight">
           Active Mirror

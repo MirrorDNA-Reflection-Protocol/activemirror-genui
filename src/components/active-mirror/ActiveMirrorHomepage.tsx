@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { Loader2 } from "lucide-react";
 import type { MirrorMode, MirrorSurfaceSpec } from "@/lib/mirror/types";
 import { getDemoSurfaceSpec, getSurfaceByMode } from "@/lib/mirror/demo-surfaces";
 import MirrorHeader from "./MirrorHeader";
@@ -12,24 +13,56 @@ import GenUIPanel from "./GenUIPanel";
 import GeneratedSurfacePanel from "./GeneratedSurfacePanel";
 import PersistentChatBar from "./PersistentChatBar";
 
+async function fetchSurface(query: string): Promise<MirrorSurfaceSpec> {
+  try {
+    const res = await fetch("/api/mirror/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    return await res.json();
+  } catch {
+    // Graceful client-side fallback to canned data
+    return getDemoSurfaceSpec(query);
+  }
+}
+
 export default function ActiveMirrorHomepage() {
   const [surface, setSurface] = useState<MirrorSurfaceSpec | null>(null);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handlePromptSubmit = useCallback((prompt: string) => {
-    const spec = getDemoSurfaceSpec(prompt);
-    setSurface(spec);
+  const handlePromptSubmit = useCallback(async (prompt: string) => {
     setHasInteracted(true);
+    setLoading(true);
+    try {
+      const spec = await fetchSurface(prompt);
+      setSurface(spec);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const handleModeChange = useCallback((mode: MirrorMode) => {
-    const spec = getSurfaceByMode(mode);
-    setSurface(spec);
+  const handleModeChange = useCallback(async (mode: MirrorMode) => {
+    setLoading(true);
+    try {
+      // Mode switches use canned data for instant UX
+      const spec = getSurfaceByMode(mode);
+      setSurface(spec);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const handlePromptSelect = useCallback((prompt: string) => {
-    const spec = getDemoSurfaceSpec(prompt);
-    setSurface(spec);
+  const handlePromptSelect = useCallback(async (prompt: string) => {
+    setLoading(true);
+    try {
+      const spec = await fetchSurface(prompt);
+      setSurface(spec);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   return (
@@ -75,12 +108,21 @@ export default function ActiveMirrorHomepage() {
                 </p>
               </div>
 
-              {surface && (
-                <GeneratedSurfacePanel
-                  surface={surface}
-                  onModeChange={handleModeChange}
-                  onPromptSelect={handlePromptSelect}
-                />
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                  <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                  <p className="text-sm text-gray-500">
+                    Generating governed surface...
+                  </p>
+                </div>
+              ) : (
+                surface && (
+                  <GeneratedSurfacePanel
+                    surface={surface}
+                    onModeChange={handleModeChange}
+                    onPromptSelect={handlePromptSelect}
+                  />
+                )
               )}
             </motion.div>
           )}
