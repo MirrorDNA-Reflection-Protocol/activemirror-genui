@@ -9,7 +9,7 @@ interface AIJourneyPromptProps {
 }
 
 export default function AIJourneyPrompt({ onSubmit }: AIJourneyPromptProps) {
-  const [value, setValue] = useState("What is Active Mirror?");
+  const [value, setValue] = useState("How does the Sovereign OS govern AI?");
 
   const handleSubmit = () => {
     if (value.trim()) {

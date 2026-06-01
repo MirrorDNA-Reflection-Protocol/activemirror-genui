@@ -1,16 +1,20 @@
 "use client";
 
-import { Globe, Smartphone, PenTool, Presentation } from "lucide-react";
+import { ShieldCheck, Network, BrainCircuit, KeySquare } from "lucide-react";
 import { motion } from "motion/react";
 
 const categories = [
-  { icon: Globe, label: "Website", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
-  { icon: Smartphone, label: "Mobile", color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-100" },
-  { icon: PenTool, label: "Design", color: "text-teal-600", bg: "bg-teal-50", border: "border-teal-100" },
-  { icon: Presentation, label: "Slides", color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-100" },
+  { icon: ShieldCheck, label: "Chetana API", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100", prompt: "[SYSTEM AUTO-TRIGGER: Route to Chetana Shield API and analyze synthetic media risks]" },
+  { icon: BrainCircuit, label: "MirrorBrain", color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-100", prompt: "[SYSTEM AUTO-TRIGGER: Explore MirrorBrain Sovereign Consciousness Layer and QualiaEngine]" },
+  { icon: KeySquare, label: "LingOS State", color: "text-teal-600", bg: "bg-teal-50", border: "border-teal-100", prompt: "[SYSTEM AUTO-TRIGGER: Trigger LingOS Cryptographic State Audit with Ed25519 hash chain]" },
+  { icon: Network, label: "6-Tier Router", color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-100", prompt: "[SYSTEM AUTO-TRIGGER: Explain the 6-Tier Model Router and local vs cloud governance]" },
 ];
 
-export default function CategoryIcons() {
+interface CategoryIconsProps {
+  onSelect?: (category: string) => void;
+}
+
+export default function CategoryIcons({ onSelect }: CategoryIconsProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -24,6 +28,7 @@ export default function CategoryIcons() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.4 + i * 0.08 }}
+          onClick={() => onSelect?.(cat.prompt)}
           className="flex flex-col items-center gap-2 group"
         >
           <div

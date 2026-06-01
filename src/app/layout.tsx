@@ -13,9 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Active Mirror — Governed AI Interface",
-  description:
-    "Don't just chat with AI. Control what it shows, remembers, proves, and does. Active Mirror gives every AI action a memory boundary, authority boundary, proof trail, and approval path.",
+  title: "Active Mirror | Sovereign AI Ecosystem",
+  description: "Governed AI interfaces by N1 Intelligence.",
   keywords: [
     "governed AI",
     "AI governance",
@@ -30,6 +29,12 @@ export const metadata: Metadata = {
       "Active Mirror does not only generate answers. It generates controlled surfaces for action.",
     siteName: "Active Mirror",
     type: "website",
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Active Mirror",
   },
 };
 

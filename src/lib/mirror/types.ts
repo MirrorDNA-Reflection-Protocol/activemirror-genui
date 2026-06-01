@@ -68,7 +68,12 @@ export type MirrorComponent = {
     | "memory_boundary_card"
     | "authority_boundary_card"
     | "agent_identity_card"
-    | "proof_card";
+    | "proof_card"
+    | "data_table_card"
+    | "chart_card"
+    | "form_card"
+    | "proof_map_card"
+    | "kyc_risk_card";
   title: string;
   body: string;
   severity?: "info" | "low" | "medium" | "high" | "blocked";
@@ -78,6 +83,7 @@ export type MirrorComponent = {
 };
 
 export type MirrorSurfaceSpec = {
+  thought_process?: string[];
   surface_id: string;
   mode: MirrorMode;
   title: string;

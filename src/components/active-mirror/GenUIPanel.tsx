@@ -33,7 +33,11 @@ const cards = [
   },
 ];
 
-export default function GenUIPanel() {
+interface GenUIPanelProps {
+  onSelect?: (title: string) => void;
+}
+
+export default function GenUIPanel({ onSelect }: GenUIPanelProps) {
   const [expanded, setExpanded] = useState(true);
 
   return (
@@ -99,6 +103,7 @@ export default function GenUIPanel() {
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: 0.55 + i * 0.1 }}
+                      onClick={() => onSelect?.(card.title.replace('\n', ' '))}
                       className="group relative bg-white/70 backdrop-blur-sm rounded-xl border border-blue-50 p-3 lg:p-4 hover:shadow-lg hover:bg-white/90 hover:border-blue-100 transition-all cursor-pointer"
                     >
                       {/* Illustration */}

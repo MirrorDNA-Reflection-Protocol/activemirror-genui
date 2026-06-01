@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Send, Sparkles } from "lucide-react";
+import { useState, useCallback, useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
+import { Sparkles, ArrowUp, Mic, MicOff } from "lucide-react";
 
 interface PersistentChatBarProps {
   onSubmit: (prompt: string) => void;
@@ -9,40 +9,144 @@ interface PersistentChatBarProps {
 
 export default function PersistentChatBar({ onSubmit }: PersistentChatBarProps) {
   const [value, setValue] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const [recognition, setRecognition] = useState<any>(null);
 
-  const handleSubmit = () => {
-    if (value.trim()) {
-      onSubmit(value.trim());
-      setValue("");
+  useEffect(() => {
+    if (typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const rec = new SpeechRecognition();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "en-US";
+
+      rec.onresult = (event: any) => {
+        let finalTranscript = "";
+        let interimTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+        
+        if (finalTranscript) {
+          setValue((prev) => (prev + " " + finalTranscript).trim());
+        }
+      };
+
+      rec.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+        setIsListening(false);
+      };
+
+      rec.onend = () => {
+        setIsListening(false);
+      };
+
+      setRecognition(rec);
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognition?.stop();
+    } else {
+      setValue(""); // clear before speaking
+      recognition?.start();
+      setIsListening(true);
     }
   };
 
-  return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 lg:pb-5 lg:pt-3">
-      {/* Gradient fade above bar */}
-      <div className="absolute inset-x-0 -top-6 h-6 bg-gradient-to-t from-white/80 to-transparent pointer-events-none" />
+  const submit = useCallback(() => {
+    if (isListening) {
+      recognition?.stop();
+      setIsListening(false);
+    }
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    onSubmit(trimmed);
+    setValue("");
+  }, [value, onSubmit, isListening, recognition]);
 
-      <div className="mx-auto max-w-2xl xl:max-w-3xl">
-        <div className="flex items-center gap-3 bg-white/80 backdrop-blur-xl rounded-2xl border border-blue-100/80 shadow-[0_4px_32px_rgba(59,130,246,0.1)] px-4 py-3 lg:px-5 lg:py-3.5">
-          <Sparkles className="w-5 h-5 text-blue-400 flex-shrink-0" />
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            className="flex-1 bg-transparent text-sm lg:text-base text-gray-800 placeholder-gray-400 outline-none"
-            placeholder="Ask Active Mirror anything..."
-            aria-label="Chat with Active Mirror"
-          />
-          <button
-            onClick={handleSubmit}
-            disabled={!value.trim()}
-            className="w-9 h-9 lg:w-10 lg:h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-40 disabled:hover:scale-100 disabled:hover:shadow-md"
-            aria-label="Send message"
-          >
-            <Send className="w-4 h-4 lg:w-5 lg:h-5" />
+  const handleSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      submit();
+    },
+    [submit],
+  );
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        submit();
+      }
+    },
+    [submit],
+  );
+
+  const isEmpty = value.trim().length === 0;
+
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50">
+      {/* Gradient fade to blend with page content above */}
+      <div className="h-16 bg-gradient-to-t from-white/80 to-transparent  " />
+
+      {/* Glass bar */}
+      <div className="pointer-events-auto border-t border-zinc-200/60 bg-white/70 backdrop-blur-xl pb-2">
+        
+        {/* Meta-UI Macros */}
+        <div className="mx-auto flex w-full max-w-3xl items-center gap-2 px-4 py-2 overflow-x-auto scrollbar-hide">
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-2 shrink-0">Macros</span>
+          <button onClick={() => onSubmit("Initialize KYC for MS-994-01A")} className="shrink-0 px-3 py-1 bg-white border border-emerald-200 text-emerald-600 rounded-full text-xs font-medium hover:bg-emerald-50 transition-colors">
+            Init KYC
+          </button>
+          <button onClick={() => onSubmit("Generate Architecture Spec")} className="shrink-0 px-3 py-1 bg-white border border-purple-200 text-purple-600 rounded-full text-xs font-medium hover:bg-purple-50 transition-colors">
+            System Spec
+          </button>
+          <button onClick={() => onSubmit("Full Cryptographic Audit")} className="shrink-0 px-3 py-1 bg-white border border-blue-200 text-blue-600 rounded-full text-xs font-medium hover:bg-blue-50 transition-colors">
+            Audit Trail
           </button>
         </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="mx-auto flex w-full max-w-3xl items-end gap-2 px-4 py-1"
+        >
+          {/* Voice button */}
+          <button
+            type="button"
+            onClick={toggleListening}
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
+            aria-label="Toggle voice input"
+          >
+            {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+          </button>
+
+          {/* Text input */}
+          <textarea
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={isListening ? "Listening..." : "Orchestrate your session..."}
+            rows={1}
+            className="max-h-40 min-h-[2.5rem] flex-1 resize-none rounded-2xl border border-zinc-200 bg-zinc-100/80 px-4 py-2.5 text-sm leading-snug text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-zinc-300 focus:bg-white      "
+          />
+
+          {/* Send button */}
+          <button
+            type="submit"
+            disabled={isEmpty && !isListening}
+            aria-label="Send message"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition-opacity hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed   "
+          >
+            <ArrowUp className="h-5 w-5" />
+          </button>
+        </form>
       </div>
     </div>
   );

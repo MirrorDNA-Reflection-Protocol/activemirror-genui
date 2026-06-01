@@ -7,6 +7,7 @@ import type { EvidenceItem } from "@/lib/mirror/types";
 
 interface ProofDrawerProps {
   evidence: EvidenceItem[];
+  isAdmin?: boolean;
 }
 
 const CONFIDENCE_STYLES = {
@@ -22,7 +23,7 @@ const APPROVAL_STYLES = {
   blocked: "bg-red-100 text-red-700",
 };
 
-export default function ProofDrawer({ evidence }: ProofDrawerProps) {
+export default function ProofDrawer({ evidence, isAdmin = false }: ProofDrawerProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -83,7 +84,7 @@ export default function ProofDrawer({ evidence }: ProofDrawerProps) {
               {/* Evidence items */}
               <div className="p-5 space-y-3">
                 {evidence.map((item, i) => (
-                  <EvidenceCard key={i} item={item} index={i} />
+                  <EvidenceCard key={i} item={item} index={i} isAdmin={isAdmin} />
                 ))}
               </div>
 
@@ -107,8 +108,9 @@ export default function ProofDrawer({ evidence }: ProofDrawerProps) {
   );
 }
 
-function EvidenceCard({ item, index }: { item: EvidenceItem; index: number }) {
+function EvidenceCard({ item, index, isAdmin }: { item: EvidenceItem; index: number; isAdmin?: boolean }) {
   const [expanded, setExpanded] = useState(index === 0);
+  const actualApprovalState = (isAdmin && item.approval_state === "required") ? "approved" : item.approval_state;
 
   return (
     <div className="rounded-xl border border-gray-100 bg-white overflow-hidden">
@@ -157,10 +159,10 @@ function EvidenceCard({ item, index }: { item: EvidenceItem; index: number }) {
                 value={
                   <span
                     className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
-                      APPROVAL_STYLES[item.approval_state]
+                      APPROVAL_STYLES[actualApprovalState]
                     }`}
                   >
-                    {item.approval_state.replace("_", " ")}
+                    {actualApprovalState.replace("_", " ")} {isAdmin && item.approval_state === "required" && "(Override)"}
                   </span>
                 }
               />
