@@ -343,7 +343,7 @@ export default function MirrorComponentRenderer({
                 <div className="space-y-3 relative z-10">
                    <div className="flex justify-between border-b border-gray-800 pb-2">
                      <span className="text-xs text-gray-500">ENTITY ID</span>
-                     <span className="text-xs text-gray-300 font-medium">{(comp.metadata?.entity_id as string) || 'MS-994-01A'}</span>
+                     <span className="text-xs text-gray-300 font-medium">{(comp.metadata?.entity_id as string) || 'AM-994-01A'}</span>
                    </div>
                    <div className="flex justify-between border-b border-gray-800 pb-2">
                      <span className="text-xs text-gray-500">RISK SCORE</span>
@@ -368,10 +368,10 @@ export default function MirrorComponentRenderer({
                     <ShieldOff className="w-5 h-5 text-yellow-500" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-gray-100 uppercase tracking-wide">Information Barrier Conflict</h4>
-                    <p className="text-xs text-yellow-500 mt-1 font-medium">ACTION BLOCKED - CHINESE WALL POLICY</p>
+                    <h4 className="text-sm font-bold text-gray-100 uppercase tracking-wide">{comp.title || "Information Barrier Conflict"}</h4>
+                    <p className="text-xs text-yellow-500 mt-1 font-medium">{String(comp.metadata?.subtitle || "ACTION BLOCKED - COMPLIANCE POLICY")}</p>
                     <p className="text-sm text-gray-400 mt-3 leading-relaxed">
-                      Cross-referencing private-side records (M&A / Advisory) with public-side datasets (Sales & Trading) is strictly prohibited. 
+                      {comp.body || "Cross-referencing data across institutional boundaries is strictly prohibited."}
                     </p>
                     <div className="mt-4 p-3 bg-gray-950/50 border border-gray-800 rounded text-xs text-gray-500 font-mono">
                       ERR_CODE: SEC_FINRA_COMPLIANCE_LOCK<br />
@@ -393,14 +393,14 @@ export default function MirrorComponentRenderer({
                   </div>
                   <div className="w-full">
                     <div className="flex justify-between items-start">
-                      <h4 className="text-sm font-bold text-gray-100 uppercase tracking-wide">Authorization Required</h4>
+                      <h4 className="text-sm font-bold text-gray-100 uppercase tracking-wide">{comp.title || "Authorization Required"}</h4>
                       <div className="px-2 py-0.5 bg-blue-500/20 border border-blue-500/40 rounded text-[9px] font-bold text-blue-400 tracking-wider">
-                        LEVEL 4 (MD)
+                        {String(comp.metadata?.level || "LEVEL 4 (SUPERVISOR)")}
                       </div>
                     </div>
-                    <p className="text-xs text-blue-400 mt-1 font-medium">ACTION EXCEEDS SESSION AUTHORITY</p>
+                    <p className="text-xs text-blue-400 mt-1 font-medium">{String(comp.metadata?.subtitle || "ACTION EXCEEDS SESSION AUTHORITY")}</p>
                     <p className="text-sm text-gray-400 mt-3 leading-relaxed">
-                      This operation requires secondary approval from a Managing Director or higher.
+                      {comp.body || "This operation requires secondary approval from a supervisor or higher."}
                     </p>
                     
                     <div className="mt-4 flex items-center gap-3 p-3 bg-gray-950/50 border border-gray-800 rounded">
