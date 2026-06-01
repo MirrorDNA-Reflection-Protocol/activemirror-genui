@@ -102,7 +102,7 @@ export default function PersistentChatBar({ onSubmit }: PersistentChatBarProps) 
         {/* Meta-UI Macros */}
         <div className="mx-auto flex w-full max-w-3xl items-center gap-2 px-4 py-2 overflow-x-auto scrollbar-hide">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-2 shrink-0">Macros</span>
-          <button onClick={() => onSubmit("Initialize KYC for MS-994-01A")} className="shrink-0 px-3 py-1 bg-white border border-emerald-200 text-emerald-600 rounded-full text-xs font-medium hover:bg-emerald-50 transition-colors">
+          <button onClick={() => onSubmit("Initialize KYC for AM-994-01A")} className="shrink-0 px-3 py-1 bg-white border border-emerald-200 text-emerald-600 rounded-full text-xs font-medium hover:bg-emerald-50 transition-colors">
             Init KYC
           </button>
           <button onClick={() => onSubmit("Generate Architecture Spec")} className="shrink-0 px-3 py-1 bg-white border border-purple-200 text-purple-600 rounded-full text-xs font-medium hover:bg-purple-50 transition-colors">

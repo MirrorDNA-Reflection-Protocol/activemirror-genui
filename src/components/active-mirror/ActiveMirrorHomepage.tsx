@@ -151,8 +151,12 @@ export default function ActiveMirrorHomepage() {
             >
               <div className="flex flex-col lg:flex-row gap-6 mx-4 lg:mx-8 xl:mx-12 mt-4 lg:mt-8 h-full">
                 {/* Left Pane: Chat History */}
-                <div className="w-full lg:w-1/3 flex flex-col h-full border-r border-gray-200/50 pr-4">
-                  <ChatHistoryPanel messages={messages} />
+                <div className="flex-1 overflow-y-auto w-full lg:w-[400px] shrink-0 border-r border-zinc-200/50">
+                  <ChatHistoryPanel 
+                    messages={messages} 
+                    isGenerating={isLoading} 
+                    error={error?.message}
+                  />
                 </div>
                 
                 {/* Right Pane: Contextual Co-Creation Canvas */}

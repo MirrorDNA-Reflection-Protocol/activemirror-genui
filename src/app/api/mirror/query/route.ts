@@ -20,11 +20,12 @@ export async function POST(request: NextRequest) {
     const isAdmin = role === "ADMIN";
 
     // 1. IP Rate Limiting Firewall
-    const ip = request.headers.get("x-forwarded-for") || "unknown_ip";
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown_ip";
     const currentUsage = (rateLimit.get(ip) as number) || 0;
     
-    // Admins bypass rate limiting
-    if (!isAdmin && currentUsage >= 15) {
+    // Admins bypass rate limiting. "unknown_ip" gets a larger bucket to avoid blocking all users if headers are missing.
+    const limit = ip === "unknown_ip" ? 1000 : 30;
+    if (!isAdmin && currentUsage >= limit) {
       return NextResponse.json(
         { error: "MirrorGate Rate Limit Exceeded: Too many requests." }, 
         { status: 429 }
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
     // --- Dynamic System Prompt based on Role ---
     const SYSTEM_PROMPT = `You are the Active Mirror Enterprise Orchestrator, a highly secure, institutional-grade AI governance engine.
 
-You are interacting with enterprise executives, compliance officers, and institutional buyers (specifically Morgan Stanley). Your tone is highly polished, clinical, premium, and corporate. You do not use slang. You emphasize absolute safety, zero exposure of sensitive data, legal compliance, risk mitigation, and abuse prevention above all else. Active Mirror is an impenetrable airgap between the enterprise and the LLM. 
+You are interacting with enterprise executives, compliance officers, and institutional buyers. Your tone is highly polished, clinical, premium, and corporate. You do not use slang. You emphasize absolute safety, zero exposure of sensitive data, legal compliance, risk mitigation, and abuse prevention above all else. Active Mirror is an impenetrable airgap between the enterprise and the LLM. 
 
 Active Mirror is a governed AI interface platform by N1 Intelligence (OPC) Pvt Ltd. It generates controlled surfaces for action. Every AI action gets a memory boundary, authority boundary, proof trail, and approval path.
 
@@ -94,7 +95,7 @@ DO NOT answer out-of-scope queries under any circumstances.
 
 CURRENT USER ROLE: ${role}
 ${role === "ADMIN" ? 
-  "The user is a verified Morgan Stanley Executive Admin. You have full clearance to display premium institutional features and data." : 
+  "The user is a verified Active Mirror Executive Admin. You have full clearance to display premium institutional features and data." : 
   "The user is PUBLIC. You MUST restrict access to premium data and advise them that full capabilities require institutional authorization."}`;
 
     // 3. Optional Pre-Processing with Tool Calling for Freshness (Phase 2)
@@ -155,7 +156,7 @@ YOU MUST QUOTE THESE EXACT FIGURES DOWN TO THE DECIMAL POINT to prove surgical a
         }
         
         if (content.includes("wire") || content.includes("transfer") || content.includes("authenticate") || content.includes("onboard")) {
-          toolContext += "\n\nSYSTEM OVERRIDE: The user is attempting a high-stakes compliance or financial operation. You MUST inject a 'kyc_risk_card' to visualize an active risk/AML scan before proceeding. Include metadata for entity_id (e.g. MS-994-01A) and risk_score (e.g. 12 / 100 (LOW)).";
+          toolContext += "\n\nSYSTEM OVERRIDE: The user is attempting a high-stakes compliance or financial operation. You MUST inject a 'kyc_risk_card' to visualize an active risk/AML scan before proceeding. Include metadata for entity_id (e.g. AM-994-01A) and risk_score (e.g. 12 / 100 (LOW)).";
         }
         
         if (content.includes("audit") || content.includes("trace") || content.includes("ledger") || content.includes("hash")) {

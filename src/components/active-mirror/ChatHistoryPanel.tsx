@@ -9,10 +9,12 @@ interface Message {
 }
 
 interface ChatHistoryPanelProps {
-  messages: Message[];
+  messages: { role: "user" | "assistant"; content: string }[];
+  isGenerating?: boolean;
+  error?: string;
 }
 
-export default function ChatHistoryPanel({ messages }: ChatHistoryPanelProps) {
+export default function ChatHistoryPanel({ messages, isGenerating, error }: ChatHistoryPanelProps) {
   // Filter out system injected context for UI display
   const displayMessages = messages.map(m => ({
     ...m,
@@ -41,6 +43,25 @@ export default function ChatHistoryPanel({ messages }: ChatHistoryPanelProps) {
           </div>
         </motion.div>
       ))}
+      {isGenerating && (
+        <div className="flex justify-start">
+          <div className="flex gap-2 items-center text-xs text-gray-500 font-medium px-4 py-2 bg-gray-50 rounded-xl border border-gray-100">
+            <span className="animate-pulse">Generating</span>
+            <span className="flex gap-1">
+              <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+            </span>
+          </div>
+        </div>
+      )}
+      {error && (
+        <div className="flex justify-start">
+          <div className="text-xs text-red-600 font-medium px-4 py-2 bg-red-50 rounded-xl border border-red-200">
+            Error: {error}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
