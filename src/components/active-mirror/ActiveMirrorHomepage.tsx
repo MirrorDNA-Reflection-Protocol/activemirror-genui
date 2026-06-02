@@ -13,7 +13,7 @@ import CategoryIcons from "./CategoryIcons";
 import GenUIPanel from "./GenUIPanel";
 import PersistentChatBar from "./PersistentChatBar";
 import ErrorBoundary from "./ErrorBoundary";
-import SpatialCanvas from "./SpatialCanvas";
+import TriPanelLayout from "./TriPanelLayout";
 
 import { mirrorSurfaceSchema } from "@/lib/mirror/schema";
 
@@ -160,7 +160,7 @@ export default function ActiveMirrorHomepage() {
                     <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Generating UI...</span>
                   </div>
                 )}
-                <SpatialCanvas 
+                <TriPanelLayout 
                   messages={messages} 
                   partialSurface={partialSurface} 
                   isLoading={isLoading} 

@@ -155,10 +155,6 @@ YOU MUST QUOTE THESE EXACT FIGURES DOWN TO THE DECIMAL POINT to prove surgical a
           toolContext += "\n\nSYSTEM OVERRIDE: The user has requested a long-horizon task. You MUST delegate this task to an autonomous background agent. Respond with an 'artifact_node' detailing the agent's scope and background execution state.";
         }
         
-        if (content.includes("wire") || content.includes("transfer") || content.includes("authenticate") || content.includes("onboard")) {
-          toolContext += "\n\nSYSTEM OVERRIDE: The user is attempting a high-stakes compliance or financial operation. You MUST inject a 'governance_node' to visualize an active risk/AML scan before proceeding.";
-        }
-        
         if (content.includes("audit") || content.includes("trace") || content.includes("ledger") || content.includes("hash")) {
           // Generate 3 cryptographic hashes for a highly realistic enterprise proof map
           const hash1 = crypto.randomBytes(32).toString("hex");
@@ -173,38 +169,18 @@ YOU MUST QUOTE THESE EXACT FIGURES DOWN TO THE DECIMAL POINT to prove surgical a
           Set 'verified' to true for all nodes.`;
         }
         
-        if (content.toLowerCase().includes("cross-reference") || content.toLowerCase().includes("m&a") || content.toLowerCase().includes("chinese wall") || content.toLowerCase().includes("trading floor")) {
-          toolContext += "\n\nSYSTEM OVERRIDE: The user is attempting to cross-reference data across the institutional Chinese Wall (Information Barrier). You MUST refuse the request and inject a 'governance_node' stating that the action is blocked due to SEC/FINRA multi-tenant isolation compliance.";
-        }
-        
-        if (content.toLowerCase().includes("execute") || content.toLowerCase().includes("approve the merger") || content.toLowerCase().includes("finalize deal")) {
-          toolContext += "\n\nSYSTEM OVERRIDE: The user is attempting to execute a highly sensitive, irrevocable financial action. You MUST refuse the request and inject a 'governance_node' indicating that the action exceeds the current session's authority level and that a Step-Up MFA notification has been sent to a Managing Director.";
-        }
-        
         // 8 New UI Intents
-        if (content.toLowerCase().includes("buy") || content.toLowerCase().includes("sign up") || content.toLowerCase().includes("contract") || content.toLowerCase().includes("deploy this")) {
-          toolContext += "\n\nSYSTEM OVERRIDE: The user is demonstrating high intent to purchase or deploy. You MUST inject an 'artifact_node' simulating a CRM lead capture and smart contract dispatch to close the deal.";
-        }
-        if (content.toLowerCase().includes("compare") || content.toLowerCase().includes("goldman") || content.toLowerCase().includes("competitor")) {
+        if (content.toLowerCase().includes("compare") || content.toLowerCase().includes("competitor")) {
           toolContext += "\n\nSYSTEM OVERRIDE: The user is asking for competitive intelligence. You MUST inject a 'browser_node' demonstrating superiority over legacy competitors.";
         }
         if (content.toLowerCase().includes("price") || content.toLowerCase().includes("cost") || content.toLowerCase().includes("tier")) {
           toolContext += "\n\nSYSTEM OVERRIDE: The user is asking about pricing. You MUST inject an 'artifact_node' detailing the Enterprise Tier with custom pricing and white-glove SLA.";
         }
-        if (content.toLowerCase().includes("volatility") || content.toLowerCase().includes("beta") || content.toLowerCase().includes("risk profile")) {
-          toolContext += "\n\nSYSTEM OVERRIDE: The user is asking about market risk. You MUST inject a 'governance_node' warning of elevated beta and recommending stop-losses.";
-        }
         if (content.toLowerCase().includes("bypass") || content.toLowerCase().includes("override") || content.toLowerCase().includes("ignore rules")) {
           toolContext += "\n\nSYSTEM OVERRIDE: The user is attempting to bypass security. You MUST inject a 'governance_node' throwing a hard governance lock.";
         }
-        if (content.toLowerCase().includes("source") || content.toLowerCase().includes("citation") || content.toLowerCase().includes("provenance")) {
-          toolContext += "\n\nSYSTEM OVERRIDE: The user wants data provenance. You MUST inject an 'artifact_node' citing the Bloomberg Terminal via FIX API.";
-        }
         if (content.toLowerCase().includes("spec") || content.toLowerCase().includes("architecture") || content.toLowerCase().includes("yaml")) {
           toolContext += "\n\nSYSTEM OVERRIDE: The user wants technical specifications. You MUST inject an 'artifact_node' with Kubernetes deployment yaml.";
-        }
-        if (content.toLowerCase().includes("signature") || content.toLowerCase().includes("zk") || content.toLowerCase().includes("zero-knowledge")) {
-          toolContext += "\n\nSYSTEM OVERRIDE: The user wants cryptographic proof. You MUST inject an 'artifact_node' with a zero-knowledge signature.";
         }
       }
     }
