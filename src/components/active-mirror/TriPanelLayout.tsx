@@ -21,6 +21,15 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
   const dataModel = a2uiState?.dataModel || {};
   const scrollRef = useRef<HTMLDivElement>(null);
   const [closedSurfaces, setClosedSurfaces] = useState<Set<string>>(new Set());
+  const [isNarrow, setIsNarrow] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)');
+    const sync = () => setIsNarrow(media.matches);
+    sync();
+    media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, []);
 
   // Auto-scroll chat to bottom
   useEffect(() => {
@@ -35,6 +44,7 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
   const governanceNodes = surfaceNodes.filter((n: any) => n?.type === 'governance_node');
   const displaySurfaces = surfaceNodes.filter((n: any) => n?.type !== 'governance_node');
   const hasSurfaces = displaySurfaces.length > 0;
+  const stackSurfaces = hasSurfaces && isNarrow;
 
   const closeSurface = (id: string) => {
     setClosedSurfaces(prev => new Set([...prev, id]));
@@ -59,12 +69,15 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
   };
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div className={`flex h-full w-full overflow-hidden ${stackSurfaces ? 'flex-col' : 'flex-row'}`}>
       {/* LEFT: Chat Thread */}
       <motion.div
-        animate={{ width: hasSurfaces ? '380px' : '100%', maxWidth: hasSurfaces ? '380px' : '640px' }}
+        animate={stackSurfaces
+          ? { width: '100%', maxWidth: '100%', height: '34%' }
+          : { width: hasSurfaces ? '380px' : '100%', maxWidth: hasSurfaces ? '380px' : '640px', height: '100%' }
+        }
         transition={{ type: 'spring', damping: 30, stiffness: 200 }}
-        className={`flex flex-col h-full shrink-0 ${hasSurfaces ? '' : 'mx-auto'}`}
+        className={`flex flex-col min-h-0 shrink-0 ${hasSurfaces ? '' : 'mx-auto'}`}
       >
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-5 py-6 space-y-4">
           {messages.map((msg, i) => {
@@ -221,11 +234,11 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
       <AnimatePresence>
         {hasSurfaces && (
           <motion.div
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: 'auto' }}
-            exit={{ opacity: 0, width: 0 }}
+            initial={stackSurfaces ? { opacity: 0, height: 0 } : { opacity: 0, width: 0 }}
+            animate={stackSurfaces ? { opacity: 1, height: '66%' } : { opacity: 1, width: 'auto' }}
+            exit={stackSurfaces ? { opacity: 0, height: 0 } : { opacity: 0, width: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 200 }}
-            className="flex-1 h-full border-l border-gray-100 overflow-hidden"
+            className={`flex-1 min-h-0 ${stackSurfaces ? 'w-full border-t' : 'h-full border-l'} border-gray-100 overflow-hidden`}
           >
             <div className="h-full p-4 space-y-4 overflow-y-auto">
               {/* Check if any node is a graph type — give it full height */}
