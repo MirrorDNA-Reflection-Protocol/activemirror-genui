@@ -103,7 +103,7 @@ export default function AdaptiveSimulator() {
                 Generate a multi-variable analysis of our Q3 growth metrics vs server costs.
               </div>
               <div className="self-start bg-zinc-800 text-zinc-200 p-4 rounded-2xl rounded-tl-sm w-5/6 shadow-lg text-sm">
-                Analyzing dataset... I've prepared a comprehensive dashboard showing user acquisition overlaying infrastructure burn rate.
+                Analyzing dataset... I have prepared a comprehensive dashboard showing user acquisition overlaying infrastructure burn rate.
               </div>
             </motion.div>
           )}

@@ -1,8 +1,21 @@
 import { useState, useCallback } from 'react';
-import { MirrorSurfaceSpec } from './schema';
+
+export type A2UIComponent = {
+  id: string;
+  type: string;
+  parent_id?: string;
+  props?: Record<string, string | number | boolean | null | undefined>;
+};
+
+type A2UIState = {
+  surface_id: string | null;
+  components: A2UIComponent[];
+  dataModel: Record<string, string>;
+  renderLock: boolean;
+};
 
 export type A2UIEnvelope = 
-  | { envelope: "surfaceUpdate"; surface_id: string; component: any }
+  | { envelope: "surfaceUpdate"; surface_id: string; component: A2UIComponent }
   | { envelope: "dataModelUpdate"; surface_id: string; data: Record<string, string> }
   | { envelope: "beginRendering"; surface_id: string };
 
@@ -12,12 +25,7 @@ export function useA2UIStream(apiEndpoint: string) {
   const [error, setError] = useState<Error | null>(null);
   
   // The raw protocol state
-  const [a2uiState, setA2uiState] = useState<{
-    surface_id: string | null;
-    components: any[];
-    dataModel: Record<string, string>;
-    renderLock: boolean;
-  }>({
+  const [a2uiState, setA2uiState] = useState<A2UIState>({
     surface_id: null,
     components: [],
     dataModel: {},
@@ -33,9 +41,9 @@ export function useA2UIStream(apiEndpoint: string) {
     setA2uiState({ surface_id: null, components: [], dataModel: {}, renderLock: false });
     
     // We maintain a draft state locally to prevent layout thrashing until beginRendering is called
-    let draftState = {
+    const draftState: A2UIState = {
       surface_id: null as string | null,
-      components: [] as any[],
+      components: [],
       dataModel: {} as Record<string, string>,
       renderLock: false,
     };

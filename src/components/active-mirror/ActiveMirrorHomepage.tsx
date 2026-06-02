@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowUp, Mic, MicOff, ArrowLeft, Plus, User, Users, Building2, Landmark, Download, Network, Languages, Video, AudioLines } from "lucide-react";
 import { useA2UIStream } from "@/lib/mirror/useA2UIStream";
@@ -76,7 +76,41 @@ type QaStatus = {
   promptPreview?: string;
 };
 
+type SpeechAlternativeLike = {
+  transcript: string;
+};
+
+type SpeechResultLike = {
+  isFinal: boolean;
+  0: SpeechAlternativeLike;
+};
+
+type SpeechRecognitionEventLike = {
+  resultIndex: number;
+  results: ArrayLike<SpeechResultLike>;
+};
+
+type SpeechRecognitionLike = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
+type SpeechRecognitionWindow = Window & {
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
+};
+
 const MIRROR_SEED_KEY = "active-mirror.mirrorseed.v1";
+const subscribeStatic = () => () => {};
+let mirrorSeedCache: MirrorSeed | null | undefined;
 
 function createMirrorSeed(): MirrorSeed {
   const id = globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2);
@@ -89,56 +123,66 @@ function createMirrorSeed(): MirrorSeed {
   };
 }
 
+function getQaModeSnapshot() {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).has("qa");
+}
+
+function getServerQaModeSnapshot() {
+  return false;
+}
+
+function getMirrorSeedSnapshot() {
+  if (typeof window === "undefined") return null;
+  if (mirrorSeedCache !== undefined) return mirrorSeedCache;
+
+  try {
+    const stored = window.localStorage.getItem(MIRROR_SEED_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as MirrorSeed;
+      if (parsed?.v === 1 && parsed.id) {
+        mirrorSeedCache = parsed;
+        return mirrorSeedCache;
+      }
+    }
+
+    const seed = createMirrorSeed();
+    window.localStorage.setItem(MIRROR_SEED_KEY, JSON.stringify(seed));
+    mirrorSeedCache = seed;
+    return mirrorSeedCache;
+  } catch {
+    mirrorSeedCache = createMirrorSeed();
+    return mirrorSeedCache;
+  }
+}
+
+function getServerMirrorSeedSnapshot() {
+  return null;
+}
+
 export default function ActiveMirrorHomepage() {
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
-  const [mounted, setMounted] = useState(false);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
-  const [mirrorSeed, setMirrorSeed] = useState<MirrorSeed | null>(null);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [qaMode, setQaMode] = useState(false);
   const [qaStatus, setQaStatus] = useState<QaStatus | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const mirrorSeed = useSyncExternalStore(subscribeStatic, getMirrorSeedSnapshot, getServerMirrorSeedSnapshot);
+  const qaMode = useSyncExternalStore(subscribeStatic, getQaModeSnapshot, getServerQaModeSnapshot);
 
   const { submit, a2uiState, isLoading, error } = useA2UIStream("/api/mirror/stream");
 
-  useEffect(() => { setMounted(true); }, []);
-
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const enabled = new URLSearchParams(window.location.search).has("qa");
-    setQaMode(enabled);
-    if (!enabled) return;
+    if (!qaMode) return;
 
     fetch("/api/mirror/system", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
       .then((status: QaStatus | null) => setQaStatus(status))
       .catch(() => setQaStatus(null));
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    try {
-      const stored = window.localStorage.getItem(MIRROR_SEED_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored) as MirrorSeed;
-        if (parsed?.v === 1 && parsed.id) {
-          setMirrorSeed(parsed);
-          return;
-        }
-      }
-
-      const seed = createMirrorSeed();
-      window.localStorage.setItem(MIRROR_SEED_KEY, JSON.stringify(seed));
-      setMirrorSeed(seed);
-    } catch {
-      setMirrorSeed(createMirrorSeed());
-    }
-  }, []);
+  }, [qaMode]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -169,21 +213,22 @@ export default function ActiveMirrorHomepage() {
 
   // Focus input
   useEffect(() => {
-    if (mounted && !hasInteracted && inputRef.current) {
+    if (!hasInteracted && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 800);
     }
-  }, [mounted, hasInteracted]);
+  }, [hasInteracted]);
 
   // Speech recognition
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!("SpeechRecognition" in window || "webkitSpeechRecognition" in window)) return;
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const speechWindow = window as SpeechRecognitionWindow;
+    const SR = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
+    if (!SR) return;
     const rec = new SR();
     rec.continuous = true;
     rec.interimResults = true;
     rec.lang = "en-US";
-    rec.onresult = (e: any) => {
+    rec.onresult = (e) => {
       let final = "";
       for (let i = e.resultIndex; i < e.results.length; ++i) {
         if (e.results[i].isFinal) final += e.results[i][0].transcript;
@@ -192,7 +237,14 @@ export default function ActiveMirrorHomepage() {
     };
     rec.onerror = () => setIsListening(false);
     rec.onend = () => setIsListening(false);
-    setRecognition(rec);
+    recognitionRef.current = rec;
+
+    return () => {
+      rec.onresult = null;
+      rec.onerror = null;
+      rec.onend = null;
+      if (recognitionRef.current === rec) recognitionRef.current = null;
+    };
   }, []);
 
   const handleSubmit = useCallback((prompt: string) => {
@@ -200,11 +252,11 @@ export default function ActiveMirrorHomepage() {
     if (!trimmed) return;
     setHasInteracted(true);
     setInputValue("");
-    if (isListening) { recognition?.stop(); setIsListening(false); }
+    if (isListening) { recognitionRef.current?.stop(); setIsListening(false); }
     const next: { role: "user" | "assistant"; content: string }[] = [...messages, { role: "user", content: trimmed }];
     setMessages(next);
     submit({ messages: next });
-  }, [messages, submit, isListening, recognition]);
+  }, [messages, submit, isListening]);
 
   const handleReset = useCallback(() => {
     setHasInteracted(false);
@@ -224,8 +276,8 @@ export default function ActiveMirrorHomepage() {
   }, [installPrompt]);
 
   const toggleListening = () => {
-    if (isListening) recognition?.stop();
-    else { setInputValue(""); recognition?.start(); setIsListening(true); }
+    if (isListening) recognitionRef.current?.stop();
+    else { setInputValue(""); recognitionRef.current?.start(); setIsListening(true); }
   };
 
   const isEmpty = inputValue.trim().length === 0;
@@ -247,9 +299,7 @@ export default function ActiveMirrorHomepage() {
             transition={{ duration: 0.3 }}
             className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center px-6 py-6 max-[360px]:justify-start"
           >
-            {mounted && (
-              <>
-                {/* Logo */}
+            {/* Logo */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -386,8 +436,6 @@ export default function ActiveMirrorHomepage() {
                     {installPrompt ? "Install app" : "PWA ready"}
                   </motion.button>
                 </motion.div>
-              </>
-            )}
           </motion.div>
         ) : (
           /* ═══════ SESSION ═══════ */

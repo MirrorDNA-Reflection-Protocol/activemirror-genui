@@ -26,8 +26,8 @@ export default function HeroSection({ onConsent, hasConsented }: HeroSectionProp
         transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
         className="mt-6 text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed font-medium"
       >
-        Absolute safety, zero exposure, and immutable governance.<br className="mt-1" />
-        <span className="text-gray-500">Powered by the world's first Reflective Cognitive OS.</span>
+        Controlled access, auditable actions, and clear data boundaries.<br className="mt-1" />
+        <span className="text-gray-500">Powered by a reflective work OS built for governed AI sessions.</span>
       </motion.p>
       
       <motion.div

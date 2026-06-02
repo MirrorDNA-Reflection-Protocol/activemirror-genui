@@ -81,6 +81,11 @@ const SEVERITY_STYLES: Record<string, string> = {
   blocked: "border-red-200 bg-red-50/60",
 };
 
+type ChartDatum = {
+  label: string;
+  value: number;
+};
+
 const SEVERITY_ICON_STYLES: Record<string, string> = {
   info: "text-blue-500 bg-blue-100",
   low: "text-green-500 bg-green-100",
@@ -186,7 +191,7 @@ export default function MirrorComponentRenderer({
             {comp.type === "chart_card" && Array.isArray(comp.metadata?.data) && (
               <div className="mt-4 p-3 bg-white rounded-lg border border-gray-100 flex items-center justify-center h-48 w-full shadow-inner">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={comp.metadata!.data as any[]}>
+                  <BarChart data={comp.metadata!.data as ChartDatum[]}>
                     <XAxis dataKey="label" stroke="#9ca3af" fontSize={10} tickLine={false} axisLine={false} />
                     <Tooltip 
                       cursor={{ fill: 'rgba(59, 130, 246, 0.05)' }}

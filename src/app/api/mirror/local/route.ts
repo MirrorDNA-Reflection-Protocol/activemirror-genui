@@ -27,10 +27,11 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ response: response.response });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error generating response with Ollama:', error);
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
+      { error: message },
       { status: 500 }
     );
   }

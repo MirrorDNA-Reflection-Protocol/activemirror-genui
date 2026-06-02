@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Plus, ArrowLeft, Shield, CloudSync, LogOut, User } from "lucide-react";
 import { useSession, signIn, signOut } from "next-auth/react";
 
@@ -13,7 +14,8 @@ interface MirrorHeaderProps {
 
 export default function MirrorHeader({ vaultSyncing = false, onAutoPrompt, onReset, hasInteracted = false }: MirrorHeaderProps) {
   const { data: session } = useSession();
-  const role = (session?.user as any)?.role || null;
+  const userWithRole = session?.user as { role?: string | null } | undefined;
+  const role = userWithRole?.role || null;
   const isAdmin = role === "ADMIN";
 
   return (
@@ -29,7 +31,7 @@ export default function MirrorHeader({ vaultSyncing = false, onAutoPrompt, onRes
             <ArrowLeft className="w-4 h-4 lg:w-5 lg:h-5" />
           </button>
         )}
-        <a href="/" className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
+        <Link href="/" className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
           <div className="relative w-10 h-10 lg:w-12 lg:h-12">
             <Image
               src="/logo.png"
@@ -43,7 +45,7 @@ export default function MirrorHeader({ vaultSyncing = false, onAutoPrompt, onRes
           <span className="text-lg lg:text-xl font-semibold text-gray-900 tracking-tight">
             Active Mirror
           </span>
-        </a>
+        </Link>
       </div>
 
       {/* Right controls */}

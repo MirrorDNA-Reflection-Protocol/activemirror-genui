@@ -1,13 +1,10 @@
-import { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   ReactFlow,
-  MiniMap,
   Controls,
   Background,
   useNodesState,
   useEdgesState,
-  addEdge,
-  ConnectionLineType,
   MarkerType,
   BackgroundVariant,
   Node,
@@ -16,22 +13,55 @@ import {
 import '@xyflow/react/dist/style.css';
 import { nodeTypes } from './SpatialNodes';
 
+type ChatMessage = {
+  role: string;
+  content: string;
+  id?: string;
+};
+
+type SpatialSurfaceNode = {
+  id?: string;
+  type?: string;
+  title?: string;
+  body?: string;
+  agent_id?: string;
+  severity?: string;
+  [key: string]: unknown;
+};
+
+type SpatialSurfaceEdge = {
+  source?: string;
+  target?: string;
+  label?: string;
+};
+
+type SpatialSurface = {
+  new_nodes?: SpatialSurfaceNode[];
+  new_edges?: SpatialSurfaceEdge[];
+};
+
 export default function SpatialCanvas({ 
   messages, 
   partialSurface,
-  isLoading 
+  isLoading: _isLoading
 }: { 
-  messages: { role: string; content: string; id?: string }[],
-  partialSurface?: any, // z.infer<typeof mirrorSurfaceSchema>
+  messages: ChatMessage[],
+  partialSurface?: SpatialSurface,
   isLoading: boolean
 }) {
+  void _isLoading;
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const nodesRef = useRef<Node[]>([]);
+
+  useEffect(() => {
+    nodesRef.current = nodes;
+  }, [nodes]);
 
   // Generate nodes from messages and surface
   useEffect(() => {
-    const newNodes: any[] = [];
-    const newEdges: any[] = [];
+    const newNodes: Node[] = [];
+    const newEdges: Edge[] = [];
 
     // 1. Map Chat Messages
     let lastUserNodeId: string | null = null;
@@ -43,7 +73,7 @@ export default function SpatialCanvas({
         lastUserNodeId = nodeId;
       }
       // Check if it already exists to preserve dragged positions
-      const existingNode = nodes.find(n => n.id === nodeId);
+      const existingNode = nodesRef.current.find(n => n.id === nodeId);
       newNodes.push({
         id: nodeId,
         type: 'chat_node',
@@ -57,9 +87,9 @@ export default function SpatialCanvas({
     // but here we are mapping the *current* partial surface being generated).
     // In a full app, you'd store past surfaces in a history array. For now, we map the live surface.
     if (partialSurface && partialSurface.new_nodes) {
-      partialSurface.new_nodes.forEach((n: any, idx: number) => {
+      partialSurface.new_nodes.forEach((n, idx) => {
         if (!n.id) return; // Skip if streaming hasn't filled id yet
-        const existingNode = nodes.find(node => node.id === n.id);
+        const existingNode = nodesRef.current.find(node => node.id === n.id);
         newNodes.push({
           id: n.id,
           type: n.type || 'artifact_node',
@@ -85,7 +115,7 @@ export default function SpatialCanvas({
     }
 
     if (partialSurface && partialSurface.new_edges) {
-      partialSurface.new_edges.forEach((e: any) => {
+      partialSurface.new_edges.forEach((e) => {
         if (!e.source || !e.target) return;
         const edgeId = `e-${e.source}-${e.target}`;
         if (!newEdges.find(ne => ne.id === edgeId)) {
@@ -127,7 +157,7 @@ export default function SpatialCanvas({
       return merged;
     });
 
-  }, [messages, partialSurface]);
+  }, [messages, partialSurface, setEdges, setNodes]);
 
   return (
     <div style={{ width: '100%', height: '100%' }} className="bg-slate-50/50 rounded-xl overflow-hidden shadow-inner border border-slate-200">

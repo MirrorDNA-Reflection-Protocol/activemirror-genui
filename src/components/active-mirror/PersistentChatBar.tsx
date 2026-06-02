@@ -1,34 +1,70 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
-import { Sparkles, ArrowUp, Mic, MicOff } from "lucide-react";
+import { ArrowUp, Mic, MicOff } from "lucide-react";
 
 interface PersistentChatBarProps {
   onSubmit: (prompt: string) => void;
 }
 
+type SpeechAlternativeLike = {
+  transcript: string;
+};
+
+type SpeechResultLike = {
+  isFinal: boolean;
+  0: SpeechAlternativeLike;
+};
+
+type SpeechRecognitionEventLike = {
+  resultIndex: number;
+  results: ArrayLike<SpeechResultLike>;
+};
+
+type SpeechRecognitionErrorLike = {
+  error?: string;
+};
+
+type SpeechRecognitionLike = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorLike) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
+type SpeechRecognitionWindow = Window & {
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
+};
+
 export default function PersistentChatBar({ onSubmit }: PersistentChatBarProps) {
   const [value, setValue] = useState("");
   const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)) {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (typeof window !== "undefined") {
+      const speechWindow = window as SpeechRecognitionWindow;
+      const SpeechRecognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+
       const rec = new SpeechRecognition();
       rec.continuous = true;
       rec.interimResults = true;
       rec.lang = "en-US";
 
-      rec.onresult = (event: any) => {
+      rec.onresult = (event) => {
         let finalTranscript = "";
-        let interimTranscript = "";
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
             finalTranscript += event.results[i][0].transcript;
-          } else {
-            interimTranscript += event.results[i][0].transcript;
           }
         }
         
@@ -37,7 +73,7 @@ export default function PersistentChatBar({ onSubmit }: PersistentChatBarProps) 
         }
       };
 
-      rec.onerror = (event: any) => {
+      rec.onerror = (event) => {
         console.error("Speech recognition error", event.error);
         setIsListening(false);
       };
@@ -46,30 +82,37 @@ export default function PersistentChatBar({ onSubmit }: PersistentChatBarProps) 
         setIsListening(false);
       };
 
-      setRecognition(rec);
+      recognitionRef.current = rec;
+
+      return () => {
+        rec.onresult = null;
+        rec.onerror = null;
+        rec.onend = null;
+        if (recognitionRef.current === rec) recognitionRef.current = null;
+      };
     }
   }, []);
 
   const toggleListening = () => {
     if (isListening) {
-      recognition?.stop();
+      recognitionRef.current?.stop();
     } else {
       setValue(""); // clear before speaking
-      recognition?.start();
+      recognitionRef.current?.start();
       setIsListening(true);
     }
   };
 
   const submit = useCallback(() => {
     if (isListening) {
-      recognition?.stop();
+      recognitionRef.current?.stop();
       setIsListening(false);
     }
     const trimmed = value.trim();
     if (!trimmed) return;
     onSubmit(trimmed);
     setValue("");
-  }, [value, onSubmit, isListening, recognition]);
+  }, [value, onSubmit, isListening]);
 
   const handleSubmit = useCallback(
     (e: FormEvent) => {

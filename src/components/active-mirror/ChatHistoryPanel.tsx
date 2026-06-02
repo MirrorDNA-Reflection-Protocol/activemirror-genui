@@ -3,11 +3,6 @@
 import { motion } from "motion/react";
 import { User, Cpu } from "lucide-react";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
-
 interface ChatHistoryPanelProps {
   messages: { role: "user" | "assistant"; content: string }[];
   isGenerating?: boolean;
