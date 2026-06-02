@@ -15,7 +15,7 @@ export const mirrorSurfaceSchema = z.object({
       title: z.string(),
       body: z.string(),
       severity: z.enum(["info", "low", "medium", "high", "blocked"]).nullable(),
-      metadata: z.record(z.string(), z.string()).nullable()
+      metadata: z.array(z.object({ key: z.string(), value: z.string() })).nullable()
     })
   ).describe("New spatial widgets to spawn on the canvas."),
   

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { streamObject } from "ai";
-import { google } from "@ai-sdk/google";
+import { openai } from "@ai-sdk/openai";
 import { LRUCache } from "lru-cache";
 import { mirrorSurfaceSchema } from "@/lib/mirror/schema";
 import { auth } from "@/lib/auth";
@@ -213,7 +213,7 @@ YOU MUST QUOTE THESE EXACT FIGURES DOWN TO THE DECIMAL POINT to prove surgical a
 
     // 4. Stream Object
     const result = await streamObject({
-      model: google("gemini-3.1-pro"),
+      model: openai("gpt-4o"),
       system: finalSystemPrompt,
       messages,
       schema: mirrorSurfaceSchema,
