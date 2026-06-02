@@ -102,7 +102,7 @@ export default function ChartSurface({ title, content, agentId, onClose }: Chart
                 <Tooltip
                   contentStyle={{ borderRadius: '12px', border: '1px solid #E5E7EB', fontSize: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
                 />
-                <Bar dataKey="value" fill="#3B82F6" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="value" fill="#0071e3" radius={[6, 6, 0, 0]} />
               </BarChart>
             )}
           </ResponsiveContainer>

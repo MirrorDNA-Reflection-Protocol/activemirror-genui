@@ -57,7 +57,7 @@ export default function DocumentSurface({ title, content, agentId, onClose }: Do
         </article>
         {/* Typing cursor when content is still streaming */}
         {content && content.length > 0 && (
-          <span className="inline-block w-0.5 h-4 bg-blue-500 animate-pulse ml-1 -mb-0.5" />
+          <span className="inline-block w-0.5 h-4 bg-[#0071e3] animate-cursor ml-1 -mb-0.5" />
         )}
       </div>
     </motion.div>

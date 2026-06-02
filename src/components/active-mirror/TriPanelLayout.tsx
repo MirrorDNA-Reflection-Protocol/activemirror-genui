@@ -62,11 +62,11 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
     <div className="flex h-full w-full overflow-hidden">
       {/* LEFT: Chat Thread */}
       <motion.div
-        animate={{ width: hasSurfaces ? '420px' : '100%', maxWidth: hasSurfaces ? '420px' : '680px' }}
+        animate={{ width: hasSurfaces ? '380px' : '100%', maxWidth: hasSurfaces ? '380px' : '640px' }}
         transition={{ type: 'spring', damping: 30, stiffness: 200 }}
         className={`flex flex-col h-full shrink-0 ${hasSurfaces ? '' : 'mx-auto'}`}
       >
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-4">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-5 py-6 space-y-4">
           {messages.map((msg, i) => {
             const isUser = msg.role === 'user';
             const cleanContent = msg.content
@@ -84,15 +84,15 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
                 className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
               >
                 {!isUser && (
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center mr-2.5 mt-0.5 shrink-0 shadow-sm">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#0071e3] to-[#5856d6] flex items-center justify-center mr-2.5 mt-0.5 shrink-0">
                     <Sparkles className="w-3.5 h-3.5 text-white" />
                   </div>
                 )}
                 <div className={`max-w-[85%] ${isUser
-                  ? 'bg-gray-900 text-white rounded-2xl rounded-br-sm px-4 py-2.5 shadow-md'
-                  : 'text-gray-700 py-1'
+                  ? 'bg-[#1d1d1f] text-white rounded-2xl rounded-br-sm px-4 py-2.5'
+                  : 'text-[#1d1d1f] py-1'
                 }`}>
-                  <div className={`text-sm leading-relaxed ${isUser ? '' : 'prose prose-sm max-w-none prose-p:text-gray-700 prose-headings:text-gray-900 prose-strong:text-gray-900'}`}>
+                  <div className={`text-[14px] leading-relaxed ${isUser ? '' : 'prose prose-sm max-w-none prose-p:text-[#424245] prose-headings:text-[#1d1d1f] prose-strong:text-[#1d1d1f]'}`}>
                     <ReactMarkdown>{cleanContent}</ReactMarkdown>
                   </div>
                 </div>
