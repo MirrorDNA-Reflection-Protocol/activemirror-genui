@@ -1,7 +1,7 @@
 "use client";
 
-import React from 'react';
-import { FileText, X, Download, Copy, MoreHorizontal } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, X, Download, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
@@ -10,9 +10,39 @@ interface DocumentSurfaceProps {
   content: string;
   agentId: string;
   onClose?: () => void;
+  children?: React.ReactNode;
 }
 
-export default function DocumentSurface({ title, content, agentId, onClose }: DocumentSurfaceProps) {
+function filenameFromTitle(title: string) {
+  const base = (title || "active-mirror-artifact")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60);
+  return `${base || "active-mirror-artifact"}.md`;
+}
+
+export default function DocumentSurface({ title, content, agentId, onClose, children }: DocumentSurfaceProps) {
+  const [copied, setCopied] = useState(false);
+
+  const copyContent = async () => {
+    await navigator.clipboard?.writeText(content || "");
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1200);
+  };
+
+  const downloadContent = () => {
+    const blob = new Blob([content || ""], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filenameFromTitle(title);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 80, scale: 0.92, filter: 'blur(12px)' }}
@@ -33,17 +63,24 @@ export default function DocumentSurface({ title, content, agentId, onClose }: Do
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <button className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+          <button
+            onClick={copyContent}
+            disabled={!content}
+            aria-label={copied ? "Copied artifact" : "Copy artifact"}
+            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+          >
             <Copy className="w-3.5 h-3.5" />
           </button>
-          <button className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+          <button
+            onClick={downloadContent}
+            disabled={!content}
+            aria-label="Download artifact"
+            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+          >
             <Download className="w-3.5 h-3.5" />
           </button>
-          <button className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-            <MoreHorizontal className="w-3.5 h-3.5" />
-          </button>
           {onClose && (
-            <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors ml-1">
+            <button onClick={onClose} aria-label="Close surface" className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors ml-1">
               <X className="w-3.5 h-3.5" />
             </button>
           )}
@@ -59,6 +96,7 @@ export default function DocumentSurface({ title, content, agentId, onClose }: Do
         {content && content.length > 0 && (
           <span className="inline-block w-0.5 h-4 bg-[#0071e3] animate-cursor ml-1 -mb-0.5" />
         )}
+        {children && <div className="mt-6">{children}</div>}
       </div>
     </motion.div>
   );

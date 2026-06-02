@@ -33,12 +33,12 @@ const nodeColors: Record<string, { bg: string; border: string; text: string }> =
 
 function buildDefaultGraph(): { nodes: Node[]; edges: Edge[] } {
   const items = [
+    { id: 'user', label: 'User', type: 'default' },
     { id: 'am', label: 'Active Mirror', type: 'agent' },
-    { id: 'mb', label: 'MirrorBrain', type: 'agent' },
     { id: 'mg', label: 'MirrorGate', type: 'security' },
     { id: 'ch', label: 'Chetana', type: 'service' },
-    { id: 'mp', label: 'MirrorProof', type: 'data' },
-    { id: 'user', label: 'User', type: 'default' },
+    { id: 'prod', label: 'MirrorProd', type: 'agent' },
+    { id: 'proof', label: 'MirrorProof', type: 'data' },
   ];
 
   const nodes: Node[] = items.map((item, i) => {
@@ -67,11 +67,12 @@ function buildDefaultGraph(): { nodes: Node[]; edges: Edge[] } {
 
   const edges: Edge[] = [
     { id: 'e1', source: 'user', target: 'am', animated: true, style: { stroke: '#8B5CF6' } },
-    { id: 'e2', source: 'am', target: 'mb', animated: true, style: { stroke: '#8B5CF6' } },
-    { id: 'e3', source: 'am', target: 'mg', style: { stroke: '#EF4444' } },
-    { id: 'e4', source: 'am', target: 'ch', style: { stroke: '#3B82F6' } },
-    { id: 'e5', source: 'mb', target: 'mp', style: { stroke: '#10B981' } },
-    { id: 'e6', source: 'mg', target: 'mp', style: { stroke: '#EF4444', strokeDasharray: '6 3' } },
+    { id: 'e2', source: 'am', target: 'mg', label: 'gate', animated: true, style: { stroke: '#EF4444' } },
+    { id: 'e3', source: 'am', target: 'ch', label: 'site shield', animated: true, style: { stroke: '#3B82F6' } },
+    { id: 'e4', source: 'am', target: 'prod', label: 'market', animated: true, style: { stroke: '#8B5CF6' } },
+    { id: 'e5', source: 'mg', target: 'proof', label: 'receipt', style: { stroke: '#EF4444', strokeDasharray: '6 3' } },
+    { id: 'e6', source: 'ch', target: 'proof', label: 'signals', style: { stroke: '#10B981' } },
+    { id: 'e7', source: 'prod', target: 'proof', label: 'claims', style: { stroke: '#8B5CF6' } },
   ];
 
   return { nodes, edges };

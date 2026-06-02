@@ -1,7 +1,7 @@
 "use client";
 
-import React from 'react';
-import { X, BarChart3, Maximize2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, BarChart3, Maximize2, Minimize2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import ReactMarkdown from 'react-markdown';
@@ -40,6 +40,7 @@ function extractChartData(content: string): { name: string; value: number }[] {
 }
 
 export default function ChartSurface({ title, content, agentId, onClose }: ChartSurfaceProps) {
+  const [expanded, setExpanded] = useState(false);
   const chartData = extractChartData(content);
   const useArea = content.toLowerCase().includes('trend') || content.toLowerCase().includes('growth') || content.toLowerCase().includes('time');
 
@@ -49,7 +50,9 @@ export default function ChartSurface({ title, content, agentId, onClose }: Chart
       animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, scale: 0.94, filter: 'blur(8px)' }}
       transition={{ type: 'spring', damping: 26, stiffness: 200 }}
-      className="bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-200/60 overflow-hidden flex flex-col h-full"
+      className={`bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-200/60 overflow-hidden flex flex-col ${
+        expanded ? 'fixed inset-4 z-50' : 'h-full'
+      }`}
     >
       {/* Chart Chrome */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/80">
@@ -63,11 +66,15 @@ export default function ChartSurface({ title, content, agentId, onClose }: Chart
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <button className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-            <Maximize2 className="w-3.5 h-3.5" />
+          <button
+            onClick={() => setExpanded(prev => !prev)}
+            aria-label={expanded ? "Collapse chart" : "Expand chart"}
+            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {expanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
           {onClose && (
-            <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
+            <button onClick={onClose} aria-label="Close chart" className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
               <X className="w-3.5 h-3.5" />
             </button>
           )}

@@ -9,6 +9,7 @@ import DocumentSurface from './surfaces/DocumentSurface';
 import BrowserSurface from './surfaces/BrowserSurface';
 import ChartSurface from './surfaces/ChartSurface';
 import MirrorGraph from './surfaces/MirrorGraph';
+import LeadCaptureCard from './LeadCaptureCard';
 
 interface TriPanelLayoutProps {
   messages: { role: "user" | "assistant"; content: string }[];
@@ -63,6 +64,12 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
         return <BrowserSurface key={node.id} title={title} content={content} agentId={agentId} onClose={onClose} />;
       case 'chart_node':
         return <ChartSurface key={node.id} title={title} content={content} agentId={agentId} onClose={onClose} />;
+      case 'lead_node':
+        return (
+          <DocumentSurface key={node.id} title={title} content={content} agentId={agentId} onClose={onClose}>
+            <LeadCaptureCard />
+          </DocumentSurface>
+        );
       default:
         return <DocumentSurface key={node.id} title={title} content={content} agentId={agentId} onClose={onClose} />;
     }
@@ -116,7 +123,9 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
           {/* Governance warnings inline in chat */}
           <AnimatePresence>
             {governanceNodes.map((node: any) => {
-              const isBlocked = node?.props?.severity === 'blocked';
+              const severity = node?.props?.severity || 'info';
+              const isBlocked = severity === 'blocked';
+              const isWarning = severity === 'warning';
               const title = dataModel[`${node.id}.title`] || node?.props?.title || '';
               const content = dataModel[`${node.id}.content`] || '';
               return (
@@ -126,20 +135,24 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
                   animate={{ opacity: 1, scale: 1 }}
                   className={`rounded-xl border-2 p-3.5 ${isBlocked
                     ? 'border-red-200 bg-red-50'
-                    : 'border-amber-200 bg-amber-50'
+                    : isWarning
+                      ? 'border-amber-200 bg-amber-50'
+                      : 'border-blue-100 bg-blue-50'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1.5">
                     {isBlocked
                       ? <ShieldAlert className="w-4 h-4 text-red-500" />
-                      : <AlertTriangle className="w-4 h-4 text-amber-500" />
+                      : isWarning
+                        ? <AlertTriangle className="w-4 h-4 text-amber-500" />
+                        : <Bot className="w-4 h-4 text-blue-500" />
                     }
-                    <span className={`text-xs font-bold uppercase tracking-wider ${isBlocked ? 'text-red-600' : 'text-amber-600'}`}>
-                      {isBlocked ? 'Governance Lock' : 'Policy Warning'}
+                    <span className={`text-xs font-bold uppercase tracking-wider ${isBlocked ? 'text-red-600' : isWarning ? 'text-amber-600' : 'text-blue-600'}`}>
+                      {isBlocked ? 'Governance Lock' : isWarning ? 'Policy Warning' : 'Governance'}
                     </span>
                   </div>
-                  {title && <div className={`text-sm font-semibold mb-1 ${isBlocked ? 'text-red-800' : 'text-amber-800'}`}>{title}</div>}
-                  <div className={`text-xs leading-relaxed ${isBlocked ? 'text-red-700' : 'text-amber-700'}`}>
+                  {title && <div className={`text-sm font-semibold mb-1 ${isBlocked ? 'text-red-800' : isWarning ? 'text-amber-800' : 'text-blue-900'}`}>{title}</div>}
+                  <div className={`text-xs leading-relaxed ${isBlocked ? 'text-red-700' : isWarning ? 'text-amber-700' : 'text-blue-800'}`}>
                     <ReactMarkdown>{content}</ReactMarkdown>
                   </div>
                 </motion.div>
@@ -196,6 +209,7 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
                       artifact_node: { icon: FileText, label: 'Document', color: 'text-blue-500 bg-blue-50/80 border-blue-100' },
                       browser_node: { icon: BookOpen, label: 'Reference', color: 'text-sky-500 bg-sky-50/80 border-sky-100' },
                       chart_node: { icon: BarChart3, label: 'Chart', color: 'text-emerald-500 bg-emerald-50/80 border-emerald-100' },
+                      lead_node: { icon: Sparkles, label: 'Access', color: 'text-violet-500 bg-violet-50/80 border-violet-100' },
                       graph_node: { icon: Network, label: 'Graph', color: 'text-violet-500 bg-violet-50/80 border-violet-100' },
                     };
                     const info = typeMap[node.type] || typeMap.artifact_node;

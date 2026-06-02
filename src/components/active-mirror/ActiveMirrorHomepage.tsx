@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUp, Mic, MicOff, ArrowLeft, Plus } from "lucide-react";
+import { ArrowUp, Mic, MicOff, ArrowLeft, Plus, User, Users, Building2, Landmark, Download, Network, Languages, Video } from "lucide-react";
 import { useA2UIStream } from "@/lib/mirror/useA2UIStream";
 import Image from "next/image";
 import TriPanelLayout from "./TriPanelLayout";
@@ -15,6 +15,70 @@ const PLACEHOLDERS = [
   "Draft a compliance report...",
 ];
 
+const STARTERS = [
+  {
+    label: "Ecosystem",
+    icon: Network,
+    prompt: "Show the full Active Mirror ecosystem demo: Chetana protects the site, MirrorProd markets it when relevant, MirrorGate protects it, and every surface should be generated and interactive.",
+  },
+  {
+    label: "Individual",
+    icon: User,
+    prompt: "Generate my individual Active Mirror workspace: a personal project plan, a browser research panel, and the fastest next step to finish my task.",
+  },
+  {
+    label: "Team",
+    icon: Users,
+    prompt: "Generate a team Active Mirror workspace: shared project brief, roles, proof trail, and a generated file handoff.",
+  },
+  {
+    label: "Enterprise",
+    icon: Building2,
+    prompt: "Generate an enterprise Active Mirror workspace: governance gate, security brief, implementation proposal, and upgrade path.",
+  },
+  {
+    label: "Government",
+    icon: Landmark,
+    prompt: "Generate a government Active Mirror workspace: consent boundary, audit/proof surface, procurement-ready brief, and risk controls.",
+  },
+  {
+    label: "Global",
+    icon: Languages,
+    prompt: "Generate a multilingual Active Mirror workspace: explain the product in English, Hindi, Arabic, and Spanish with localized onboarding, governance labels, and commercial next steps.",
+  },
+  {
+    label: "Video",
+    icon: Video,
+    prompt: "Generate a Veo-ready Active Mirror video workbench: storyboard, prompt, safety gate, cost gate, source previews for the video API, and access path for rendering.",
+  },
+];
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform?: string }>;
+};
+
+type MirrorSeed = {
+  v: 1;
+  id: string;
+  createdAt: string;
+  turnLimit: number;
+  surfaceBias: "finish";
+};
+
+const MIRROR_SEED_KEY = "active-mirror.mirrorseed.v1";
+
+function createMirrorSeed(): MirrorSeed {
+  const id = globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2);
+  return {
+    v: 1,
+    id: `ms-${id}`,
+    createdAt: new Date().toISOString(),
+    turnLimit: 5,
+    surfaceBias: "finish",
+  };
+}
+
 export default function ActiveMirrorHomepage() {
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -23,11 +87,52 @@ export default function ActiveMirrorHomepage() {
   const [recognition, setRecognition] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
+  const [mirrorSeed, setMirrorSeed] = useState<MirrorSeed | null>(null);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const { submit, a2uiState, isLoading, error } = useA2UIStream("/api/mirror/stream");
 
   useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const stored = window.localStorage.getItem(MIRROR_SEED_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as MirrorSeed;
+        if (parsed?.v === 1 && parsed.id) {
+          setMirrorSeed(parsed);
+          return;
+        }
+      }
+
+      const seed = createMirrorSeed();
+      window.localStorage.setItem(MIRROR_SEED_KEY, JSON.stringify(seed));
+      setMirrorSeed(seed);
+    } catch {
+      setMirrorSeed(createMirrorSeed());
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+    const handleAppInstalled = () => setInstallPrompt(null);
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
 
   // Cycle placeholder text
   useEffect(() => {
@@ -82,6 +187,17 @@ export default function ActiveMirrorHomepage() {
     setMessages([]);
     setInputValue("");
   }, []);
+
+  const handleInstall = useCallback(async () => {
+    if (installPrompt) {
+      await installPrompt.prompt();
+      await installPrompt.userChoice.catch(() => null);
+      setInstallPrompt(null);
+      return;
+    }
+
+    window.open("/manifest.json", "_blank", "noopener,noreferrer");
+  }, [installPrompt]);
 
   const toggleListening = () => {
     if (isListening) recognition?.stop();
@@ -141,13 +257,14 @@ export default function ActiveMirrorHomepage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: 'spring', damping: 24, stiffness: 140, delay: 0.5 }}
-                  className="w-full max-w-xl mt-10"
+                  className="w-full max-w-2xl mt-10"
                 >
                   <div className="relative bg-white rounded-2xl border border-[#d2d2d7] shadow-sm hover:shadow-md focus-within:shadow-lg focus-within:border-[#0071e3]/40 transition-all duration-300">
                     <div className="flex items-end p-2">
                       <button
                         type="button"
                         onClick={toggleListening}
+                        aria-label={isListening ? "Stop voice input" : "Start voice input"}
                         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all ${
                           isListening
                             ? 'bg-red-500 text-white scale-110'
@@ -170,6 +287,7 @@ export default function ActiveMirrorHomepage() {
                       <button
                         onClick={() => handleSubmit(inputValue)}
                         disabled={isEmpty && !isListening}
+                        aria-label="Generate surface"
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0071e3] text-white hover:bg-[#0077ed] disabled:bg-[#d2d2d7] disabled:text-white transition-all duration-200"
                       >
                         <ArrowUp className="h-[18px] w-[18px]" />
@@ -184,8 +302,58 @@ export default function ActiveMirrorHomepage() {
                     transition={{ delay: 1.2 }}
                     className="text-center text-[12px] text-[#86868b] mt-4 tracking-wide"
                   >
-                    Documents, charts, graphs, and research surfaces — generated instantly.
+                    5 free generated turns. Finish fast, then join the access list.
                   </motion.p>
+
+                  {mirrorSeed && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 1.28 }}
+                      className="text-center text-[11px] text-[#a1a1a6] mt-1"
+                    >
+                      MirrorSeed local: {mirrorSeed.id.slice(0, 11)}. No tracking profile.
+                    </motion.p>
+                  )}
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.35, duration: 0.35 }}
+                    className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4"
+                  >
+                    {STARTERS.map((starter, index) => {
+                      const Icon = starter.icon;
+                      return (
+                        <motion.button
+                          key={starter.label}
+                          type="button"
+                          onClick={() => handleSubmit(starter.prompt)}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 1.45 + index * 0.07 }}
+                          className="group flex h-16 flex-col items-center justify-center gap-1 rounded-xl border border-[#d2d2d7] bg-white/80 text-[#424245] shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#0071e3]/40 hover:bg-white hover:shadow-md"
+                          aria-label={`Start as ${starter.label}`}
+                        >
+                          <Icon className="h-4 w-4 text-[#0071e3] transition-transform group-hover:scale-110" />
+                          <span className="text-[12px] font-medium">{starter.label}</span>
+                        </motion.button>
+                      );
+                    })}
+                  </motion.div>
+
+                  <motion.button
+                    type="button"
+                    onClick={handleInstall}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.75 }}
+                    className="mx-auto mt-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium text-[#86868b] transition-colors hover:bg-white hover:text-[#1d1d1f]"
+                    aria-label={installPrompt ? "Install Active Mirror app" : "Open PWA manifest"}
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    {installPrompt ? "Install app" : "PWA ready"}
+                  </motion.button>
                 </motion.div>
               </>
             )}
@@ -204,6 +372,7 @@ export default function ActiveMirrorHomepage() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleReset}
+                  aria-label="Back to landing"
                   className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f5f5f7] text-[#86868b] hover:text-[#1d1d1f] transition-colors"
                 >
                   <ArrowLeft className="w-[18px] h-[18px]" />
@@ -237,6 +406,7 @@ export default function ActiveMirrorHomepage() {
                   <button
                     type="button"
                     onClick={toggleListening}
+                    aria-label={isListening ? "Stop voice input" : "Start voice input"}
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all ${
                       isListening ? 'bg-red-500 text-white' : 'text-[#86868b] hover:text-[#1d1d1f]'
                     }`}
@@ -256,6 +426,7 @@ export default function ActiveMirrorHomepage() {
                   <button
                     onClick={() => handleSubmit(inputValue)}
                     disabled={isEmpty && !isListening}
+                    aria-label="Generate surface"
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0071e3] text-white hover:bg-[#0077ed] disabled:bg-[#d2d2d7] transition-all duration-200"
                   >
                     <ArrowUp className="h-4 w-4" />

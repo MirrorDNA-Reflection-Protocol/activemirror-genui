@@ -8,24 +8,30 @@ export const authOptions: NextAuthConfig = {
   session: { strategy: "jwt" },
   providers: [
     CredentialsProvider({
-      name: "Mock Authentication",
+      name: "Active Mirror Demo",
       credentials: {
-        role: { label: "Role (admin or public)", type: "text", placeholder: "admin" },
+        role: { label: "Role", type: "text", placeholder: "demo" },
       },
       async authorize(credentials) {
-        const role = String(credentials?.role || "public").toUpperCase();
-        
+        const requestedRole = String(credentials?.role || "demo").toUpperCase();
+        const role = requestedRole === "SUBSCRIBER" ? "PUBLIC_DEMO" : "PUBLIC_DEMO";
+
         let user = await prisma.user.findFirst({
-          where: { email: `${role.toLowerCase()}@swfi.com` }
+          where: { email: "demo@activemirror.ai" }
         });
 
         if (!user) {
           user = await prisma.user.create({
             data: {
-              email: `${role.toLowerCase()}@swfi.com`,
-              name: `${role} User`,
+              email: "demo@activemirror.ai",
+              name: "Active Mirror Demo",
               role: role,
             }
+          });
+        } else if (user.role !== role) {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { role },
           });
         }
         

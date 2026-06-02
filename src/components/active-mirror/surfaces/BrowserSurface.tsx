@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { X, Globe, ExternalLink, BookOpen } from 'lucide-react';
+import { X, ExternalLink, BookOpen, Globe, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
@@ -13,7 +13,8 @@ interface BrowserSurfaceProps {
 }
 
 export default function BrowserSurface({ title, content, agentId, onClose }: BrowserSurfaceProps) {
-  // Extract URLs from markdown content and make them open in real browser
+  const sourceCards = extractSourceCards(content);
+
   const handleLinkClick = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -49,6 +50,38 @@ export default function BrowserSurface({ title, content, agentId, onClose }: Bro
       {/* Reference Body */}
       <div className="flex-1 overflow-y-auto bg-white">
         <div className="px-6 py-5">
+          {sourceCards.length > 0 && (
+            <div className="mb-5 space-y-2">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-sky-700">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Source Previews
+              </div>
+              <div className="grid gap-2">
+                {sourceCards.map((source) => (
+                  <button
+                    key={`${source.url}-${source.title}`}
+                    type="button"
+                    onClick={() => handleLinkClick(source.url)}
+                    className="group flex w-full items-center justify-between gap-3 rounded-xl border border-sky-100 bg-sky-50/60 px-3 py-2.5 text-left transition-colors hover:border-sky-200 hover:bg-sky-50"
+                  >
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-1.5 text-[11px] font-medium text-sky-700">
+                        <Globe className="h-3.5 w-3.5 shrink-0" />
+                        {source.host}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[13px] font-semibold text-gray-900">
+                        {source.title}
+                      </span>
+                    </span>
+                    <span className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-sky-700 group-hover:text-sky-900">
+                      Open source
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-bold prose-p:text-gray-600 prose-p:leading-relaxed prose-strong:text-gray-800 prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-ul:text-gray-600 prose-blockquote:border-sky-300 prose-blockquote:bg-sky-50/50">
             <ReactMarkdown
               components={{
@@ -70,4 +103,36 @@ export default function BrowserSurface({ title, content, agentId, onClose }: Bro
       </div>
     </motion.div>
   );
+}
+
+function extractSourceCards(markdown: string) {
+  const markdownLinks = Array.from(markdown.matchAll(/\[([^\]]+)]\((https?:\/\/[^)\s]+)\)/g)).map((match) => ({
+    title: match[1].trim(),
+    url: match[2].trim(),
+  }));
+  const bareLinks = Array.from(markdown.matchAll(/(^|\s)(https?:\/\/[^\s)]+)/g)).map((match) => ({
+    title: match[2].trim(),
+    url: match[2].trim(),
+  }));
+
+  const seen = new Set<string>();
+  return [...markdownLinks, ...bareLinks]
+    .map((source) => {
+      try {
+        const parsed = new URL(source.url);
+        return {
+          title: source.title.replace(/^https?:\/\//, '').slice(0, 96),
+          url: parsed.toString(),
+          host: parsed.hostname.replace(/^www\./, ''),
+        };
+      } catch {
+        return null;
+      }
+    })
+    .filter((source): source is { title: string; url: string; host: string } => {
+      if (!source || seen.has(source.url)) return false;
+      seen.add(source.url);
+      return true;
+    })
+    .slice(0, 4);
 }
