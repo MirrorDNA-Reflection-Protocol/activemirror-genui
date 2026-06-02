@@ -133,7 +133,7 @@ export default function ActiveMirrorHomepage() {
                   transition={{ duration: 0.6, delay: 0.25 }}
                   className="text-4xl sm:text-5xl font-semibold text-[#1d1d1f] tracking-tight text-center leading-[1.1]"
                 >
-                  What can I help you build?
+                  AI that shows its work.
                 </motion.h1>
 
                 {/* Input */}

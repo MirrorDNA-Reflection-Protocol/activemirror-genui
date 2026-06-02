@@ -175,9 +175,9 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                className="mt-8 flex flex-col items-center gap-4 py-6"
+                className="mt-8 flex flex-col items-start gap-4 py-6 w-full overflow-hidden"
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex flex-wrap gap-2 w-full">
                   {displaySurfaces.map((node: any) => {
                     const typeMap: Record<string, { icon: any; label: string; color: string }> = {
                       artifact_node: { icon: FileText, label: 'Document', color: 'text-blue-500 bg-blue-50/80 border-blue-100' },
