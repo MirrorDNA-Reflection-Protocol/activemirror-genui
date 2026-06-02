@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { AlertTriangle, ShieldAlert, Bot, User, Sparkles } from 'lucide-react';
+import { AlertTriangle, ShieldAlert, Bot, User, Sparkles, FileText, Network, BarChart3, BookOpen } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -166,6 +166,54 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
               </div>
             </motion.div>
           )}
+
+          {/* Contextual visual — what was generated */}
+          <AnimatePresence>
+            {hasSurfaces && !isLoading && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="mt-8 flex flex-col items-center gap-4 py-6"
+              >
+                <div className="flex items-center gap-2.5">
+                  {displaySurfaces.map((node: any) => {
+                    const typeMap: Record<string, { icon: any; label: string; color: string }> = {
+                      artifact_node: { icon: FileText, label: 'Document', color: 'text-blue-500 bg-blue-50/80 border-blue-100' },
+                      browser_node: { icon: BookOpen, label: 'Reference', color: 'text-sky-500 bg-sky-50/80 border-sky-100' },
+                      chart_node: { icon: BarChart3, label: 'Chart', color: 'text-emerald-500 bg-emerald-50/80 border-emerald-100' },
+                      graph_node: { icon: Network, label: 'Graph', color: 'text-violet-500 bg-violet-50/80 border-violet-100' },
+                    };
+                    const info = typeMap[node.type] || typeMap.artifact_node;
+                    const Icon = info.icon;
+                    const title = dataModel[`${node.id}.title`] || info.label;
+                    return (
+                      <motion.div
+                        key={node.id}
+                        initial={{ opacity: 0, scale: 0.85 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-[12px] font-medium ${info.color}`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        <span className="max-w-[120px] truncate">{title}</span>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+                <div className="flex items-center gap-1">
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <motion.div
+                      key={i}
+                      animate={{ opacity: [0.15, 0.5, 0.15] }}
+                      transition={{ duration: 2, delay: i * 0.2, repeat: Infinity }}
+                      className="w-1 h-1 rounded-full bg-[#0071e3]"
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
 
