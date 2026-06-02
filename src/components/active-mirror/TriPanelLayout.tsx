@@ -1,203 +1,218 @@
-import React, { useState, useEffect } from 'react';
-import { MirrorSurfaceSpec } from '@/lib/mirror/schema';
-import { FileText, Globe, AlertTriangle, ShieldAlert, BarChart3, Bot, User } from 'lucide-react';
+"use client";
+
+import React, { useState, useRef, useEffect } from 'react';
+import { AlertTriangle, ShieldAlert, Bot, User, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import DocumentSurface from './surfaces/DocumentSurface';
+import BrowserSurface from './surfaces/BrowserSurface';
+import ChartSurface from './surfaces/ChartSurface';
+import MirrorGraph from './surfaces/MirrorGraph';
+
 interface TriPanelLayoutProps {
   messages: { role: "user" | "assistant"; content: string }[];
-  partialSurface?: Partial<MirrorSurfaceSpec>;
+  a2uiState: any;
   isLoading: boolean;
 }
 
-const AgentBadge = ({ agentId }: { agentId?: string }) => {
-  if (!agentId) return null;
-  let color = 'bg-gray-800 text-gray-300 border-gray-700';
-  let icon = <Bot className="w-3 h-3" />;
-  if (agentId === 'MirrorGate') { color = 'bg-red-900/50 text-red-400 border-red-800'; icon = <ShieldAlert className="w-3 h-3" />; }
-  if (agentId === 'Chetana') { color = 'bg-blue-900/50 text-blue-400 border-blue-800'; icon = <BarChart3 className="w-3 h-3" />; }
-  if (agentId === 'MirrorProof') { color = 'bg-emerald-900/50 text-emerald-400 border-emerald-800'; icon = <FileText className="w-3 h-3" />; }
-  if (agentId === 'MirrorBrain') { color = 'bg-purple-900/50 text-purple-400 border-purple-800'; icon = <Globe className="w-3 h-3" />; }
-  
-  return (
-    <div className={`absolute -top-3 right-4 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border shadow-sm ${color} backdrop-blur-md`}>
-      {icon} {agentId}
-    </div>
+export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPanelLayoutProps) {
+  const nodes = a2uiState?.components || [];
+  const dataModel = a2uiState?.dataModel || {};
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [closedSurfaces, setClosedSurfaces] = useState<Set<string>>(new Set());
+
+  // Auto-scroll chat to bottom
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, dataModel]);
+
+  const surfaceNodes = nodes.filter((n: any) =>
+    n?.type && n.type !== 'fluid_grid' && !closedSurfaces.has(n?.id)
   );
-};
+  const governanceNodes = surfaceNodes.filter((n: any) => n?.type === 'governance_node');
+  const displaySurfaces = surfaceNodes.filter((n: any) => n?.type !== 'governance_node');
+  const hasSurfaces = displaySurfaces.length > 0;
 
-export default function TriPanelLayout({ messages, partialSurface, isLoading }: TriPanelLayoutProps) {
-  const nodes = partialSurface?.new_nodes || [];
-  
-  const artifactNodes = nodes.filter(n => n?.type === 'artifact_node' || n?.type === 'chart_node');
-  const browserNodes = nodes.filter(n => n?.type === 'browser_node');
-  const governanceNodes = nodes.filter(n => n?.type === 'governance_node');
+  const closeSurface = (id: string) => {
+    setClosedSurfaces(prev => new Set([...prev, id]));
+  };
 
-  const hasArtifact = artifactNodes.length > 0;
-  const hasBrowser = browserNodes.length > 0;
+  const renderSurface = (node: any, index: number) => {
+    const agentId = node?.props?.agent_id || 'ActiveMirror';
+    const title = dataModel[`${node.id}.title`] || node?.props?.title || '';
+    const content = dataModel[`${node.id}.content`] || '';
+    const onClose = () => closeSurface(node.id);
 
-  // Fluid CSS Grid configuration based on the user blueprint
-  const getGridConfig = () => {
-    const left = hasBrowser ? '400px' : '0px';
-    const right = hasArtifact ? '450px' : '0px';
-    return {
-      gridTemplateColumns: `${left} 1fr ${right}`,
-      transition: 'grid-template-columns 400ms cubic-bezier(0.16, 1, 0.3, 1)'
-    };
+    switch (node.type) {
+      case 'artifact_node':
+        return <DocumentSurface key={node.id} title={title} content={content} agentId={agentId} onClose={onClose} />;
+      case 'browser_node':
+        return <BrowserSurface key={node.id} title={title} content={content} agentId={agentId} onClose={onClose} />;
+      case 'chart_node':
+        return <ChartSurface key={node.id} title={title} content={content} agentId={agentId} onClose={onClose} />;
+      default:
+        return <DocumentSurface key={node.id} title={title} content={content} agentId={agentId} onClose={onClose} />;
+    }
   };
 
   return (
-    <div className="w-full h-full bg-[#0d0f12] text-slate-100 overflow-hidden grid rounded-xl shadow-2xl" style={getGridConfig()}>
-      
-      {/* LEFT PANEL: Browser Lookups */}
-      <div 
-        className="border-r border-slate-800 bg-[#111418] h-full overflow-y-auto"
-        style={{ contain: 'paint' }}
+    <div className="flex h-full w-full overflow-hidden">
+      {/* LEFT: Chat Thread */}
+      <motion.div
+        animate={{ width: hasSurfaces ? '420px' : '100%', maxWidth: hasSurfaces ? '420px' : '680px' }}
+        transition={{ type: 'spring', damping: 30, stiffness: 200 }}
+        className={`flex flex-col h-full shrink-0 ${hasSurfaces ? '' : 'mx-auto'}`}
       >
-        <div className="w-[400px] h-full p-4 space-y-4">
-          {browserNodes.map((node, i) => (
-            <div key={node?.id || i} className="bg-zinc-900 rounded-xl shadow-2xl border border-zinc-800 overflow-visible relative">
-              <AgentBadge agentId={node?.agent_id as string} />
-              <div className="bg-zinc-950 px-4 py-2 flex items-center gap-2 text-white border-b border-zinc-800 rounded-t-xl">
-                <div className="flex gap-1.5 mr-2">
-                  <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                  <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                  <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                </div>
-                <Globe className="w-4 h-4 text-zinc-400" />
-                <div className="bg-zinc-800 rounded text-xs px-2 py-1 flex-1 font-mono text-center text-zinc-300 truncate">
-                  {node?.title || "active-mirror.net/search"}
-                </div>
-              </div>
-              <div className="p-5 min-h-[200px]">
-                <h3 className="font-bold text-lg text-zinc-100 mb-3">{node?.title}</h3>
-                <div className="text-sm text-zinc-400 space-y-4 whitespace-pre-wrap prose prose-invert max-w-none">
-                  <ReactMarkdown>{node?.body || ""}</ReactMarkdown>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* CENTER PANEL: Core Chat Thread */}
-      <div className="h-full flex flex-col justify-between bg-[#0d0f12] relative overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-4">
           {messages.map((msg, i) => {
             const isUser = msg.role === 'user';
+            const cleanContent = msg.content
+              .replace(/\[VAULT CONTEXT:.*?\]\n\n/g, '')
+              .replace(/\[SYSTEM AUTO-TRIGGER:.*?\]/g, '')
+              .trim();
+            if (!cleanContent) return null;
+
             return (
-              <motion.div 
-                key={i} 
-                initial={{ opacity: 0, y: 10 }}
+              <motion.div
+                key={`msg-${i}`}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
                 className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`px-4 py-3 rounded-2xl max-w-[85%] shadow-md border ${isUser ? 'bg-zinc-800 text-slate-100 border-zinc-700' : 'bg-[#15191e] text-slate-300 border-slate-800'}`}>
-                  <div className="flex items-center gap-2 mb-1 opacity-60 text-[10px] uppercase tracking-wider font-semibold">
-                    {isUser ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
-                    {isUser ? 'You' : 'Active Mirror'}
+                {!isUser && (
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center mr-2.5 mt-0.5 shrink-0 shadow-sm">
+                    <Sparkles className="w-3.5 h-3.5 text-white" />
                   </div>
-                  <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                    <ReactMarkdown>{msg.content.replace(/\[VAULT CONTEXT:.*?\]\n\n/g, '')}</ReactMarkdown>
+                )}
+                <div className={`max-w-[85%] ${isUser
+                  ? 'bg-gray-900 text-white rounded-2xl rounded-br-sm px-4 py-2.5 shadow-md'
+                  : 'text-gray-700 py-1'
+                }`}>
+                  <div className={`text-sm leading-relaxed ${isUser ? '' : 'prose prose-sm max-w-none prose-p:text-gray-700 prose-headings:text-gray-900 prose-strong:text-gray-900'}`}>
+                    <ReactMarkdown>{cleanContent}</ReactMarkdown>
                   </div>
                 </div>
               </motion.div>
             );
           })}
-          
+
+          {/* Governance warnings inline in chat */}
           <AnimatePresence>
-            {governanceNodes.map((node, i) => {
-              const isBlocked = node?.severity === 'blocked';
+            {governanceNodes.map((node: any) => {
+              const isBlocked = node?.props?.severity === 'blocked';
+              const title = dataModel[`${node.id}.title`] || node?.props?.title || '';
+              const content = dataModel[`${node.id}.content`] || '';
               return (
-                <motion.div 
-                  key={node?.id || `gov-${i}`}
-                  initial={{ opacity: 0, scale: 0.95 }}
+                <motion.div
+                  key={node.id}
+                  initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={`mx-auto w-full max-w-[85%] bg-zinc-900 rounded-xl shadow-2xl border overflow-visible relative my-4 ${isBlocked ? 'border-red-900 shadow-red-900/20' : 'border-amber-900 shadow-amber-900/20'}`}
+                  className={`rounded-xl border-2 p-3.5 ${isBlocked
+                    ? 'border-red-200 bg-red-50'
+                    : 'border-amber-200 bg-amber-50'
+                  }`}
                 >
-                  <AgentBadge agentId={node?.agent_id as string} />
-                  <div className={`px-4 py-3 border-b flex items-center gap-2 text-white rounded-t-xl ${isBlocked ? 'bg-red-950/80 border-red-900' : 'bg-amber-950/80 border-amber-900'}`}>
-                    {isBlocked ? <ShieldAlert className="w-4 h-4 text-red-400" /> : <AlertTriangle className="w-4 h-4 text-amber-400" />}
-                    <span className={`font-bold text-xs tracking-widest ${isBlocked ? 'text-red-400' : 'text-amber-400'}`}>
-                      {isBlocked ? 'GOVERNANCE LOCK' : 'POLICY WARNING'}
+                  <div className="flex items-center gap-2 mb-1.5">
+                    {isBlocked
+                      ? <ShieldAlert className="w-4 h-4 text-red-500" />
+                      : <AlertTriangle className="w-4 h-4 text-amber-500" />
+                    }
+                    <span className={`text-xs font-bold uppercase tracking-wider ${isBlocked ? 'text-red-600' : 'text-amber-600'}`}>
+                      {isBlocked ? 'Governance Lock' : 'Policy Warning'}
                     </span>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-zinc-200 mb-2">{node?.title}</h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed font-mono">{node?.body}</p>
+                  {title && <div className={`text-sm font-semibold mb-1 ${isBlocked ? 'text-red-800' : 'text-amber-800'}`}>{title}</div>}
+                  <div className={`text-xs leading-relaxed ${isBlocked ? 'text-red-700' : 'text-amber-700'}`}>
+                    <ReactMarkdown>{content}</ReactMarkdown>
                   </div>
                 </motion.div>
               );
             })}
           </AnimatePresence>
 
-          {isLoading && partialSurface?.thought_process && (
-            <motion.div 
+          {/* Thinking indicator */}
+          {isLoading && (
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="px-4 py-3 bg-[#15191e] rounded-xl border border-slate-800 text-slate-400 text-xs font-mono max-w-[85%] mt-4 shadow-xl"
+              className="flex items-start gap-2.5"
             >
-              {partialSurface.thought_process.map((thought, i) => (
-                <div key={i} className="mb-1 flex items-start gap-2">
-                  <span className="text-blue-500 mt-0.5">●</span>
-                  <span>{thought}</span>
-                </div>
-              ))}
-              <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-800 text-slate-500">
-                <span className="animate-pulse">_</span> generating surface...
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center shrink-0 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
-            </motion.div>
-          )}
-        </div>
-      </div>
-
-      {/* RIGHT PANEL: Document Artifacts */}
-      <div 
-        className="border-l border-slate-800 bg-[#15191e] h-full overflow-y-auto"
-        style={{ contain: 'paint' }}
-      >
-        <div className="w-[450px] h-full p-6 space-y-6">
-          {artifactNodes.map((node, i) => (
-            <div key={node?.id || i} className="bg-[#0d0f12] rounded-xl shadow-2xl border border-slate-800 overflow-visible relative">
-              <AgentBadge agentId={node?.agent_id as string} />
-              <div className="bg-[#111418] px-4 py-3 border-b border-slate-800 flex items-center gap-2 text-slate-300 rounded-t-xl">
-                {node?.type === 'chart_node' ? <BarChart3 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
-                <span className="font-semibold text-xs tracking-wide uppercase">
-                  {node?.type === 'chart_node' ? 'Data Visualization' : 'Document Artifact'}
-                </span>
-              </div>
-              <div className="p-6">
-                <h3 className="font-bold text-xl text-slate-100 mb-4">{node?.title}</h3>
-                <div className="text-[0.925rem] text-slate-300 leading-relaxed prose prose-invert max-w-none">
-                  <ReactMarkdown>{node?.body || ""}</ReactMarkdown>
-                </div>
-                
-                {node?.type === 'chart_node' && (
-                  <div className="mt-6 h-40 bg-[#111418] rounded-lg flex flex-col justify-end p-2 gap-2 border border-slate-800">
-                     <div className="w-full bg-blue-900/40 h-1/4 rounded border border-blue-800/50"></div>
-                     <div className="w-full bg-blue-800/50 h-2/4 rounded border border-blue-700/50"></div>
-                     <div className="w-full bg-blue-600/60 h-3/4 rounded border border-blue-500/50"></div>
+              <div className="space-y-1.5 pt-1">
+                {dataModel["thought_process"] ? (
+                  <div className="bg-gray-50 rounded-xl px-3.5 py-2.5 border border-gray-100">
+                    {(JSON.parse(dataModel["thought_process"]) as string[]).map((thought: string, i: number) => (
+                      <div key={i} className="flex items-start gap-2 text-xs text-gray-500 font-mono py-0.5">
+                        <span className="text-blue-400 mt-0.5 shrink-0">●</span>
+                        <span>{thought}</span>
+                      </div>
+                    ))}
                   </div>
-                )}
-
-                {node?.metadata && node.metadata.length > 0 && (
-                  <div className="mt-6 pt-4 border-t border-slate-800">
-                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Metadata / Citations</div>
-                    <div className="flex flex-wrap gap-2">
-                      {node.metadata.map((meta: any, idx: number) => (
-                        <div key={idx} className="text-xs bg-[#111418] px-2 py-1 rounded text-slate-400 border border-slate-800 font-mono">
-                          <span className="text-slate-500">{meta?.key}:</span> {meta?.value}
-                        </div>
-                      ))}
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                   </div>
                 )}
               </div>
-            </div>
-          ))}
+            </motion.div>
+          )}
         </div>
-      </div>
+      </motion.div>
 
+      {/* RIGHT: Surfaces Area */}
+      <AnimatePresence>
+        {hasSurfaces && (
+          <motion.div
+            initial={{ opacity: 0, width: 0 }}
+            animate={{ opacity: 1, width: 'auto' }}
+            exit={{ opacity: 0, width: 0 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 200 }}
+            className="flex-1 h-full border-l border-gray-100 overflow-hidden"
+          >
+            <div className="h-full p-4 space-y-4 overflow-y-auto">
+              {/* Check if any node is a graph type — give it full height */}
+              {displaySurfaces.some((n: any) => n?.type === 'graph_node') ? (
+                // Graph gets full space
+                displaySurfaces.map((node: any) => {
+                  if (node.type === 'graph_node') {
+                    const agentId = node?.props?.agent_id || 'ActiveMirror';
+                    const title = dataModel[`${node.id}.title`] || node?.props?.title || '';
+                    return (
+                      <div key={node.id} className="h-full">
+                        <MirrorGraph
+                          title={title}
+                          content={dataModel[`${node.id}.content`] || ''}
+                          agentId={agentId}
+                          onClose={() => closeSurface(node.id)}
+                        />
+                      </div>
+                    );
+                  }
+                  return <div key={node.id} className="h-[45%] min-h-[280px]">{renderSurface(node, 0)}</div>;
+                })
+              ) : displaySurfaces.length === 1 ? (
+                // Single surface gets full height
+                <div className="h-full">{renderSurface(displaySurfaces[0], 0)}</div>
+              ) : (
+                // Multiple surfaces split space
+                displaySurfaces.map((node: any, i: number) => (
+                  <div key={node.id} className="h-[48%] min-h-[280px]">{renderSurface(node, i)}</div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
