@@ -133,17 +133,8 @@ export default function ActiveMirrorHomepage() {
                   transition={{ duration: 0.6, delay: 0.25 }}
                   className="text-4xl sm:text-5xl font-semibold text-[#1d1d1f] tracking-tight text-center leading-[1.1]"
                 >
-                  Governed AI. Delivered.
+                  Active Mirror
                 </motion.h1>
-
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.45, duration: 0.5 }}
-                  className="text-[15px] text-[#86868b] mt-4 text-center max-w-lg leading-relaxed"
-                >
-                  We build and operate AI systems for organizations that need accountability, not just answers.
-                </motion.p>
 
                 {/* Input */}
                 <motion.div
