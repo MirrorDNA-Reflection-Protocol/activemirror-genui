@@ -2,16 +2,16 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Sparkles, ArrowUp, Mic, MicOff, ArrowLeft } from "lucide-react";
+import { Sparkles, ArrowUp, Mic, MicOff, ArrowLeft, FileText, Network, BarChart3, Shield } from "lucide-react";
 import { useA2UIStream } from "@/lib/mirror/useA2UIStream";
 import Image from "next/image";
 import TriPanelLayout from "./TriPanelLayout";
 
 const SUGGESTED_PROMPTS = [
-  "Draft a product requirements document for Active Mirror",
-  "Show me the system architecture as an interactive graph",
-  "Analyze enterprise AI market trends with charts",
-  "Run a security governance audit on this session",
+  { icon: FileText, text: "Draft a product spec", prompt: "Draft a product requirements document for Active Mirror with objectives, user stories, and success metrics", color: "text-blue-500" },
+  { icon: Network, text: "System architecture", prompt: "Show me the full system architecture with all agents, services, and data flows as an interactive graph", color: "text-violet-500" },
+  { icon: BarChart3, text: "Market analysis", prompt: "Analyze the enterprise AI market — show growth trends, competitor landscape, and our positioning with charts", color: "text-emerald-500" },
+  { icon: Shield, text: "Security audit", prompt: "Run a comprehensive security governance audit on this session and show compliance posture", color: "text-amber-500" },
 ];
 
 export default function ActiveMirrorHomepage() {
@@ -162,13 +162,24 @@ export default function ActiveMirrorHomepage() {
                       transition={{ delay: 0.4, duration: 0.5 }}
                       className="flex flex-col items-center mb-10"
                     >
-                      <div className="relative w-14 h-14 mb-4">
-                        <Image src="/logo.png" alt="Active Mirror" width={56} height={56} className="w-full h-full object-contain" />
+                      <div className="relative w-16 h-16 mb-5 animate-float">
+                        <Image src="/logo.png" alt="Active Mirror" width={64} height={64} className="w-full h-full object-contain drop-shadow-lg" />
                       </div>
-                      <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Active Mirror</h1>
-                      <p className="text-sm text-gray-500 mt-1.5 text-center max-w-sm">
-                        Ask anything. Surfaces materialize on demand — documents, graphs, charts, research.
+                      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gradient">Active Mirror</h1>
+                      <p className="text-sm sm:text-base text-gray-500 mt-3 text-center max-w-md leading-relaxed">
+                        Ask for a document and it appears. Ask for research and it opens.
+                        <span className="block mt-1 text-gray-400">AI that builds what you ask for.</span>
                       </p>
+                      <div className="flex items-center gap-4 mt-4">
+                        <div className="flex items-center gap-1.5 text-[10px] text-gray-400 uppercase tracking-widest font-semibold">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
+                          <span>GPT-4.1 Connected</span>
+                        </div>
+                        <div className="w-px h-3 bg-gray-200" />
+                        <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Governed</span>
+                        <div className="w-px h-3 bg-gray-200" />
+                        <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Sovereign</span>
+                      </div>
                     </motion.div>
 
                     {/* Input */}
@@ -176,7 +187,7 @@ export default function ActiveMirrorHomepage() {
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.6, duration: 0.4 }}
-                      className="bg-white/80 backdrop-blur-xl rounded-2xl border border-gray-200 shadow-xl shadow-gray-200/40 p-2"
+                      className="bg-white/80 backdrop-blur-xl rounded-2xl border border-indigo-200/50 shadow-xl shadow-indigo-100/30 p-2 animate-border-glow"
                     >
                       <div className="flex items-end gap-2">
                         <button
@@ -217,18 +228,19 @@ export default function ActiveMirrorHomepage() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.9, duration: 0.5 }}
-                      className="flex flex-wrap justify-center gap-2 mt-5"
+                      className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-6 w-full"
                     >
-                      {SUGGESTED_PROMPTS.map((prompt, i) => (
+                      {SUGGESTED_PROMPTS.map((item, i) => (
                         <motion.button
                           key={i}
-                          initial={{ opacity: 0, y: 6 }}
+                          initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 1.0 + i * 0.08 }}
-                          onClick={() => handleSubmit(prompt)}
-                          className="px-3.5 py-2 text-xs text-gray-500 bg-white/60 border border-gray-200/80 rounded-xl hover:bg-white hover:text-gray-700 hover:border-gray-300 hover:shadow-sm transition-all"
+                          transition={{ delay: 1.0 + i * 0.1 }}
+                          onClick={() => handleSubmit(item.prompt)}
+                          className="group flex flex-col items-center gap-2 px-4 py-3.5 bg-white/60 border border-gray-200/80 rounded-xl hover:bg-white hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                         >
-                          {prompt}
+                          <item.icon className={`w-5 h-5 ${item.color} group-hover:scale-110 transition-transform`} />
+                          <span className="text-xs font-medium text-gray-600 group-hover:text-gray-900">{item.text}</span>
                         </motion.button>
                       ))}
                     </motion.div>

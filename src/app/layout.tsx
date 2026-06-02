@@ -13,22 +13,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Active Mirror | Sovereign AI Ecosystem",
-  description: "Governed AI interfaces by N1 Intelligence.",
+  title: "Active Mirror — AI That Builds What You Ask For",
+  description: "Ask for a document, get a document. Ask for research, get a research surface. Ask for a chart, get live data. Active Mirror generates governed AI interfaces on demand.",
   keywords: [
-    "governed AI",
-    "AI governance",
     "generative UI",
-    "MirrorGate",
+    "AI workspace",
+    "governed AI",
     "enterprise AI",
-    "AI compliance",
+    "AI documents",
+    "AI governance",
+    "interactive AI",
+    "N1 Intelligence",
   ],
   openGraph: {
-    title: "Active Mirror — Governed AI Interface",
-    description:
-      "Active Mirror does not only generate answers. It generates controlled surfaces for action.",
+    title: "Active Mirror — AI That Builds What You Ask For",
+    description: "Documents, graphs, charts, and research surfaces materialize on demand. Governed. Sovereign. Instant.",
     siteName: "Active Mirror",
     type: "website",
+    url: "https://activemirror.ai",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Active Mirror — AI That Builds What You Ask For",
+    description: "Documents, graphs, charts, and research surfaces materialize on demand.",
   },
   manifest: "/manifest.json",
   appleWebApp: {
@@ -36,6 +43,8 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Active Mirror",
   },
+  robots: { index: true, follow: true },
+  alternates: { canonical: "https://activemirror.ai" },
 };
 
 export const viewport: Viewport = {

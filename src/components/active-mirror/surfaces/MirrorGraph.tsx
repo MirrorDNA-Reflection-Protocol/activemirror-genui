@@ -131,7 +131,7 @@ export default function MirrorGraph({ title, content, agentId, graphNodes, graph
       animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, scale: 0.92, filter: 'blur(10px)' }}
       transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-      className="bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-200/60 overflow-hidden flex flex-col h-full"
+      className="bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-200/60 overflow-hidden flex flex-col h-full animate-surface-enter"
     >
       {/* Graph Chrome */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/80">

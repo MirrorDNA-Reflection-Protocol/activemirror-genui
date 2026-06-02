@@ -19,7 +19,7 @@ export default function DocumentSurface({ title, content, agentId, onClose }: Do
       animate={{ opacity: 1, x: 0, scale: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, x: 40, scale: 0.95, filter: 'blur(8px)' }}
       transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-      className="bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-200/60 overflow-hidden flex flex-col h-full"
+      className="bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-200/60 overflow-hidden flex flex-col h-full animate-surface-enter"
     >
       {/* Document Chrome */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/80">
