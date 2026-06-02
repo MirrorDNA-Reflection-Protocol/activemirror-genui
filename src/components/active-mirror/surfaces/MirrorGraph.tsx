@@ -118,7 +118,7 @@ function buildFromData(
   return { nodes, edges };
 }
 
-export default function MirrorGraph({ title, content, agentId, graphNodes, graphEdges, onClose }: MirrorGraphProps) {
+export default function MirrorGraph({ title, graphNodes, graphEdges, onClose }: MirrorGraphProps) {
   const { nodes, edges } = useMemo(() => {
     if (graphNodes && graphNodes.length > 0 && graphEdges) {
       return buildFromData(graphNodes, graphEdges);
@@ -142,7 +142,7 @@ export default function MirrorGraph({ title, content, agentId, graphNodes, graph
           </div>
           <div>
             <div className="text-sm font-semibold text-gray-900 leading-tight">{title || 'System Graph'}</div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{agentId} / interactive</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Interactive operating map</div>
           </div>
         </div>
         <div className="flex items-center gap-1">

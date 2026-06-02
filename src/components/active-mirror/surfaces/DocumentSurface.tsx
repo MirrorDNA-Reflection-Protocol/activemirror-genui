@@ -4,11 +4,12 @@ import React, { useState } from 'react';
 import { FileText, X, Download, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface DocumentSurfaceProps {
   title: string;
   content: string;
-  agentId: string;
+  agentId?: string;
   onClose?: () => void;
   children?: React.ReactNode;
 }
@@ -22,7 +23,7 @@ function filenameFromTitle(title: string) {
   return `${base || "active-mirror-artifact"}.md`;
 }
 
-export default function DocumentSurface({ title, content, agentId, onClose, children }: DocumentSurfaceProps) {
+export default function DocumentSurface({ title, content, onClose, children }: DocumentSurfaceProps) {
   const [copied, setCopied] = useState(false);
 
   const copyContent = async () => {
@@ -49,7 +50,7 @@ export default function DocumentSurface({ title, content, agentId, onClose, chil
       animate={{ opacity: 1, x: 0, scale: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, x: 40, scale: 0.95, filter: 'blur(8px)' }}
       transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-      className="bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-200/60 overflow-hidden flex flex-col h-full animate-surface-enter"
+      className="bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-200/60 overflow-hidden flex flex-col h-full min-h-0 animate-surface-enter"
     >
       {/* Document Chrome */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/80">
@@ -59,7 +60,7 @@ export default function DocumentSurface({ title, content, agentId, onClose, chil
           </div>
           <div>
             <div className="text-sm font-semibold text-gray-900 leading-tight">{title || 'Document'}</div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{agentId}</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Downloadable artifact</div>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -88,9 +89,9 @@ export default function DocumentSurface({ title, content, agentId, onClose, chil
       </div>
 
       {/* Document Body */}
-      <div className="flex-1 overflow-y-auto px-8 py-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-8 py-6">
         <article className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-bold prose-h1:text-2xl prose-h1:border-b prose-h1:border-gray-100 prose-h1:pb-3 prose-h2:text-lg prose-h2:mt-6 prose-h3:text-base prose-p:text-gray-600 prose-p:leading-relaxed prose-strong:text-gray-800 prose-ul:text-gray-600 prose-li:text-gray-600 prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-blue-700 prose-code:text-xs prose-blockquote:border-blue-300 prose-blockquote:bg-blue-50/50 prose-blockquote:text-gray-700 prose-blockquote:py-2 prose-blockquote:rounded-r-lg">
-          <ReactMarkdown>{content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
         </article>
         {/* Typing cursor when content is still streaming */}
         {content && content.length > 0 && (

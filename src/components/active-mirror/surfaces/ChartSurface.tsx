@@ -5,6 +5,7 @@ import { X, BarChart3, Maximize2, Minimize2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ChartSurfaceProps {
   title: string;
@@ -39,7 +40,7 @@ function extractChartData(content: string): { name: string; value: number }[] {
   ];
 }
 
-export default function ChartSurface({ title, content, agentId, onClose }: ChartSurfaceProps) {
+export default function ChartSurface({ title, content, onClose }: ChartSurfaceProps) {
   const [expanded, setExpanded] = useState(false);
   const chartData = extractChartData(content);
   const useArea = content.toLowerCase().includes('trend') || content.toLowerCase().includes('growth') || content.toLowerCase().includes('time');
@@ -50,7 +51,7 @@ export default function ChartSurface({ title, content, agentId, onClose }: Chart
       animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, scale: 0.94, filter: 'blur(8px)' }}
       transition={{ type: 'spring', damping: 26, stiffness: 200 }}
-      className={`bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-200/60 overflow-hidden flex flex-col ${
+      className={`bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-200/60 overflow-hidden flex flex-col min-h-0 ${
         expanded ? 'fixed inset-4 z-50' : 'h-full'
       }`}
     >
@@ -62,7 +63,7 @@ export default function ChartSurface({ title, content, agentId, onClose }: Chart
           </div>
           <div>
             <div className="text-sm font-semibold text-gray-900 leading-tight">{title || 'Data Visualization'}</div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{agentId} / live data</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Generated finish map</div>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -82,7 +83,7 @@ export default function ChartSurface({ title, content, agentId, onClose }: Chart
       </div>
 
       {/* Chart */}
-      <div className="flex-1 p-5 flex flex-col">
+      <div className="min-h-0 flex-1 p-5 flex flex-col">
         <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
             {useArea ? (
@@ -119,7 +120,7 @@ export default function ChartSurface({ title, content, agentId, onClose }: Chart
         {content && (
           <div className="mt-4 pt-3 border-t border-gray-100 max-h-32 overflow-y-auto">
             <div className="text-xs text-gray-500 leading-relaxed prose prose-xs max-w-none">
-              <ReactMarkdown>{content}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
             </div>
           </div>
         )}

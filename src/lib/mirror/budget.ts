@@ -1,4 +1,7 @@
-export const FREE_TURN_LIMIT = Number(process.env.MIRROR_FREE_TURN_LIMIT || 5);
+export const FREE_TURNS_UNLOCKED = process.env.MIRROR_FREE_TURNS_UNLOCKED !== "false";
+export const FREE_TURN_LIMIT = Number(
+  process.env.MIRROR_FREE_TURN_LIMIT || (FREE_TURNS_UNLOCKED ? 999999 : 5)
+);
 export const MAX_PROMPT_CHARS = Number(process.env.MIRROR_MAX_PROMPT_CHARS || 1200);
 export const MAX_CONTEXT_MESSAGES = Number(process.env.MIRROR_MAX_CONTEXT_MESSAGES || 6);
 export const PUBLIC_RATE_LIMIT_PER_MINUTE = Number(process.env.MIRROR_PUBLIC_RATE_LIMIT_PER_MINUTE || 12);
@@ -28,6 +31,14 @@ export function getUserTurnCount(messages: { role: "user" | "assistant"; content
 
 export function checkFreeTurnBudget(messages: { role: "user" | "assistant"; content: string }[]): BudgetDecision {
   const usedTurns = getUserTurnCount(messages);
+  if (FREE_TURNS_UNLOCKED) {
+    return {
+      allowed: true,
+      remainingTurns: FREE_TURN_LIMIT,
+      usedTurns,
+    };
+  }
+
   if (usedTurns > FREE_TURN_LIMIT) {
     return { allowed: false, remainingTurns: 0, usedTurns, reason: "free_turn_limit" };
   }

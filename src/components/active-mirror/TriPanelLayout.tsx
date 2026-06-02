@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { AlertTriangle, ShieldAlert, Bot, User, Sparkles, FileText, Network, BarChart3, BookOpen } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { AlertTriangle, ShieldAlert, Bot, Sparkles, FileText, Network, BarChart3, BookOpen } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import DocumentSurface from './surfaces/DocumentSurface';
@@ -13,13 +14,27 @@ import LeadCaptureCard from './LeadCaptureCard';
 
 interface TriPanelLayoutProps {
   messages: { role: "user" | "assistant"; content: string }[];
-  a2uiState: any;
+  a2uiState?: {
+    components?: SurfaceNode[];
+    dataModel?: Record<string, string>;
+  };
   isLoading: boolean;
 }
 
+type SurfaceNode = {
+  id: string;
+  type: string;
+  parent_id?: string;
+  props?: {
+    agent_id?: string | null;
+    title?: string | null;
+    severity?: string | null;
+  };
+};
+
 export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPanelLayoutProps) {
-  const nodes = a2uiState?.components || [];
-  const dataModel = a2uiState?.dataModel || {};
+  const nodes = useMemo(() => a2uiState?.components || [], [a2uiState?.components]);
+  const dataModel = useMemo(() => a2uiState?.dataModel || {}, [a2uiState?.dataModel]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [closedSurfaces, setClosedSurfaces] = useState<Set<string>>(new Set());
   const [isNarrow, setIsNarrow] = useState(false);
@@ -39,11 +54,11 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
     }
   }, [messages, dataModel]);
 
-  const surfaceNodes = nodes.filter((n: any) =>
+  const surfaceNodes = nodes.filter((n) =>
     n?.type && n.type !== 'fluid_grid' && !closedSurfaces.has(n?.id)
   );
-  const governanceNodes = surfaceNodes.filter((n: any) => n?.type === 'governance_node');
-  const displaySurfaces = surfaceNodes.filter((n: any) => n?.type !== 'governance_node');
+  const governanceNodes = surfaceNodes.filter((n) => n?.type === 'governance_node');
+  const displaySurfaces = surfaceNodes.filter((n) => n?.type !== 'governance_node');
   const hasSurfaces = displaySurfaces.length > 0;
   const stackSurfaces = hasSurfaces && isNarrow;
 
@@ -51,7 +66,7 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
     setClosedSurfaces(prev => new Set([...prev, id]));
   };
 
-  const renderSurface = (node: any, index: number) => {
+  const renderSurface = (node: SurfaceNode) => {
     const agentId = node?.props?.agent_id || 'ActiveMirror';
     const title = dataModel[`${node.id}.title`] || node?.props?.title || '';
     const content = dataModel[`${node.id}.content`] || '';
@@ -80,7 +95,7 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
       {/* LEFT: Chat Thread */}
       <motion.div
         animate={stackSurfaces
-          ? { width: '100%', maxWidth: '100%', height: '34%' }
+          ? { width: '100%', maxWidth: '100%', height: 'clamp(180px, 32vh, 280px)' }
           : { width: hasSurfaces ? '380px' : '100%', maxWidth: hasSurfaces ? '380px' : '640px', height: '100%' }
         }
         transition={{ type: 'spring', damping: 30, stiffness: 200 }}
@@ -113,7 +128,7 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
                   : 'text-[#1d1d1f] py-1'
                 }`}>
                   <div className={`text-[14px] leading-relaxed ${isUser ? '' : 'prose prose-sm max-w-none prose-p:text-[#424245] prose-headings:text-[#1d1d1f] prose-strong:text-[#1d1d1f]'}`}>
-                    <ReactMarkdown>{cleanContent}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{cleanContent}</ReactMarkdown>
                   </div>
                 </div>
               </motion.div>
@@ -122,7 +137,7 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
 
           {/* Governance warnings inline in chat */}
           <AnimatePresence>
-            {governanceNodes.map((node: any) => {
+            {governanceNodes.map((node) => {
               const severity = node?.props?.severity || 'info';
               const isBlocked = severity === 'blocked';
               const isWarning = severity === 'warning';
@@ -148,12 +163,12 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
                         : <Bot className="w-4 h-4 text-blue-500" />
                     }
                     <span className={`text-xs font-bold uppercase tracking-wider ${isBlocked ? 'text-red-600' : isWarning ? 'text-amber-600' : 'text-blue-600'}`}>
-                      {isBlocked ? 'Governance Lock' : isWarning ? 'Policy Warning' : 'Governance'}
+                      {isBlocked ? 'Review Lock' : isWarning ? 'Risk Note' : 'Trust Check'}
                     </span>
                   </div>
                   {title && <div className={`text-sm font-semibold mb-1 ${isBlocked ? 'text-red-800' : isWarning ? 'text-amber-800' : 'text-blue-900'}`}>{title}</div>}
                   <div className={`text-xs leading-relaxed ${isBlocked ? 'text-red-700' : isWarning ? 'text-amber-700' : 'text-blue-800'}`}>
-                    <ReactMarkdown>{content}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
                   </div>
                 </motion.div>
               );
@@ -204,10 +219,10 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
                 className="mt-8 flex flex-col items-start gap-4 py-6 w-full overflow-hidden"
               >
                 <div className="flex flex-wrap gap-2 w-full">
-                  {displaySurfaces.map((node: any) => {
-                    const typeMap: Record<string, { icon: any; label: string; color: string }> = {
+                  {displaySurfaces.map((node) => {
+                    const typeMap: Record<string, { icon: React.ComponentType<{ className?: string }>; label: string; color: string }> = {
                       artifact_node: { icon: FileText, label: 'Document', color: 'text-blue-500 bg-blue-50/80 border-blue-100' },
-                      browser_node: { icon: BookOpen, label: 'Reference', color: 'text-sky-500 bg-sky-50/80 border-sky-100' },
+                      browser_node: { icon: BookOpen, label: 'Preview', color: 'text-sky-500 bg-sky-50/80 border-sky-100' },
                       chart_node: { icon: BarChart3, label: 'Chart', color: 'text-emerald-500 bg-emerald-50/80 border-emerald-100' },
                       lead_node: { icon: Sparkles, label: 'Access', color: 'text-violet-500 bg-violet-50/80 border-violet-100' },
                       graph_node: { icon: Network, label: 'Graph', color: 'text-violet-500 bg-violet-50/80 border-violet-100' },
@@ -248,42 +263,57 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
       <AnimatePresence>
         {hasSurfaces && (
           <motion.div
-            initial={stackSurfaces ? { opacity: 0, height: 0 } : { opacity: 0, width: 0 }}
-            animate={stackSurfaces ? { opacity: 1, height: '66%' } : { opacity: 1, width: 'auto' }}
-            exit={stackSurfaces ? { opacity: 0, height: 0 } : { opacity: 0, width: 0 }}
+            initial={stackSurfaces ? { opacity: 0 } : { opacity: 0, width: 0 }}
+            animate={stackSurfaces ? { opacity: 1 } : { opacity: 1, width: 'auto' }}
+            exit={stackSurfaces ? { opacity: 0 } : { opacity: 0, width: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 200 }}
             className={`flex-1 min-h-0 ${stackSurfaces ? 'w-full border-t' : 'h-full border-l'} border-gray-100 overflow-hidden`}
           >
-            <div className="h-full p-4 space-y-4 overflow-y-auto">
-              {/* Check if any node is a graph type — give it full height */}
-              {displaySurfaces.some((n: any) => n?.type === 'graph_node') ? (
-                // Graph gets full space
-                displaySurfaces.map((node: any) => {
-                  if (node.type === 'graph_node') {
-                    const agentId = node?.props?.agent_id || 'ActiveMirror';
-                    const title = dataModel[`${node.id}.title`] || node?.props?.title || '';
-                    return (
-                      <div key={node.id} className="h-full">
-                        <MirrorGraph
-                          title={title}
-                          content={dataModel[`${node.id}.content`] || ''}
-                          agentId={agentId}
-                          onClose={() => closeSurface(node.id)}
-                        />
+            <div className="flex h-full flex-col overflow-hidden bg-[#f7f8fa]">
+              <div className="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white/85 px-4 py-3 backdrop-blur">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Generated Workspace</div>
+                  <div className="text-sm font-semibold text-gray-950">Preview, spec, export, and demo path</div>
+                </div>
+                <div className="hidden items-center gap-2 text-[11px] font-medium text-gray-500 sm:flex">
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">Solution path</span>
+                  <span className="rounded-full bg-blue-50 px-2.5 py-1 text-blue-700">Download ready</span>
+                </div>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
+                <div className="flex min-h-full flex-col gap-4 pb-6">
+                  {displaySurfaces.some((n) => n?.type === 'graph_node') ? (
+                    displaySurfaces.map((node) => {
+                      if (node.type === 'graph_node') {
+                        const agentId = node?.props?.agent_id || 'ActiveMirror';
+                        const title = dataModel[`${node.id}.title`] || node?.props?.title || '';
+                        return (
+                          <div key={node.id} className={`${stackSurfaces ? 'h-[min(78vh,720px)] min-h-[430px]' : 'h-[min(78vh,760px)] min-h-[620px]'} shrink-0`}>
+                            <MirrorGraph
+                              title={title}
+                              content={dataModel[`${node.id}.content`] || ''}
+                              agentId={agentId}
+                              onClose={() => closeSurface(node.id)}
+                            />
+                          </div>
+                        );
+                      }
+                      return <div key={node.id} className={`${stackSurfaces ? 'h-[min(70vh,680px)] min-h-[420px]' : 'h-[min(56vh,560px)] min-h-[320px]'} shrink-0`}>{renderSurface(node)}</div>;
+                    })
+                  ) : displaySurfaces.length === 1 ? (
+                    <div className={`h-full ${stackSurfaces ? 'min-h-[420px]' : 'min-h-[520px]'} shrink-0`}>{renderSurface(displaySurfaces[0])}</div>
+                  ) : (
+                    displaySurfaces.map((node, i) => (
+                      <div
+                        key={node.id}
+                        className={`shrink-0 ${i === 0 || node.type === 'browser_node' ? `${stackSurfaces ? 'h-[min(78vh,720px)] min-h-[430px]' : 'h-[min(78vh,760px)] min-h-[560px]'}` : `${stackSurfaces ? 'h-[min(62vh,600px)] min-h-[340px]' : 'h-[min(58vh,620px)] min-h-[360px]'}`}`}
+                      >
+                        {renderSurface(node)}
                       </div>
-                    );
-                  }
-                  return <div key={node.id} className="h-[45%] min-h-[280px]">{renderSurface(node, 0)}</div>;
-                })
-              ) : displaySurfaces.length === 1 ? (
-                // Single surface gets full height
-                <div className="h-full">{renderSurface(displaySurfaces[0], 0)}</div>
-              ) : (
-                // Multiple surfaces split space
-                displaySurfaces.map((node: any, i: number) => (
-                  <div key={node.id} className="h-[48%] min-h-[280px]">{renderSurface(node, i)}</div>
-                ))
-              )}
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
           </motion.div>
         )}

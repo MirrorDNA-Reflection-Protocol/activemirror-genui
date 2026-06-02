@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUp, Mic, MicOff, ArrowLeft, Plus, User, Users, Building2, Landmark, Download, Network, Languages, Video } from "lucide-react";
+import { ArrowUp, Mic, MicOff, ArrowLeft, Plus, User, Users, Building2, Landmark, Download, Network, Languages, Video, AudioLines } from "lucide-react";
 import { useA2UIStream } from "@/lib/mirror/useA2UIStream";
 import Image from "next/image";
 import TriPanelLayout from "./TriPanelLayout";
@@ -19,37 +19,42 @@ const STARTERS = [
   {
     label: "Ecosystem",
     icon: Network,
-    prompt: "Show the full Active Mirror ecosystem demo: Chetana protects the site, MirrorProd markets it when relevant, MirrorGate protects it, and every surface should be generated and interactive.",
+    prompt: "Show the Active Mirror operating map: trust layer, launch surface, proof view, workspace boundary, and generated app preview.",
   },
   {
     label: "Individual",
     icon: User,
-    prompt: "Generate my individual Active Mirror workspace: a personal project plan, a browser research panel, and the fastest next step to finish my task.",
+    prompt: "Generate my individual software-on-demand workspace: personal project app preview, finish plan, export pack, and fastest next step.",
   },
   {
     label: "Team",
     icon: Users,
-    prompt: "Generate a team Active Mirror workspace: shared project brief, roles, proof trail, and a generated file handoff.",
+    prompt: "Generate a team software-on-demand workspace: shared project app preview, roles, handoff file, timeline, and export pack.",
   },
   {
     label: "Enterprise",
     icon: Building2,
-    prompt: "Generate an enterprise Active Mirror workspace: governance gate, security brief, implementation proposal, and upgrade path.",
+    prompt: "Generate an enterprise software-on-demand workspace: buyer app preview, trust-by-design brief, pilot plan, and reviewed access path.",
   },
   {
     label: "Government",
     icon: Landmark,
-    prompt: "Generate a government Active Mirror workspace: consent boundary, audit/proof surface, procurement-ready brief, and risk controls.",
+    prompt: "Generate a public-sector software-on-demand workspace: civic-service app preview, consent boundary, evidence checklist, proof surface, and reviewed access path.",
   },
   {
     label: "Global",
     icon: Languages,
-    prompt: "Generate a multilingual Active Mirror workspace: explain the product in English, Hindi, Arabic, and Spanish with localized onboarding, governance labels, and commercial next steps.",
+    prompt: "Generate a global Active Mirror workspace: localized app preview in English, Hindi, Arabic, and Spanish with onboarding labels and regional access path.",
   },
   {
     label: "Video",
     icon: Video,
     prompt: "Generate a Veo-ready Active Mirror video workbench: storyboard, prompt, safety gate, cost gate, source previews for the video API, and access path for rendering.",
+  },
+  {
+    label: "Audio",
+    icon: AudioLines,
+    prompt: "Generate an Active Mirror audio workbench: voice brief, podcast outline, narration script, consent and likeness boundary, render cost gate, locale caveats when relevant, and transcript/export path.",
   },
 ];
 
@@ -66,6 +71,11 @@ type MirrorSeed = {
   surfaceBias: "finish";
 };
 
+type QaStatus = {
+  freeTurnLimit?: number;
+  promptPreview?: string;
+};
+
 const MIRROR_SEED_KEY = "active-mirror.mirrorseed.v1";
 
 function createMirrorSeed(): MirrorSeed {
@@ -74,7 +84,7 @@ function createMirrorSeed(): MirrorSeed {
     v: 1,
     id: `ms-${id}`,
     createdAt: new Date().toISOString(),
-    turnLimit: 5,
+    turnLimit: 999999,
     surfaceBias: "finish",
   };
 }
@@ -89,11 +99,25 @@ export default function ActiveMirrorHomepage() {
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [mirrorSeed, setMirrorSeed] = useState<MirrorSeed | null>(null);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [qaMode, setQaMode] = useState(false);
+  const [qaStatus, setQaStatus] = useState<QaStatus | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const { submit, a2uiState, isLoading, error } = useA2UIStream("/api/mirror/stream");
 
   useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const enabled = new URLSearchParams(window.location.search).has("qa");
+    setQaMode(enabled);
+    if (!enabled) return;
+
+    fetch("/api/mirror/system", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((status: QaStatus | null) => setQaStatus(status))
+      .catch(() => setQaStatus(null));
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -207,7 +231,7 @@ export default function ActiveMirrorHomepage() {
   const isEmpty = inputValue.trim().length === 0;
 
   return (
-    <div className="h-screen flex flex-col bg-[#fafafa] overflow-hidden">
+    <div className="min-h-dvh h-dvh flex flex-col bg-[#fafafa] overflow-hidden">
       {/* Ultra-subtle background */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-white via-[#fafafa] to-[#f5f5f7]" />
@@ -221,7 +245,7 @@ export default function ActiveMirrorHomepage() {
             key="landing"
             exit={{ opacity: 0, scale: 0.985, filter: 'blur(8px)' }}
             transition={{ duration: 0.3 }}
-            className="flex-1 flex flex-col items-center justify-center px-6"
+            className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center px-6 py-6 max-[360px]:justify-start"
           >
             {mounted && (
               <>
@@ -230,7 +254,7 @@ export default function ActiveMirrorHomepage() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ type: 'spring', damping: 20, stiffness: 120, delay: 0.1 }}
-                  className="mb-8"
+                  className="mb-8 max-[640px]:mb-5 max-[360px]:mb-4"
                 >
                   <Image
                     src="/logo.png"
@@ -257,7 +281,7 @@ export default function ActiveMirrorHomepage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: 'spring', damping: 24, stiffness: 140, delay: 0.5 }}
-                  className="w-full max-w-2xl mt-10"
+                  className="w-full max-w-2xl mt-10 max-[640px]:mt-6 max-[360px]:mt-5"
                 >
                   <div className="relative bg-white rounded-2xl border border-[#d2d2d7] shadow-sm hover:shadow-md focus-within:shadow-lg focus-within:border-[#0071e3]/40 transition-all duration-300">
                     <div className="flex items-end p-2">
@@ -302,7 +326,7 @@ export default function ActiveMirrorHomepage() {
                     transition={{ delay: 1.2 }}
                     className="text-center text-[12px] text-[#86868b] mt-4 tracking-wide"
                   >
-                    5 free generated turns. Finish fast, then join the access list.
+                    Preview turns are unlocked while we tune the experience.
                   </motion.p>
 
                   {mirrorSeed && (
@@ -316,11 +340,18 @@ export default function ActiveMirrorHomepage() {
                     </motion.p>
                   )}
 
+                  {qaMode && (
+                    <QaTestStrip
+                      status={qaStatus}
+                      onSubmit={handleSubmit}
+                    />
+                  )}
+
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.35, duration: 0.35 }}
-                    className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4"
+                    className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 max-[640px]:mt-4"
                   >
                     {STARTERS.map((starter, index) => {
                       const Icon = starter.icon;
@@ -332,7 +363,7 @@ export default function ActiveMirrorHomepage() {
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 1.45 + index * 0.07 }}
-                          className="group flex h-16 flex-col items-center justify-center gap-1 rounded-xl border border-[#d2d2d7] bg-white/80 text-[#424245] shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#0071e3]/40 hover:bg-white hover:shadow-md"
+                          className="group flex h-16 max-[640px]:h-14 flex-col items-center justify-center gap-1 rounded-xl border border-[#d2d2d7] bg-white/80 text-[#424245] shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#0071e3]/40 hover:bg-white hover:shadow-md"
                           aria-label={`Start as ${starter.label}`}
                         >
                           <Icon className="h-4 w-4 text-[#0071e3] transition-transform group-hover:scale-110" />
@@ -348,7 +379,7 @@ export default function ActiveMirrorHomepage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.75 }}
-                    className="mx-auto mt-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium text-[#86868b] transition-colors hover:bg-white hover:text-[#1d1d1f]"
+                    className="mx-auto mt-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium text-[#86868b] transition-colors hover:bg-white hover:text-[#1d1d1f] max-[640px]:hidden"
                     aria-label={installPrompt ? "Install Active Mirror app" : "Open PWA manifest"}
                   >
                     <Download className="h-3.5 w-3.5" />
@@ -438,5 +469,78 @@ export default function ActiveMirrorHomepage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function QaTestStrip({
+  status,
+  onSubmit,
+}: {
+  status: QaStatus | null;
+  onSubmit: (prompt: string) => void;
+}) {
+  const prompts = [
+    {
+      label: "Spec",
+      prompt: "Generate a downloadable spec for an Active Mirror sales demo.",
+    },
+    {
+      label: "Research",
+      prompt: "Research browser OS and generated UI tools; show a source preview and downloadable brief.",
+    },
+    {
+      label: "Company",
+      prompt: "My company is Acme Clinics. Show how Active Mirror can help us with patient operations without making medical claims.",
+    },
+    {
+      label: "Small Biz",
+      prompt: "Active Mirror for small business: generate a customer intake, offer page, quote path, follow-up automation, and downloadable action pack.",
+    },
+    {
+      label: "Audio",
+      prompt: "Generate an audio workbench with narration script, consent gate, and transcript export.",
+    },
+  ];
+  const unlocked =
+    status?.freeTurnLimit && status.freeTurnLimit > 1000
+      ? "Unlocked"
+      : status?.freeTurnLimit
+        ? `${status.freeTurnLimit} turns`
+        : "Checking";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1.34 }}
+      className="mx-auto mt-4 w-full max-w-xl rounded-2xl border border-sky-100 bg-white/80 p-3 text-left shadow-sm"
+      data-testid="qa-test-strip"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-sky-600">
+            QA Mode
+          </div>
+          <div className="text-xs text-[#6e6e73]">
+            Canonical: activemirror.ai · Preview: localhost:4005
+          </div>
+        </div>
+        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+          Turns: {unlocked}
+        </span>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+        {prompts.map((item) => (
+          <button
+            key={item.label}
+            type="button"
+            onClick={() => onSubmit(item.prompt)}
+            className="rounded-xl border border-[#d2d2d7] bg-[#f5f5f7] px-3 py-2 text-xs font-medium text-[#1d1d1f] transition-colors hover:border-[#0071e3]/40 hover:bg-white"
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </motion.div>
   );
 }
