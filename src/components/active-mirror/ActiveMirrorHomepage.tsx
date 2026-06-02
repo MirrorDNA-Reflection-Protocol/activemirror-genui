@@ -11,10 +11,9 @@ import HeroSection from "./HeroSection";
 import AIJourneyPrompt from "./AIJourneyPrompt";
 import CategoryIcons from "./CategoryIcons";
 import GenUIPanel from "./GenUIPanel";
-import GeneratedSurfacePanel from "./GeneratedSurfacePanel";
 import PersistentChatBar from "./PersistentChatBar";
 import ErrorBoundary from "./ErrorBoundary";
-import ChatHistoryPanel from "./ChatHistoryPanel";
+import SpatialCanvas from "./SpatialCanvas";
 
 import { mirrorSurfaceSchema } from "@/lib/mirror/schema";
 
@@ -149,41 +148,23 @@ export default function ActiveMirrorHomepage() {
               transition={{ duration: 0.4 }}
               className="px-2"
             >
-              <div className="flex flex-col lg:flex-row gap-6 mx-4 lg:mx-8 xl:mx-12 mt-4 lg:mt-8 h-full">
-                {/* Left Pane: Chat History */}
-                <div className="flex-1 overflow-y-auto w-full lg:w-[400px] shrink-0 border-r border-zinc-200/50">
-                  <ChatHistoryPanel 
-                    messages={messages} 
-                    isGenerating={isLoading} 
-                    error={error?.message}
-                  />
-                </div>
-                
-                {/* Right Pane: Contextual Co-Creation Canvas */}
-                <div className="w-full lg:w-2/3 h-full">
-                  {error && (
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-                      <strong>Connection Error:</strong> {error.message}
-                    </div>
-                  )}
-
-                  {isLoading && !partialSurface && !error && (
-                    <div className="flex flex-col items-center justify-center py-20 gap-3">
-                      <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                      <p className="text-sm text-gray-500">Establishing secure sovereign connection...</p>
-                    </div>
-                  )}
-
-                  {partialSurface && (
-                    <ErrorBoundary>
-                      <GeneratedSurfacePanel
-                        surface={partialSurface as MirrorSurfaceSpec}
-                        onModeChange={handleModeChange}
-                        onPromptSelect={handlePromptSelect}
-                      />
-                    </ErrorBoundary>
-                  )}
-                </div>
+              <div className="mx-4 lg:mx-8 xl:mx-12 mt-4 lg:mt-8 h-[75vh] w-full rounded-2xl overflow-hidden relative">
+                {error && (
+                  <div className="absolute top-4 right-4 z-50 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm shadow-xl">
+                    <strong>Connection Error:</strong> {error.message}
+                  </div>
+                )}
+                {isLoading && !partialSurface && !error && (
+                  <div className="absolute top-4 left-4 z-50 flex items-center gap-3 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-md border border-gray-200">
+                    <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Generating UI...</span>
+                  </div>
+                )}
+                <SpatialCanvas 
+                  messages={messages} 
+                  partialSurface={partialSurface} 
+                  isLoading={isLoading} 
+                />
               </div>
             </motion.div>
           )}
