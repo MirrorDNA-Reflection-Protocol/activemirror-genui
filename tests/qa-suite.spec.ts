@@ -1,49 +1,58 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
-test.describe('Active Mirror - E2E QA Suite', () => {
+test.describe('Active Mirror public GenUI', () => {
+  test('generates a spec workspace and downloads the pack', async ({ page }) => {
+    await page.goto('/?qa=1');
 
-  test('Should pass Biometric Authentication on load', async ({ page }) => {
-    await page.goto('/');
-    
-    // We will just wait for the final clearance state, as initial states may render too quickly.
-    // Eventually it should grant clearance
-    await expect(page.locator('text=CLEARANCE GRANTED: MD')).toBeVisible({ timeout: 5000 });
-
-    // After auth is complete, the auth screen unmounts, revealing the dashboard.
-    // Wait for the auth overlay to disappear
-    await expect(page.locator('text=CLEARANCE GRANTED: MD')).toBeHidden({ timeout: 5000 });
-
-    // Verify main UI is visible
     await expect(page.getByRole('heading', { name: 'Active Mirror' })).toBeVisible();
+    await expect(page.getByTestId('qa-test-strip')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Spec' }).click();
+
+    await expect(page.getByText('Generated Workspace')).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText('Capability Dock')).toBeVisible();
+    await expect(page.getByText('Downloadable Spec', { exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Working Demo Spec' }).first()).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: /Download pack/i }).click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/active-mirror-workspace-pack/i);
+
+    const path = await download.path();
+    expect(path).toBeTruthy();
+    const content = await readFile(path as string, 'utf8');
+    expect(content).toContain('Active Mirror Workspace Pack');
+    expect(content).toContain('Working Demo Spec');
   });
 
-  test('Should handle valid AI prompts and render cards', async ({ page }) => {
-    await page.goto('/');
-    
-    // Wait for biometric auth to complete
-    await expect(page.locator('text=CLEARANCE GRANTED: MD')).toBeHidden({ timeout: 10000 });
+  test('typed research prompt opens source and chart lanes', async ({ page }) => {
+    await page.goto('/?qa=1');
 
-    // Wait for the biometric auth flow to finish OR bypass it
-    const consentButton = page.locator('button', { hasText: 'I Consent' });
-    
-    // The consent button takes a few seconds to appear due to the animation
-    await consentButton.waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
-    
-    if (await consentButton.isVisible()) {
-      await consentButton.click();
-    }
-      const queryPrompt = page.getByPlaceholder('Ask anything...').first();
-      await queryPrompt.fill('Give me a detailed overview of the system architecture');
-      await queryPrompt.press('Enter');
+    const textarea = page.locator('textarea').first();
+    await textarea.fill('Research generated UI browser OS trends and show a chart with source assumptions.');
+    await textarea.press('Enter');
 
-    // After prompt submission, we should see the loader and then generated content
-    await expect(page.locator('text=Establishing secure sovereign connection...')).toBeVisible();
-    
-    // The AI should respond and eventually the loader disappears
-    await expect(page.locator('text=Establishing secure sovereign connection...')).toBeHidden({ timeout: 30000 });
-
-    // Verify some surface content is rendered (the title)
-    await expect(page.locator('h2')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'Research Browser Workspace' }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText('Browser Source', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Chart Surface', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Generated Signal Map', { exact: true }).first()).toBeVisible();
   });
 
+  test('mobile viewport keeps generated workspace readable', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 820 });
+    await page.goto('/?qa=1');
+
+    const textarea = page.locator('textarea').first();
+    await textarea.fill('Create an automation that watches my website and emails me if it breaks.');
+    await textarea.press('Enter');
+
+    const workspaceChrome = page.getByText('Generated Workspace', { exact: true });
+    await expect(workspaceChrome).toBeVisible({ timeout: 30_000 });
+    await workspaceChrome.scrollIntoViewIfNeeded();
+    await expect(page.getByRole('button', { name: /active:\/\/generated\/automation-builder-workspace/i }).first()).toBeVisible();
+    await expect(page.getByText('Capability Dock', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Automation Builder', { exact: true }).first()).toBeVisible();
+  });
 });

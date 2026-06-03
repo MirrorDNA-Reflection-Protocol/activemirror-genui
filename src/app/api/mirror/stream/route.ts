@@ -14,6 +14,7 @@ import {
 } from "@/lib/mirror/budget";
 import {
   cleanIntent,
+  pluginLanesForPrompt,
   requestIntent,
   workspaceProfile,
 } from "@/lib/mirror/lingos";
@@ -21,6 +22,9 @@ import { buildMirrorSystemPrompt } from "@/lib/mirror/systemPrompt";
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const FREE_TURN_COOKIE = "am_free_turns";
+const MAX_BODY_BYTES = Number(process.env.MIRROR_MAX_BODY_BYTES || 16_384);
+const ALLOWED_HOST_SUFFIXES = [".activemirror.ai", ".pages.dev"];
+const ALLOWED_EXACT_HOSTS = new Set(["activemirror.ai", "localhost", "127.0.0.1", "::1"]);
 
 const minuteRateLimit = new LRUCache<string, number>({
   max: 5000,
@@ -68,6 +72,25 @@ function isIncomingMessageRecord(value: unknown): value is IncomingMessageRecord
 function getClientKey(request: NextRequest) {
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   return forwarded || request.headers.get("x-real-ip") || "unknown";
+}
+
+function allowedRequestOrigin(request: NextRequest) {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
+  try {
+    const originHost = new URL(origin).hostname.toLowerCase();
+    if (host && originHost === host) return true;
+    if (ALLOWED_EXACT_HOSTS.has(originHost)) return true;
+    return ALLOWED_HOST_SUFFIXES.some((suffix) => originHost.endsWith(suffix));
+  } catch {
+    return false;
+  }
+}
+
+function requestBodyTooLarge(request: NextRequest) {
+  const contentLength = Number(request.headers.get("content-length") || 0);
+  return Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES;
 }
 
 function bumpLimit(cache: LRUCache<string, number>, key: string) {
@@ -520,12 +543,34 @@ The first output I need is: ${profile.title}
 Please scope the files, source lookup, media, vault, and review path required to finish this quickly.`;
 }
 
+function shouldEmitChart(prompt: string) {
+  return /\b(chart|graph|trend|market|analytics|metrics|kpi|compare|comparison|data|forecast|audit|readiness)\b/i.test(prompt);
+}
+
+function generatedChartContent(prompt: string) {
+  const intent = cleanIntent(prompt);
+  return `# Generated Signal Map
+
+## Request
+${intent}
+
+- Demand signal: 78
+- Trust requirement: 91
+- Source sensitivity: 72
+- Automation fit: 68
+- Export value: 86
+- Demo readiness: 74
+
+These values are a generated planning map, not verified market data. Replace them with sourced numbers after browser lookup or user-provided files are approved.`;
+}
+
 function createSoftwareWorkspaceStream(prompt: string) {
   const encoder = new TextEncoder();
   return new ReadableStream({
     async start(controller) {
       const surface_id = "workspace_" + Math.random().toString(36).substring(7);
       const profile = workspaceProfile(prompt);
+      const pluginLanes = pluginLanesForPrompt(prompt);
       const yieldEnvelope = async (envelope: StreamEnvelope, delay: number = 0) => {
         if (delay > 0) await sleep(delay);
         enqueueEnvelope(controller, encoder, envelope);
@@ -535,10 +580,20 @@ function createSoftwareWorkspaceStream(prompt: string) {
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Opening the right workspace." } }, 80);
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "generated_preview", type: "browser_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: profile.title, severity: "info" } } }, 110);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "generated_preview.content": generatedPreviewContent(prompt) } }, 80);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "capability_dock", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Capability Dock", severity: "info", surface_kind: "plugin_dock" } } }, 110);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "capability_dock.title": "Capability Dock", "capability_dock.content": JSON.stringify({ lanes: pluginLanes }, null, 2) } }, 80);
+      if (shouldEmitChart(prompt)) {
+        await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "signal_map", type: "chart_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Generated Signal Map", severity: "info" } } }, 110);
+        await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "signal_map.title": "Generated Signal Map", "signal_map.content": generatedChartContent(prompt) } }, 80);
+      }
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "one_pager", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Downloadable One-Pager", severity: "info" } } }, 110);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "one_pager.title": "Downloadable One-Pager", "one_pager.content": createGeneratedDocumentContent(prompt) } }, 80);
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "demo_spec", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Downloadable Spec", severity: "info" } } }, 110);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "demo_spec.content": createGeneratedSpecContent(prompt) } }, 80);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "export_pack", type: "lead_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Finish Route", severity: "info" } } }, 110);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "export_pack.content": exportPackContent(prompt) } }, 80);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "demo_spec.title": "Downloadable Spec", "demo_spec.content": createGeneratedSpecContent(prompt) } }, 80);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "export_pack", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Downloadable Export Pack", severity: "info" } } }, 110);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "export_pack.title": "Downloadable Export Pack", "export_pack.content": exportPackContent(prompt) } }, 80);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "lead_access", type: "lead_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Request Working Demo", severity: "info" } } }, 110);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "lead_access.title": "Request Working Demo", "lead_access.content": "## Working Demo Request\n\nThe useful preview and downloadable artifacts are ready. Share contact and project scope only if you want Active Mirror to prepare the reviewed 72-hour demo path." } }, 80);
       await yieldEnvelope({ envelope: "beginRendering", surface_id }, 80);
       controller.close();
     }
@@ -734,6 +789,14 @@ function createLeadStream(reason: string) {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!allowedRequestOrigin(request)) {
+      return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
+    }
+
+    if (requestBodyTooLarge(request)) {
+      return NextResponse.json({ error: "Request too large" }, { status: 413 });
+    }
+
     const body = await request.json();
     const rawMessages = Array.isArray(body?.messages) ? body.messages : [];
     const rawLastUserContent = String(
@@ -808,7 +871,7 @@ export async function POST(request: NextRequest) {
       case "company":
       case "research":
       case "build":
-        return ndjsonResponse(createSoftwareWorkspaceStream(lastUserMessage.content), setCookie);
+        break;
       case "gate":
         return ndjsonResponse(
           createGovernanceStream(
@@ -845,12 +908,30 @@ export async function POST(request: NextRequest) {
     }
 
     const encoder = new TextEncoder();
+    let streamClosed = false;
     const customStream = new ReadableStream({
       async start(controller) {
         const surface_id = "workspace_" + Math.random().toString(36).substring(7);
 
         const yieldEnvelope = (envelope: StreamEnvelope) => {
-          enqueueEnvelope(controller, encoder, envelope);
+          if (streamClosed) return false;
+          try {
+            enqueueEnvelope(controller, encoder, envelope);
+            return true;
+          } catch {
+            streamClosed = true;
+            return false;
+          }
+        };
+
+        const closeStream = () => {
+          if (streamClosed) return;
+          streamClosed = true;
+          try {
+            controller.close();
+          } catch {
+            // Client already cancelled the stream.
+          }
         };
 
         // Track incremental state to avoid duplicates
@@ -905,6 +986,59 @@ export async function POST(request: NextRequest) {
             envelope: "surfaceUpdate",
             surface_id,
             component: {
+              id: "capability_dock",
+              type: "artifact_node",
+              parent_id: "root_grid",
+              props: {
+                agent_id: "ActiveMirror",
+                title: "Capability Dock",
+                severity: "info",
+                surface_kind: "plugin_dock",
+              }
+            }
+          });
+          emittedNodeIds.add("capability_dock");
+          yieldEnvelope({
+            envelope: "dataModelUpdate",
+            surface_id,
+            data: {
+              "capability_dock.title": "Capability Dock",
+              "capability_dock.content": JSON.stringify({ lanes: pluginLanesForPrompt(lastUserMessage.content) }, null, 2),
+            }
+          });
+          lastNodeTitle.capability_dock = "Capability Dock";
+          lastNodeBody.capability_dock = JSON.stringify({ lanes: pluginLanesForPrompt(lastUserMessage.content) }, null, 2);
+          if (shouldEmitChart(lastUserMessage.content)) {
+            yieldEnvelope({
+              envelope: "surfaceUpdate",
+              surface_id,
+              component: {
+                id: "signal_map",
+                type: "chart_node",
+                parent_id: "root_grid",
+                props: {
+                  agent_id: "ActiveMirror",
+                  title: "Generated Signal Map",
+                  severity: "info",
+                }
+              }
+            });
+            emittedNodeIds.add("signal_map");
+            yieldEnvelope({
+              envelope: "dataModelUpdate",
+              surface_id,
+              data: {
+                "signal_map.title": "Generated Signal Map",
+                "signal_map.content": generatedChartContent(lastUserMessage.content),
+              }
+            });
+            lastNodeTitle.signal_map = "Generated Signal Map";
+            lastNodeBody.signal_map = generatedChartContent(lastUserMessage.content);
+          }
+          yieldEnvelope({
+            envelope: "surfaceUpdate",
+            surface_id,
+            component: {
               id: "one_pager",
               type: "artifact_node",
               parent_id: "root_grid",
@@ -951,8 +1085,59 @@ export async function POST(request: NextRequest) {
           });
           lastNodeTitle.demo_spec = "Downloadable Spec";
           lastNodeBody.demo_spec = createGeneratedSpecContent(lastUserMessage.content);
+          yieldEnvelope({
+            envelope: "surfaceUpdate",
+            surface_id,
+            component: {
+              id: "export_pack",
+              type: "artifact_node",
+              parent_id: "root_grid",
+              props: {
+                agent_id: "ActiveMirror",
+                title: "Downloadable Export Pack",
+                severity: "info",
+              }
+            }
+          });
+          emittedNodeIds.add("export_pack");
+          yieldEnvelope({
+            envelope: "dataModelUpdate",
+            surface_id,
+            data: {
+              "export_pack.title": "Downloadable Export Pack",
+              "export_pack.content": exportPackContent(lastUserMessage.content),
+            }
+          });
+          lastNodeTitle.export_pack = "Downloadable Export Pack";
+          lastNodeBody.export_pack = exportPackContent(lastUserMessage.content);
+          yieldEnvelope({
+            envelope: "surfaceUpdate",
+            surface_id,
+            component: {
+              id: "finish_route",
+              type: "lead_node",
+              parent_id: "root_grid",
+              props: {
+                agent_id: "ActiveMirror",
+                title: "Finish Route",
+                severity: "info",
+              }
+            }
+          });
+          emittedNodeIds.add("finish_route");
+          yieldEnvelope({
+            envelope: "dataModelUpdate",
+            surface_id,
+            data: {
+              "finish_route.title": "Finish Route",
+              "finish_route.content": exportPackContent(lastUserMessage.content),
+            }
+          });
+          lastNodeTitle.finish_route = "Finish Route";
+          lastNodeBody.finish_route = exportPackContent(lastUserMessage.content);
 
           for await (const partial of result.partialObjectStream) {
+            if (streamClosed) break;
             // Stream only complete public status lines, never partial model thought fragments.
             if (partial.thought_process) {
               for (const thought of partial.thought_process) {
@@ -1018,8 +1203,9 @@ export async function POST(request: NextRequest) {
           }
 
           yieldEnvelope({ envelope: "beginRendering", surface_id });
-          controller.close();
+          closeStream();
         } catch (err) {
+          if (streamClosed) return;
           console.error("[Mirror] Stream error:", err);
           yieldEnvelope({
             envelope: "surfaceUpdate",
@@ -1037,9 +1223,13 @@ export async function POST(request: NextRequest) {
             data: { "error_node.content": "Generation paused before a complete surface was returned. The public preview can continue with an unlocked workspace preview or route this request to reviewed access." }
           });
           yieldEnvelope({ envelope: "beginRendering", surface_id });
-          controller.close();
+          closeStream();
         }
-      }
+      },
+      cancel() {
+        streamClosed = true;
+        // The browser navigated away or started a new request. Stop late model deltas quietly.
+      },
     });
 
     return ndjsonResponse(customStream, setCookie);

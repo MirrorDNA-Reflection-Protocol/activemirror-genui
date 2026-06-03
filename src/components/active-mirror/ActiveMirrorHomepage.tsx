@@ -2,44 +2,78 @@
 
 import { useState, useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUp, Mic, MicOff, ArrowLeft, Plus, User, Users, Building2, Landmark, Download, Network, Languages, Video, AudioLines } from "lucide-react";
+import {
+  ArrowUp,
+  Mic,
+  MicOff,
+  ArrowLeft,
+  Plus,
+  Download,
+  Network,
+  Languages,
+  Video,
+  AudioLines,
+  Search,
+  FileText,
+  Presentation,
+  Workflow,
+  ShieldCheck,
+  MailPlus,
+  Store,
+  Brain,
+} from "lucide-react";
 import { useA2UIStream } from "@/lib/mirror/useA2UIStream";
 import Image from "next/image";
 import TriPanelLayout from "./TriPanelLayout";
 
 const PLACEHOLDERS = [
-  "Write a project proposal...",
-  "Map out a system architecture...",
-  "Analyze market trends with charts...",
-  "Research competitor strategies...",
-  "Draft a compliance report...",
+  "Research a company and show the source path...",
+  "Generate a proposal and PDF-ready one-pager...",
+  "Create an automation for my workflow...",
+  "Audit my website and give me a fix pack...",
+  "Turn my idea into a 72-hour demo spec...",
 ];
 
 const STARTERS = [
   {
-    label: "Ecosystem",
-    icon: Network,
-    prompt: "Show the Active Mirror operating map: trust layer, launch surface, proof view, workspace boundary, and generated app preview.",
+    label: "Research",
+    icon: Search,
+    prompt: "Research global market trends for generated work OS products. Open a browser-style source surface, mark assumptions, and export a concise brief.",
   },
   {
-    label: "Individual",
-    icon: User,
-    prompt: "Generate my individual software-on-demand workspace: personal project app preview, finish plan, export pack, and fastest next step.",
+    label: "Document",
+    icon: FileText,
+    prompt: "Generate a project proposal document for Active Mirror with PDF-ready copy, proof notes, checklist, and downloadable spec.",
   },
   {
-    label: "Team",
-    icon: Users,
-    prompt: "Generate a team software-on-demand workspace: shared project app preview, roles, handoff file, timeline, and export pack.",
+    label: "Deck",
+    icon: Presentation,
+    prompt: "Create an investor-ready explainer deck for Active Mirror with slide outline, visual direction, proof notes, and export pack.",
   },
   {
-    label: "Enterprise",
-    icon: Building2,
-    prompt: "Generate an enterprise software-on-demand workspace: buyer app preview, trust-by-design brief, pilot plan, and reviewed access path.",
+    label: "Automation",
+    icon: Workflow,
+    prompt: "Create an automation that watches my website every hour, checks the homepage and API stream, records proof, and emails me if it breaks.",
   },
   {
-    label: "Government",
-    icon: Landmark,
-    prompt: "Generate a public-sector software-on-demand workspace: civic-service app preview, consent boundary, evidence checklist, proof surface, and reviewed access path.",
+    label: "Site Audit",
+    icon: ShieldCheck,
+    prompt: "Audit activemirror.ai for launch readiness: PWA, headers, generated workspace behavior, lead capture, accessibility, and proof checklist.",
+  },
+  {
+    label: "Lead Form",
+    icon: MailPlus,
+    prompt: "Generate an on-demand waitlist and demo request form for Active Mirror that routes concise project briefs to paul@activemirror.ai.",
+  },
+  {
+    label: "Small Biz",
+    icon: Store,
+    prompt: "Generate a small-business workspace for a local clinic: offer page, customer intake, quote path, follow-up automation, and downloadable action pack.",
+  },
+  {
+    label: "Focus Mode",
+    icon: Brain,
+    prompt: "Generate a neurodivergent-friendly focus workspace for finishing a proposal: one clear goal, low-noise steps, time boxes, gentle review gates, and export pack.",
   },
   {
     label: "Global",
@@ -55,6 +89,11 @@ const STARTERS = [
     label: "Audio",
     icon: AudioLines,
     prompt: "Generate an Active Mirror audio workbench: voice brief, podcast outline, narration script, consent and likeness boundary, render cost gate, locale caveats when relevant, and transcript/export path.",
+  },
+  {
+    label: "Ecosystem",
+    icon: Network,
+    prompt: "Show the Active Mirror operating map as a visual workspace: trust layer, launch surface, proof view, workspace boundary, and generated app preview.",
   },
 ];
 
@@ -74,6 +113,7 @@ type MirrorSeed = {
 type QaStatus = {
   freeTurnLimit?: number;
   promptPreview?: string;
+  swStatus?: "ready" | "failed";
 };
 
 type SpeechAlternativeLike = {
@@ -180,7 +220,7 @@ export default function ActiveMirrorHomepage() {
 
     fetch("/api/mirror/system", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
-      .then((status: QaStatus | null) => setQaStatus(status))
+      .then((status: QaStatus | null) => setQaStatus(prev => ({ ...(prev || {}), ...(status || {}) })))
       .catch(() => setQaStatus(null));
   }, [qaMode]);
 
@@ -188,7 +228,10 @@ export default function ActiveMirrorHomepage() {
     if (typeof window === "undefined") return;
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => null);
+      navigator.serviceWorker
+        .register("/sw.js", { scope: "/", updateViaCache: "none" })
+        .then(() => setQaStatus(prev => ({ ...(prev || {}), swStatus: "ready" })))
+        .catch(() => setQaStatus(prev => ({ ...(prev || {}), swStatus: "failed" })));
     }
 
     const handleBeforeInstallPrompt = (event: Event) => {
@@ -579,6 +622,9 @@ function QaTestStrip({
         </div>
         <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
           Turns: {unlocked}
+        </span>
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${status?.swStatus === "failed" ? "bg-red-50 text-red-700" : "bg-blue-50 text-blue-700"}`}>
+          SW: {status?.swStatus || "checking"}
         </span>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">

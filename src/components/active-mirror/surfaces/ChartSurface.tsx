@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, BarChart3, Maximize2, Minimize2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, AreaChart, Area } from 'recharts';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -42,8 +42,25 @@ function extractChartData(content: string): { name: string; value: number }[] {
 
 export default function ChartSurface({ title, content, onClose }: ChartSurfaceProps) {
   const [expanded, setExpanded] = useState(false);
+  const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
+  const chartFrameRef = useRef<HTMLDivElement>(null);
   const chartData = extractChartData(content);
   const useArea = content.toLowerCase().includes('trend') || content.toLowerCase().includes('growth') || content.toLowerCase().includes('time');
+
+  useEffect(() => {
+    const element = chartFrameRef.current;
+    if (!element) return;
+    const resizeObserver = new ResizeObserver((entries) => {
+      const rect = entries[0]?.contentRect;
+      if (!rect) return;
+      setChartSize({
+        width: Math.max(240, Math.floor(rect.width)),
+        height: Math.max(260, Math.floor(rect.height || 260)),
+      });
+    });
+    resizeObserver.observe(element);
+    return () => resizeObserver.disconnect();
+  }, [expanded]);
 
   return (
     <motion.div
@@ -84,10 +101,10 @@ export default function ChartSurface({ title, content, onClose }: ChartSurfacePr
 
       {/* Chart */}
       <div className="min-h-0 flex-1 p-5 flex flex-col">
-        <div className="flex-1 min-h-0">
-          <ResponsiveContainer width="100%" height="100%">
-            {useArea ? (
-              <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+        <div ref={chartFrameRef} className="flex-1 min-h-[260px]">
+          {chartSize.width > 0 && chartSize.height > 0 ? (
+            useArea ? (
+              <AreaChart width={chartSize.width} height={chartSize.height} data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3} />
@@ -103,7 +120,7 @@ export default function ChartSurface({ title, content, onClose }: ChartSurfacePr
                 <Area type="monotone" dataKey="value" stroke="#8B5CF6" fill="url(#colorValue)" strokeWidth={2} />
               </AreaChart>
             ) : (
-              <BarChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <BarChart width={chartSize.width} height={chartSize.height} data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={{ stroke: '#E5E7EB' }} />
                 <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={{ stroke: '#E5E7EB' }} />
@@ -112,8 +129,8 @@ export default function ChartSurface({ title, content, onClose }: ChartSurfacePr
                 />
                 <Bar dataKey="value" fill="#0071e3" radius={[6, 6, 0, 0]} />
               </BarChart>
-            )}
-          </ResponsiveContainer>
+            )
+          ) : null}
         </div>
 
         {/* Context below chart */}

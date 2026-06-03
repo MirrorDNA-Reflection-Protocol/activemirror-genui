@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { AlertTriangle, ShieldAlert, Bot, Sparkles, FileText, Network, BarChart3, BookOpen } from 'lucide-react';
+import { AlertTriangle, ShieldAlert, Bot, Sparkles, FileText, Network, BarChart3, BookOpen, Plug, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +11,8 @@ import BrowserSurface from './surfaces/BrowserSurface';
 import ChartSurface from './surfaces/ChartSurface';
 import MirrorGraph from './surfaces/MirrorGraph';
 import LeadCaptureCard from './LeadCaptureCard';
+import PluginDockSurface from './surfaces/PluginDockSurface';
+import { downloadMarkdownArtifact } from '@/lib/mirror/downloadArtifact';
 
 interface TriPanelLayoutProps {
   messages: { role: "user" | "assistant"; content: string }[];
@@ -29,6 +31,7 @@ type SurfaceNode = {
     agent_id?: string | null;
     title?: string | null;
     severity?: string | null;
+    surface_kind?: string | null;
   };
 };
 
@@ -66,11 +69,40 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
     setClosedSurfaces(prev => new Set([...prev, id]));
   };
 
+  const downloadWorkspacePack = () => {
+    const sections = displaySurfaces
+      .map((node) => {
+        const title = dataModel[`${node.id}.title`] || node?.props?.title || node.id;
+        const content = dataModel[`${node.id}.content`] || '';
+        if (!content.trim()) return '';
+        if (node?.props?.surface_kind === 'plugin_dock') {
+          return `## ${title}\n\nPrepared capability dock is included in the workspace preview.`;
+        }
+        return `## ${title}\n\n${content}`;
+      })
+      .filter(Boolean);
+
+    downloadMarkdownArtifact(
+      'Active Mirror Workspace Pack',
+      [
+        '# Active Mirror Workspace Pack',
+        '',
+        'Generated in the public preview. Browser, media, automation, device, and live-send actions remain gated until they actually run.',
+        '',
+        ...sections,
+      ].join('\n')
+    );
+  };
+
   const renderSurface = (node: SurfaceNode) => {
     const agentId = node?.props?.agent_id || 'ActiveMirror';
     const title = dataModel[`${node.id}.title`] || node?.props?.title || '';
     const content = dataModel[`${node.id}.content`] || '';
     const onClose = () => closeSurface(node.id);
+
+    if (node?.props?.surface_kind === 'plugin_dock') {
+      return <PluginDockSurface key={node.id} title={title} content={content} onClose={onClose} />;
+    }
 
     switch (node.type) {
       case 'artifact_node':
@@ -227,7 +259,9 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
                       lead_node: { icon: Sparkles, label: 'Access', color: 'text-violet-500 bg-violet-50/80 border-violet-100' },
                       graph_node: { icon: Network, label: 'Graph', color: 'text-violet-500 bg-violet-50/80 border-violet-100' },
                     };
-                    const info = typeMap[node.type] || typeMap.artifact_node;
+                    const info = node?.props?.surface_kind === 'plugin_dock'
+                      ? { icon: Plug, label: 'Tools', color: 'text-gray-700 bg-gray-100/80 border-gray-200' }
+                      : typeMap[node.type] || typeMap.artifact_node;
                     const Icon = info.icon;
                     const title = dataModel[`${node.id}.title`] || info.label;
                     return (
@@ -277,7 +311,14 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
                 </div>
                 <div className="hidden items-center gap-2 text-[11px] font-medium text-gray-500 sm:flex">
                   <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">Solution path</span>
-                  <span className="rounded-full bg-blue-50 px-2.5 py-1 text-blue-700">Download ready</span>
+                  <button
+                    type="button"
+                    onClick={downloadWorkspacePack}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download pack
+                  </button>
                 </div>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">

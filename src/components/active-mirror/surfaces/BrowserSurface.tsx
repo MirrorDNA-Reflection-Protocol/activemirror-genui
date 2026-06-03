@@ -5,6 +5,7 @@ import { X, ExternalLink, Globe, ShieldCheck, Download, Copy, Sparkles, MousePoi
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { downloadMarkdownArtifact } from "@/lib/mirror/downloadArtifact";
 
 interface BrowserSurfaceProps {
   title: string;
@@ -40,10 +41,6 @@ function previewModules(markdown: string) {
   ];
 }
 
-function filenameFromTitle(title: string) {
-  return `${slugFromTitle(title)}.md`;
-}
-
 export default function BrowserSurface({ title, content, onClose }: BrowserSurfaceProps) {
   const [copied, setCopied] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -64,15 +61,7 @@ export default function BrowserSurface({ title, content, onClose }: BrowserSurfa
   };
 
   const downloadContent = () => {
-    const blob = new Blob([content || ""], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filenameFromTitle(title);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    downloadMarkdownArtifact(title || "Generated Preview", content || "");
   };
 
   return (

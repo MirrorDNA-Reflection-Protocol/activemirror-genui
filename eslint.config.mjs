@@ -12,8 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "playwright-report/**",
+    "test-results/**",
     "public/sw.js",
     "public/workbox-*.js",
+    "prisma/*.db",
+    "prisma/*.db-*",
   ]),
 ]);
 

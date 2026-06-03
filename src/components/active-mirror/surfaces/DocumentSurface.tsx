@@ -5,6 +5,7 @@ import { FileText, X, Download, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { downloadMarkdownArtifact } from '@/lib/mirror/downloadArtifact';
 
 interface DocumentSurfaceProps {
   title: string;
@@ -12,15 +13,6 @@ interface DocumentSurfaceProps {
   agentId?: string;
   onClose?: () => void;
   children?: React.ReactNode;
-}
-
-function filenameFromTitle(title: string) {
-  const base = (title || "active-mirror-artifact")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 60);
-  return `${base || "active-mirror-artifact"}.md`;
 }
 
 export default function DocumentSurface({ title, content, onClose, children }: DocumentSurfaceProps) {
@@ -33,15 +25,7 @@ export default function DocumentSurface({ title, content, onClose, children }: D
   };
 
   const downloadContent = () => {
-    const blob = new Blob([content || ""], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filenameFromTitle(title);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    downloadMarkdownArtifact(title, content || "");
   };
 
   return (

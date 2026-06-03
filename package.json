@@ -6,7 +6,11 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "audit:prod": "npm audit --omit=dev",
+    "ci": "npm run lint && npm run typecheck && npm run build"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.80",
@@ -47,6 +51,7 @@
     "typescript": "^5"
   },
   "overrides": {
+    "postcss": "8.5.10",
     "serialize-javascript": "7.0.5"
   }
 }

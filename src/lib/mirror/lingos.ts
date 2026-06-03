@@ -25,6 +25,41 @@ export type WorkspaceProfile = {
   lookupLabel?: string;
 };
 
+export type PluginLane = {
+  id: string;
+  label: string;
+  icon: "browser" | "document" | "chart" | "automation" | "media" | "review" | "lead";
+  state: "prepared" | "source_ready" | "export_ready" | "review_required" | "gated";
+  action: string;
+  description: string;
+  proof: string;
+  targetUrl?: string;
+};
+
+function hasAutomationIntent(lower: string) {
+  return /\b(automation|automate|workflow|watch|monitor|cron|schedule|daily|hourly|recurring|trigger|zapier|make\.com|ifttt|email me|alert me|notify)\b/.test(lower);
+}
+
+function hasDocumentIntent(lower: string) {
+  return /\b(proposal|document|pdf|pdf-ready|one-pager|one pager|brief|spec|report|doc|downloadable|file|export)\b/.test(lower);
+}
+
+function hasDeckIntent(lower: string) {
+  return /\b(deck|slides|presentation|pitch|investor|explainer)\b/.test(lower);
+}
+
+function hasLeadIntent(lower: string) {
+  return /\b(lead|waitlist|wait list|contact form|intake form|demo request|join|signup|sign up|paul@activemirror\.ai)\b/.test(lower);
+}
+
+function hasSiteAuditIntent(lower: string) {
+  return /\b(audit|site audit|readiness|headers?|pwa|accessibility|csp|security scan|launch readiness|lighthouse|uptime|homepage|api stream)\b/.test(lower);
+}
+
+function hasFocusHarnessIntent(lower: string) {
+  return /\b(neurodivergent|nd mode|adhd|autism|autistic|spectrum|assistive|at mode|focus mode|low-noise|low noise|time box|timebox)\b/.test(lower);
+}
+
 export function normalizePromptForIntent(prompt: string) {
   return prompt
     .replace(/Generated App Preview/gi, "workspace preview")
@@ -100,7 +135,7 @@ export function compileLingOS(prompt: string): LingOSCompilation {
   const hasVideo = /\b(video|veo|veo 3|storyboard|mp4|render|text-to-video|generate video)\b/.test(lower);
   const hasAudio = /\b(audio|voice|podcast|narration|speech|text-to-speech|tts|sound|multilingual audio)\b/.test(lower);
   const hasSmallBusiness = /\b(small business|smb|local business|shop|restaurant|clinic|salon|agency|solo operator|owner operator|retailer|tradesperson)\b/.test(lower);
-  const hasBuildArtifact = hasSmallBusiness || /\b(spec|downloadable|demo|app preview|generated app|workspace|proposal|document|pdf|one-pager|one pager|deck|form|calculator|brief)\b/.test(lower);
+  const hasBuildArtifact = hasSmallBusiness || hasAutomationIntent(lower) || hasDocumentIntent(lower) || hasDeckIntent(lower) || hasLeadIntent(lower) || hasFocusHarnessIntent(lower) || /\b(demo|app preview|generated app|workspace|form|calculator)\b/.test(lower);
   const hasMarketing = /\b(marketing|positioning|campaign|launch|sales|copy|brand|pricing|commercial|mirrorprod)\b/.test(lower);
 
   if (/\b(hack|exploit|bypass|steal|phish|malware|credential|password|token|private key|dox|scrape personal|unhackable)\b/.test(lower)) {
@@ -130,7 +165,7 @@ export function requestIntent(prompt: string) {
     lingos: route,
     ecosystem: /\b(ecosystem|operating map|chetana|mirrorgate protects|full working demo|show me your system)\b/.test(lower),
     company: Boolean(extractCompanyTarget(prompt)),
-    software: /\b(software-on-demand|software on demand|app preview|generated app|generate an app|website preview|workspace|dashboard|calculator|form|explainer|one-pager|deck|download|export pack|individual|team|enterprise|public-sector|public sector|government|small business|smb|local business|shop|restaurant|clinic|salon)\b/.test(lower),
+    software: /\b(software-on-demand|software on demand|app preview|generated app|generate an app|website preview|workspace|dashboard|calculator|form|explainer|one-pager|deck|download|export pack|individual|team|enterprise|public-sector|public sector|government|small business|smb|local business|shop|restaurant|clinic|salon)\b/.test(lower) || hasAutomationIntent(lower) || hasDocumentIntent(lower) || hasLeadIntent(lower) || hasFocusHarnessIntent(lower) || hasSiteAuditIntent(lower),
     marketing: /\b(marketing|positioning|campaign|launch|sales|copy|brand|pricing|commercial|mirrorprod)\b/.test(lower),
     lookup: /\b(lookup|internet|online|source|sources|citation|citations|research|browse|browser|current|latest|news|who is|what is available)\b/.test(lower),
     multilingual: /\b(multilingual|multi-language|multilanguage|translate|translation|localize|localized|locale|language|hindi|arabic|spanish|french|tamil|telugu|marathi|bengali)\b/.test(lower),
@@ -143,6 +178,27 @@ export function requestIntent(prompt: string) {
 
 export function workspaceProfile(prompt: string): WorkspaceProfile {
   const lower = normalizePromptForIntent(prompt).toLowerCase();
+  if (hasAutomationIntent(lower)) {
+    return {
+      title: "Automation Builder Workspace",
+      audience: "Operator",
+      promise: "A workflow builder opens with trigger, checks, schedule, proof receipt, alert copy, and reviewed activation path.",
+      primaryAction: "Prepare automation",
+      modules: ["Trigger", "Checks", "Schedule", "Receipt", "Alert path"],
+    };
+  }
+  if (hasSiteAuditIntent(lower)) {
+    const target = extractCompanyTarget(prompt);
+    return {
+      title: "Site Audit Workspace",
+      audience: target?.label || "Website owner",
+      promise: "A launch-readiness browser workspace opens with checks, evidence slots, fix list, export pack, and reviewed monitoring path.",
+      primaryAction: "Prepare audit",
+      modules: ["Browser check", "Readiness scan", "Fix pack", "Proof notes", "Monitor setup"],
+      lookupUrl: target?.url,
+      lookupLabel: target ? "Open site target" : undefined,
+    };
+  }
   if (/\b(video|veo|veo 3|storyboard|mp4|render|text-to-video|generate video)\b/.test(lower)) {
     const wantsSources = /\b(source|sources|api|provider|lookup|current|latest|internet|online)\b/.test(lower);
     return {
@@ -173,6 +229,15 @@ export function workspaceProfile(prompt: string): WorkspaceProfile {
       modules: ["Customer intake", "Offer page", "Quote and invoice", "Follow-up automation", "Download pack"],
     };
   }
+  if (hasLeadIntent(lower)) {
+    return {
+      title: "Lead Capture Workspace",
+      audience: "Buyer or visitor",
+      promise: "A generated intake surface opens with form fields, consent note, routing copy, email handoff, and downloadable demo brief.",
+      primaryAction: "Prepare intake",
+      modules: ["Intake form", "Consent note", "Routing email", "Demo brief", "Access gate"],
+    };
+  }
   const company = extractCompanyTarget(prompt);
   if (company) {
     return {
@@ -195,6 +260,33 @@ export function workspaceProfile(prompt: string): WorkspaceProfile {
       modules: ["Search surface", "Source notes", "Research brief", "Downloadable spec"],
       lookupUrl: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
       lookupLabel: "Open research search",
+    };
+  }
+  if (hasDeckIntent(lower)) {
+    return {
+      title: "Deck Studio",
+      audience: "Presenter",
+      promise: "A presentation workspace opens with slide map, visual direction, speaker notes, proof notes, and export path.",
+      primaryAction: "Prepare deck",
+      modules: ["Slide map", "Visual direction", "Speaker notes", "Proof notes", "Export path"],
+    };
+  }
+  if (hasFocusHarnessIntent(lower)) {
+    return {
+      title: "Focus Harness Workspace",
+      audience: "Neurodivergent user",
+      promise: "A low-noise finish surface opens with one goal, paced steps, sensory-light controls, review gates, and export pack.",
+      primaryAction: "Finish gently",
+      modules: ["One goal", "Paced steps", "Low-noise lane", "Review gate", "Export pack"],
+    };
+  }
+  if (hasDocumentIntent(lower)) {
+    return {
+      title: "Document Studio",
+      audience: "Writer",
+      promise: "A document workspace opens with outline, PDF-ready copy, proof notes, checklist, and export pack.",
+      primaryAction: "Export document",
+      modules: ["Outline", "Document draft", "Proof notes", "Checklist", "Export pack"],
     };
   }
   if (/\bteam\b/.test(lower)) {
@@ -249,4 +341,98 @@ export function workspaceProfile(prompt: string): WorkspaceProfile {
     primaryAction: "Generate output",
     modules: ["Request desk", "Working surface", "Proof note", "Export pack"],
   };
+}
+
+export function pluginLanesForPrompt(prompt: string): PluginLane[] {
+  const lower = normalizePromptForIntent(prompt).toLowerCase();
+  const profile = workspaceProfile(prompt);
+  const lanes: PluginLane[] = [];
+  const addLane = (lane: PluginLane) => {
+    if (!lanes.some((existing) => existing.id === lane.id)) lanes.push(lane);
+  };
+
+  if (profile.lookupUrl || requestIntent(prompt).lookup || requestIntent(prompt).company || hasSiteAuditIntent(lower)) {
+    addLane({
+      id: "browser",
+      label: "Browser Source",
+      icon: "browser",
+      state: profile.lookupUrl ? "source_ready" : "prepared",
+      action: profile.lookupUrl ? "Open target" : "Prepare lookup",
+      description: "Creates a browser-style source surface when current facts, public pages, or citations matter.",
+      proof: profile.lookupUrl ? "Source target is openable; claims stay assumptions until reviewed." : "No source opened yet; public claims remain assumptions.",
+      targetUrl: profile.lookupUrl,
+    });
+  }
+
+  if (hasDocumentIntent(lower) || hasDeckIntent(lower) || requestIntent(prompt).software || requestIntent(prompt).marketing || lanes.length === 0) {
+    addLane({
+      id: "document",
+      label: hasDeckIntent(lower) ? "Deck Export" : "Document Export",
+      icon: "document",
+      state: "export_ready",
+      action: hasDeckIntent(lower) ? "Prepare slide brief" : "Download markdown",
+      description: hasDeckIntent(lower)
+        ? "Turns the request into a slide map, speaker notes, visual direction, and proof-backed handoff."
+        : "Turns the request into PDF-ready markdown, checklist, and a handoff note before deeper work spends tokens.",
+      proof: "A downloadable artifact is generated in this session.",
+    });
+  }
+
+  if (/\b(chart|graph|trend|market|analytics|metrics|kpi|compare|comparison|data|forecast)\b/.test(lower)) {
+    addLane({
+      id: "chart",
+      label: "Chart Surface",
+      icon: "chart",
+      state: "prepared",
+      action: "Create visual data view",
+      description: "Prepares chart-ready interpretation for trends, comparisons, and KPI-style prompts.",
+      proof: "Numbers are demo or user-provided unless source lookup is approved.",
+    });
+  }
+
+  if (hasAutomationIntent(lower)) {
+    addLane({
+      id: "automation",
+      label: "Automation Builder",
+      icon: "automation",
+      state: "review_required",
+      action: "Generate workflow spec",
+      description: "Drafts triggers, checks, schedule, alert copy, and receipt format. Live sends require approval.",
+      proof: "Prepared as a spec; no automation is activated from the public preview.",
+    });
+  }
+
+  if (requestIntent(prompt).video || requestIntent(prompt).audio) {
+    addLane({
+      id: "media",
+      label: "Media Job",
+      icon: "media",
+      state: "gated",
+      action: "Prepare render brief",
+      description: "Creates storyboard, voice/script, prompt, consent, and cost notes before any render job.",
+      proof: "No finished media is claimed until a real render completes.",
+    });
+  }
+
+  addLane({
+    id: "review",
+    label: "Review Gate",
+    icon: "review",
+    state: requestIntent(prompt).highRisk || requestIntent(prompt).unsafe ? "review_required" : "prepared",
+    action: "Check boundary",
+    description: "Keeps private data, unsupported claims, legal/risk issues, unsafe workflows, and cost spikes out of public preview.",
+    proof: "Boundary is visible before deeper execution.",
+  });
+
+  addLane({
+    id: "lead",
+    label: "Access Path",
+    icon: "lead",
+    state: "prepared",
+    action: "Route scoped demo",
+    description: "Offers a short project brief and 72-hour demo path after a useful artifact exists.",
+    proof: "Lead form uses contact and project scope only.",
+  });
+
+  return lanes.slice(0, 6);
 }

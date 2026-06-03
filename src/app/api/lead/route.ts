@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 const LEAD_TO = "paul@activemirror.ai";
+const MAX_BODY_BYTES = Number(process.env.MIRROR_LEAD_MAX_BODY_BYTES || 8_192);
+const ALLOWED_HOST_SUFFIXES = [".activemirror.ai", ".pages.dev"];
+const ALLOWED_EXACT_HOSTS = new Set(["activemirror.ai", "localhost", "127.0.0.1", "::1"]);
 
 function clean(value: unknown, max = 500) {
   return String(value || "").trim().slice(0, max);
@@ -15,8 +18,31 @@ function mailtoFromLead(lead: { name: string; email: string; company: string; us
   return `mailto:${LEAD_TO}?subject=${subject}&body=${body}`;
 }
 
+function allowedRequestOrigin(request: NextRequest) {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
+  try {
+    const originHost = new URL(origin).hostname.toLowerCase();
+    if (host && originHost === host) return true;
+    if (ALLOWED_EXACT_HOSTS.has(originHost)) return true;
+    return ALLOWED_HOST_SUFFIXES.some((suffix) => originHost.endsWith(suffix));
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
+    if (!allowedRequestOrigin(request)) {
+      return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
+    }
+
+    const contentLength = Number(request.headers.get("content-length") || 0);
+    if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: "Request too large" }, { status: 413 });
+    }
+
     const body = await request.json();
     const lead = {
       name: clean(body?.name, 120),
@@ -54,4 +80,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Lead capture failed." }, { status: 500 });
   }
 }
-
