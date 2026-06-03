@@ -570,7 +570,7 @@ function QaTestStrip({
             QA Mode
           </div>
           <div className="text-xs text-[#6e6e73]">
-            Canonical: activemirror.ai · Preview: localhost:4005
+            Canonical: activemirror.ai · Preview: live GenUI
           </div>
         </div>
         <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
