@@ -2,6 +2,18 @@ import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
 test.describe('Active Mirror public GenUI', () => {
+  test('official demo route opens a product workspace without private setup leakage', async ({ page }) => {
+    await page.goto('/?qa=1');
+
+    await page.getByTestId('qa-test-strip').getByRole('button', { name: 'Demo', exact: true }).click();
+
+    await expect(page.getByRole('heading', { name: 'Official Product Demo Workspace' }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('heading', { name: 'Demo Control Room' }).first()).toBeVisible();
+    await expect(page.getByText('Downloadable Export Pack', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText(/private implementation/i)).toHaveCount(0);
+    await expect(page.getByText(/plumbing/i)).toHaveCount(0);
+  });
+
   test('generates a spec workspace and downloads the pack', async ({ page }) => {
     await page.goto('/?qa=1');
 

@@ -21,12 +21,14 @@ import {
   MailPlus,
   Store,
   Brain,
+  Sparkles,
 } from "lucide-react";
 import { useA2UIStream } from "@/lib/mirror/useA2UIStream";
 import Image from "next/image";
 import TriPanelLayout from "./TriPanelLayout";
 
 const PLACEHOLDERS = [
+  "Run the official Active Mirror demo...",
   "Research a company and show the source path...",
   "Generate a proposal and PDF-ready one-pager...",
   "Create an automation for my workflow...",
@@ -35,6 +37,11 @@ const PLACEHOLDERS = [
 ];
 
 const STARTERS = [
+  {
+    label: "Official Demo",
+    icon: Sparkles,
+    prompt: "Run the official Active Mirror product demo: strategy route, build plan, generated workspace, proof boundary, downloadable pack, and 72-hour demo request path. Show what a real visitor can do with the private setup hidden.",
+  },
   {
     label: "Research",
     icon: Search,
@@ -576,6 +583,10 @@ function QaTestStrip({
 }) {
   const prompts = [
     {
+      label: "Demo",
+      prompt: "Run the official Active Mirror product demo with strategy route, build plan, generated workspace, proof boundary, downloadable pack, and demo request path.",
+    },
+    {
       label: "Spec",
       prompt: "Generate a downloadable spec for an Active Mirror sales demo.",
     },
@@ -627,7 +638,7 @@ function QaTestStrip({
           SW: {status?.swStatus || "checking"}
         </span>
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-6">
         {prompts.map((item) => (
           <button
             key={item.label}

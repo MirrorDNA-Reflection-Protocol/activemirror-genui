@@ -214,6 +214,38 @@ function generatedPreviewContent(prompt: string) {
     ? `\n## Source Target\n[${profile.lookupLabel}](${profile.lookupUrl})\n\nCurrent claims stay marked as assumptions until the source view is opened or approved.`
     : "";
 
+  if (lowerTitle.includes("official product demo")) {
+    return `# ${profile.title}
+
+## Demo Control Room
+The workspace opens the official Active Mirror demo. It shows the product behavior first: ask for an outcome, watch the right surface appear, export the useful artifact, then request a scoped working demo only if the visitor wants depth.
+
+| Zone | What the visitor sees | State |
+| --- | --- | --- |
+| Ask surface | Chat, speech, upload-ready context, starter actions | Live |
+| Generated workspace | Document, browser preview, chart, workflow, form, or media brief based on intent | Ready |
+| Proof boundary | Real, assumed, gated, and reviewed items separated in plain language | Visible |
+| Download pack | One-pager, spec, checklist, email brief, and handoff notes | Ready |
+| Demo route | A concise 72-hour working-demo request path | Gated |
+
+## What It Demonstrates
+- **Strategy angle:** Active Mirror sells the finished outcome: speak or type a task and get the working surface needed to finish.
+- **Build plan:** The public product can generate a useful preview now, then route live sources, files, media, automations, vault continuity, or device actions through reviewed access.
+- **Workspace behavior:** The same prompt can become a document studio, research browser, sales surface, automation builder, focus harness, media workbench, or company-fit desk.
+- **Proof posture:** Claims stay marked as demo, assumption, source-ready, or reviewed instead of pretending unsupported work happened.
+- **Commercial path:** The visitor leaves with a downloadable artifact and a clean option to request a scoped 72-hour demo.
+
+## Live Demo Script
+1. Start with a real business or project problem.
+2. Generate the first useful workspace instead of a static answer.
+3. Export the document/spec/checklist before spending more turns.
+4. Open browser, media, file, vault, automation, or device lanes only when they are relevant.
+5. Convert strong intent into a demo request for paul@activemirror.ai.
+
+## Finish Route
+Use this page as the official live product demo. Keep private setup behind the product boundary; show generated work, proof, export, and reviewed access instead.`;
+  }
+
   if (lowerTitle.includes("public-service")) {
     return `# ${profile.title}
 
@@ -868,6 +900,8 @@ export async function POST(request: NextRequest) {
         return ndjsonResponse(createEcosystemStream(), setCookie);
       case "marketing":
         return ndjsonResponse(createMarketingStream(lastUserMessage.content), setCookie);
+      case "demo":
+        return ndjsonResponse(createSoftwareWorkspaceStream(lastUserMessage.content), setCookie);
       case "company":
       case "research":
       case "build":
