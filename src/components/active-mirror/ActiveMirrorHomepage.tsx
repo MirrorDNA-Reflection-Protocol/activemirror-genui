@@ -187,6 +187,10 @@ export default function ActiveMirrorHomepage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => null);
+    }
+
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
