@@ -40,7 +40,7 @@ const STARTERS = [
   {
     label: "Official Demo",
     icon: Sparkles,
-    prompt: "Run the official Active Mirror product demo: strategy route, build plan, generated workspace, proof boundary, downloadable pack, and 72-hour demo request path. Show what a real visitor can do with the private setup hidden.",
+    prompt: "Run the official Active Mirror demo.",
   },
   {
     label: "Research",
@@ -584,7 +584,7 @@ function QaTestStrip({
   const prompts = [
     {
       label: "Demo",
-      prompt: "Run the official Active Mirror product demo with strategy route, build plan, generated workspace, proof boundary, downloadable pack, and demo request path.",
+      prompt: "Run the official Active Mirror demo.",
     },
     {
       label: "Spec",

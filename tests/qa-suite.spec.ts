@@ -10,8 +10,24 @@ test.describe('Active Mirror public GenUI', () => {
     await expect(page.getByRole('heading', { name: 'Official Product Demo Workspace' }).first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole('heading', { name: 'Demo Control Room' }).first()).toBeVisible();
     await expect(page.getByText('Downloadable Export Pack', { exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Official Demo One-Pager' }).first()).toBeVisible();
+    await expect(page.getByText('Official Demo Pack').first()).toBeVisible();
     await expect(page.getByText(/private implementation/i)).toHaveCount(0);
     await expect(page.getByText(/plumbing/i)).toHaveCount(0);
+  });
+
+  test('ux feedback opens repair workspace instead of generic filler', async ({ page }) => {
+    await page.goto('/?qa=1');
+
+    const textarea = page.locator('textarea').first();
+    await textarea.fill('this looks difficult to use');
+    await textarea.press('Enter');
+
+    await expect(page.getByRole('heading', { name: 'UX Repair Workspace' }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('heading', { name: 'Usability Fix Board' }).first()).toBeVisible();
+    await expect(page.getByText('UX Cleanup Pack').first()).toBeVisible();
+    await expect(page.getByText('Request desk')).toHaveCount(0);
+    await expect(page.getByText('Working surface')).toHaveCount(0);
   });
 
   test('generates a spec workspace and downloads the pack', async ({ page }) => {

@@ -6,6 +6,7 @@ export type LingOSRoute =
   | "ecosystem"
   | "marketing"
   | "demo"
+  | "ux"
   | "company"
   | "research"
   | "build";
@@ -64,6 +65,13 @@ function hasFocusHarnessIntent(lower: string) {
 function hasOfficialDemoIntent(lower: string) {
   return /\b(official demo|official active mirror|product demo|working product|people can demo|canonical demo|official working product|strategy route|build plan|72-hour demo|72 hour demo)\b/.test(lower) ||
     /\b(implementation and strategy|strategy and implementation)\b/.test(lower);
+}
+
+function hasUxFeedbackIntent(lower: string) {
+  const feedback = /\b(polish|hard to use|difficult to use|confusing|clunky|messy|too much|overwhelming|not intuitive|friction|cleanup|clean up|make it easier|make it simple|simplify|hard to read|cutoff|cannot scroll|can't scroll|unable to scroll|repeated|repetitive|too many cards|generic cards|canned|needs polish|need polish|needs work|need work)\b/.test(lower);
+  const designFeedback = /\b(uxui|uiux|ux\/ui|ui\/ux|ux|interface|design)\b/.test(lower) &&
+    /\b(still|need|needs|polish|improve|fix|better|bad|hard|difficult|confusing|clunky|messy|overwhelming)\b/.test(lower);
+  return feedback || designFeedback;
 }
 
 export function normalizePromptForIntent(prompt: string) {
@@ -148,6 +156,7 @@ export function compileLingOS(prompt: string): LingOSCompilation {
   if (/\b(hack|exploit|bypass|steal|phish|malware|credential|password|token|private key|dox|scrape personal|unhackable)\b/.test(lower)) {
     return { route: "gate", tokens: [...tokens, "GATE", "STOP"], needsProof: true };
   }
+  if (hasUxFeedbackIntent(lower)) return { route: "ux", tokens: [...tokens, "UX", "FIX", "POLISH"], needsProof: false };
   if (hasOfficialDemo) return { route: "demo", tokens: [...tokens, "DEMO", "WORK", "PROOF", "EXPORT"], needsProof: true };
   if (hasVideo) return { route: "video", tokens: [...tokens, "MEDIA", "VIDEO", hasLookup ? "SRC" : "BRIEF", "GATE"], needsProof: hasLookup };
   if (hasAudio) return { route: "audio", tokens: [...tokens, "MEDIA", "AUDIO", "SCRIPT", "GATE"], needsProof: false };
@@ -173,7 +182,7 @@ export function requestIntent(prompt: string) {
     lingos: route,
     ecosystem: /\b(ecosystem|operating map|chetana|mirrorgate protects|full working demo|show me your system)\b/.test(lower),
     company: Boolean(extractCompanyTarget(prompt)),
-    software: hasOfficialDemoIntent(lower) || /\b(software-on-demand|software on demand|app preview|generated app|generate an app|website preview|workspace|dashboard|calculator|form|explainer|one-pager|deck|download|export pack|individual|team|enterprise|public-sector|public sector|government|small business|smb|local business|shop|restaurant|clinic|salon)\b/.test(lower) || hasAutomationIntent(lower) || hasDocumentIntent(lower) || hasLeadIntent(lower) || hasFocusHarnessIntent(lower) || hasSiteAuditIntent(lower),
+    software: hasOfficialDemoIntent(lower) || hasUxFeedbackIntent(lower) || /\b(software-on-demand|software on demand|app preview|generated app|generate an app|website preview|workspace|dashboard|calculator|form|explainer|one-pager|deck|download|export pack|individual|team|enterprise|public-sector|public sector|government|small business|smb|local business|shop|restaurant|clinic|salon)\b/.test(lower) || hasAutomationIntent(lower) || hasDocumentIntent(lower) || hasLeadIntent(lower) || hasFocusHarnessIntent(lower) || hasSiteAuditIntent(lower),
     marketing: /\b(marketing|positioning|campaign|launch|sales|copy|brand|pricing|commercial|mirrorprod)\b/.test(lower),
     lookup: /\b(lookup|internet|online|source|sources|citation|citations|research|browse|browser|current|latest|news|who is|what is available)\b/.test(lower),
     multilingual: /\b(multilingual|multi-language|multilanguage|translate|translation|localize|localized|locale|language|hindi|arabic|spanish|french|tamil|telugu|marathi|bengali)\b/.test(lower),
@@ -186,6 +195,15 @@ export function requestIntent(prompt: string) {
 
 export function workspaceProfile(prompt: string): WorkspaceProfile {
   const lower = normalizePromptForIntent(prompt).toLowerCase();
+  if (hasUxFeedbackIntent(lower)) {
+    return {
+      title: "UX Repair Workspace",
+      audience: "Visitor",
+      promise: "A cleaner workspace opens with the next action, the current issue, the visible fix, and one downloadable cleanup plan instead of repeated generic surfaces.",
+      primaryAction: "Simplify flow",
+      modules: ["What feels hard", "Immediate fix", "Cleaner workspace", "Proof and export"],
+    };
+  }
   if (hasOfficialDemoIntent(lower)) {
     return {
       title: "Official Product Demo Workspace",
@@ -356,7 +374,7 @@ export function workspaceProfile(prompt: string): WorkspaceProfile {
     audience: "Visitor",
     promise: "A custom app-like workspace generated from the request, with a preview, artifacts, and download path.",
     primaryAction: "Generate output",
-    modules: ["Request desk", "Working surface", "Proof note", "Export pack"],
+    modules: ["Goal", "Preview", "Proof", "Download"],
   };
 }
 
@@ -367,6 +385,18 @@ export function pluginLanesForPrompt(prompt: string): PluginLane[] {
   const addLane = (lane: PluginLane) => {
     if (!lanes.some((existing) => existing.id === lane.id)) lanes.push(lane);
   };
+
+  if (profile.title.includes("UX Repair")) {
+    addLane({
+      id: "ux_polish",
+      label: "UX Polish",
+      icon: "review",
+      state: "prepared",
+      action: "Simplify surface",
+      description: "Turns feedback into a clearer screen plan, fewer repeated surfaces, stronger hierarchy, and a visible next action.",
+      proof: "This is a public UI cleanup plan; no private data or hidden setup is needed.",
+    });
+  }
 
   if (profile.lookupUrl || requestIntent(prompt).lookup || requestIntent(prompt).company || hasSiteAuditIntent(lower)) {
     addLane({

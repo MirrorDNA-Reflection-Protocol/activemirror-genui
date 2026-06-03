@@ -41,6 +41,14 @@ function previewModules(markdown: string) {
   ];
 }
 
+function surfaceSubtitle(title: string) {
+  const lower = title.toLowerCase();
+  if (lower.includes("ux repair")) return "The feedback became a focused repair path with one visible fix, one proof line, and one export.";
+  if (lower.includes("official product demo")) return "The request became a working product surface with proof, export, and a clear next step.";
+  if (lower.includes("research")) return "Source targets, assumptions, and a concise brief are separated before live lookup runs.";
+  return "A task-specific surface is ready with a useful lane, proof line, and download path.";
+}
+
 export default function BrowserSurface({ title, content, onClose }: BrowserSurfaceProps) {
   const [copied, setCopied] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -126,7 +134,7 @@ export default function BrowserSurface({ title, content, onClose }: BrowserSurfa
               </div>
               <h2 className="text-xl font-semibold tracking-normal text-gray-950 sm:text-2xl">{title || "Live Workspace Preview"}</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-600">
-                The workspace changes to match the request, then packages the useful output into a downloadable spec.
+                {surfaceSubtitle(title || "Live Workspace Preview")}
               </p>
             </div>
             <div className="hidden rounded-xl border border-gray-200 bg-white px-3 py-2 text-right shadow-sm sm:block">

@@ -214,36 +214,62 @@ function generatedPreviewContent(prompt: string) {
     ? `\n## Source Target\n[${profile.lookupLabel}](${profile.lookupUrl})\n\nCurrent claims stay marked as assumptions until the source view is opened or approved.`
     : "";
 
+  if (lowerTitle.includes("ux repair")) {
+    return `# ${profile.title}
+
+## Usability Fix Board
+The workspace treats this as product feedback, not as a new project request. The screen should answer: what is hard, what changed, what to click next, and what can be exported.
+
+| Area | Cleaner behavior | State |
+| --- | --- | --- |
+| Current issue | The workspace feels too busy or hard to scan | Captured |
+| Main action | Show one obvious next step above the generated surfaces | Ready |
+| Surface cleanup | Collapse repeated export/finish cards into one access path | Ready |
+| Proof line | Keep assumptions, live sources, and gated actions visible | Ready |
+| Export | Save a short cleanup plan, not another long generic spec | Ready |
+
+## Working Areas
+- **What feels hard:** Short feedback is interpreted as UX critique, so the product improves the current flow instead of generating unrelated filler.
+- **Immediate fix:** Keep the generated preview first, then show one capability dock, one useful artifact, and one access path.
+- **Cleaner workspace:** Replace generic lane labels with task-specific actions and visible next steps.
+- **Proof and export:** Mark what is real, assumed, gated, or downloadable without repeating the same paid-access table.
+
+## UI Cleanup Rules
+1. One primary generated surface per turn.
+2. One artifact pack per turn.
+3. One clear next action in the header and at the end.
+4. Feedback prompts repair the workspace instead of becoming the workspace topic.
+5. Browser/source panels appear only for research or citation intent.
+
+## Finish Route
+Apply the cleanup, export the short UX plan, and keep the visitor moving with one next action instead of another stack of repeated cards.`;
+  }
+
   if (lowerTitle.includes("official product demo")) {
     return `# ${profile.title}
 
 ## Demo Control Room
-The workspace opens the official Active Mirror demo. It shows the product behavior first: ask for an outcome, watch the right surface appear, export the useful artifact, then request a scoped working demo only if the visitor wants depth.
+The visitor asks for an outcome. Active Mirror opens the right working surface, marks the proof boundary, and gives one useful download path.
 
 | Zone | What the visitor sees | State |
 | --- | --- | --- |
-| Ask surface | Chat, speech, upload-ready context, starter actions | Live |
-| Generated workspace | Document, browser preview, chart, workflow, form, or media brief based on intent | Ready |
-| Proof boundary | Real, assumed, gated, and reviewed items separated in plain language | Visible |
-| Download pack | One-pager, spec, checklist, email brief, and handoff notes | Ready |
-| Demo route | A concise 72-hour working-demo request path | Gated |
+| Ask | Speak, type, or bring context | Live |
+| Work surface | Document, browser, workflow, form, chart, or media brief | Ready |
+| Proof | Real, assumed, gated, and reviewed items are separated | Visible |
+| Export | One concise pack saves the work | Ready |
+| Demo request | 72-hour scoped build path appears after value | Gated |
 
-## What It Demonstrates
-- **Strategy angle:** Active Mirror sells the finished outcome: speak or type a task and get the working surface needed to finish.
-- **Build plan:** The public product can generate a useful preview now, then route live sources, files, media, automations, vault continuity, or device actions through reviewed access.
-- **Workspace behavior:** The same prompt can become a document studio, research browser, sales surface, automation builder, focus harness, media workbench, or company-fit desk.
-- **Proof posture:** Claims stay marked as demo, assumption, source-ready, or reviewed instead of pretending unsupported work happened.
-- **Commercial path:** The visitor leaves with a downloadable artifact and a clean option to request a scoped 72-hour demo.
+## Working Areas
+- **Ask:** The user starts with a real problem, not a menu of internal capabilities.
+- **Generate:** The workspace becomes the missing tool for that task.
+- **Prove:** Claims and actions are marked as live, assumed, gated, or reviewed.
+- **Finish:** The visitor downloads the useful pack or requests a scoped demo.
 
-## Live Demo Script
-1. Start with a real business or project problem.
-2. Generate the first useful workspace instead of a static answer.
-3. Export the document/spec/checklist before spending more turns.
-4. Open browser, media, file, vault, automation, or device lanes only when they are relevant.
-5. Convert strong intent into a demo request for paul@activemirror.ai.
+## Product Feel
+This should feel like software appearing on demand: one live surface, one proof line, one artifact pack, one next step.
 
 ## Finish Route
-Use this page as the official live product demo. Keep private setup behind the product boundary; show generated work, proof, export, and reviewed access instead.`;
+Use this as the official live demo. Keep the screen compact: show generated work first, then proof, export, and reviewed access.`;
   }
 
   if (lowerTitle.includes("public-service")) {
@@ -450,11 +476,55 @@ ${profile.modules.map((module) => `- **${module}:** A visible workspace area wit
 Use the preview, download the artifact, then route expensive or sensitive work through reviewed access.`;
 }
 
+function publicRequestLabel(prompt: string) {
+  const profile = workspaceProfile(prompt);
+  if (profile.title.includes("Official Product Demo")) return "Run the official Active Mirror demo.";
+  if (profile.title.includes("UX Repair")) return "Improve the workspace usability.";
+  return cleanIntent(prompt);
+}
+
 function exportPackContent(prompt: string) {
   const profile = workspaceProfile(prompt);
+  const intent = publicRequestLabel(prompt);
+  if (profile.title.includes("UX Repair")) {
+    return `## UX Cleanup Pack
+
+**Goal:** Make the generated workspace easier to scan and easier to act on.
+
+**Immediate fixes**
+- Treat feedback like "difficult to use" as UX critique, not a new task.
+- Keep one generated preview, one capability dock, one artifact, and one access path.
+- Rename generic lanes into concrete user actions.
+- Remove duplicate export/finish content.
+- Keep source/browser panels only when live research is actually needed.
+
+**Acceptance check**
+- A visitor can tell what changed in 10 seconds.
+- The next click is obvious.
+- The useful artifact can be downloaded.
+- Assumptions and gated actions remain visible.
+- No repeated generic cards appear for the same turn.`;
+  }
+  if (profile.title.includes("Official Product Demo")) {
+    return `## Official Demo Pack
+
+**What the visitor just saw**
+- A request became a generated workspace.
+- The workspace showed the useful surface before the explanation.
+- Proof and gated actions stayed visible.
+- A concise artifact is ready to download.
+
+**What unlocks next**
+- Live browser/source lookup when current facts matter.
+- File, media, automation, vault, or device lanes only after reviewed access.
+- A scoped 72-hour demo when the visitor has a real use case.
+
+**Next action**
+Download this pack or send a short demo brief to paul@activemirror.ai.`;
+  }
   return `## Working Demo Offer
 
-Active Mirror extracted a first spec from this request. The next step is a small working demo, not another generic call.
+Active Mirror extracted a first spec for: ${intent}
 
 **Demo scope**
 - Generated preview screen
@@ -495,9 +565,68 @@ Before paid depth starts, the request is checked by deterministic rules and a re
 **Send:** paul@activemirror.ai for the scoped workspace.`;
 }
 
+function finishRouteContent(prompt: string) {
+  const profile = workspaceProfile(prompt);
+  if (profile.title.includes("UX Repair")) {
+    return `## Next Action
+
+The workspace has a focused cleanup plan. Apply the simpler flow, export the UX pack, then test one real visitor prompt before adding more surfaces.`;
+  }
+  return `## Request Working Demo
+
+The useful preview and downloadable artifacts are ready. Share contact and project scope only if you want Active Mirror to prepare the reviewed 72-hour demo path.`;
+}
+
 function createGeneratedSpecContent(prompt: string) {
   const profile = workspaceProfile(prompt);
-  const intent = cleanIntent(prompt);
+  const intent = publicRequestLabel(prompt);
+  if (profile.title.includes("UX Repair")) {
+    return `# UX Cleanup Spec
+
+## Feedback
+${intent}
+
+## Product Surface
+${profile.title}
+
+## Goal
+Reduce friction so a visitor can understand the generated workspace, use the first artifact, and choose the next step without reading repeated cards.
+
+## Required Screen Behavior
+- Feedback prompts open a UX repair board.
+- Research prompts open a source/research board.
+- Build prompts open a workspace and export pack.
+- Finish/access copy appears once.
+
+## Acceptance Criteria
+- No generic fallback labels for usability feedback.
+- No duplicate export pack and finish route content.
+- The main generated surface contains concrete labels and one next action.
+- The artifact is short enough to scan and download.`;
+  }
+  if (profile.title.includes("Official Product Demo")) {
+    return `# Official Demo Spec
+
+## Request
+${intent}
+
+## Visitor Promise
+Ask or speak a task. Active Mirror generates the working surface, proof line, export pack, and reviewed demo path.
+
+## First Screen
+- One chat surface
+- One generated workspace
+- One proof boundary
+- One download pack
+- One demo request path
+
+## Acceptance Criteria
+- The visitor understands the product in under 30 seconds.
+- The generated workspace appears before long explanation.
+- Artifacts summarize the value instead of repeating the starter prompt.
+- Browser, media, vault, automation, and device lanes stay gated until relevant.
+- The demo request appears only after a useful output exists.`;
+  }
   return `# Working Demo Spec
 
 ## Request
@@ -542,7 +671,47 @@ Would you like Active Mirror to turn this downloadable spec into a working demo 
 
 function createGeneratedDocumentContent(prompt: string) {
   const profile = workspaceProfile(prompt);
-  const intent = cleanIntent(prompt);
+  const intent = publicRequestLabel(prompt);
+  if (profile.title.includes("UX Repair")) {
+    return `# UX Repair One-Pager
+
+## Feedback
+${intent}
+
+## Outcome
+${profile.promise}
+
+## What Changes
+1. Feedback becomes a workspace repair path.
+2. Repeated export and finish content collapses into one access path.
+3. Generic lane labels become specific to the user intent.
+4. The next action remains visible above and below the generated surface.
+
+## Checklist
+- [ ] One generated surface
+- [ ] One artifact pack
+- [ ] One access path
+- [ ] No repeated cards for the same content
+- [ ] Browser/source pane only when research is requested`;
+  }
+  if (profile.title.includes("Official Product Demo")) {
+    return `# Official Demo One-Pager
+
+## What Active Mirror Does
+Active Mirror turns a request into the working surface needed to finish: document, research browser, workflow, form, chart, media brief, or governed handoff.
+
+## Why It Matters
+The visitor does not need to learn the product first. They describe the outcome, see the generated workspace, export the useful artifact, and choose whether deeper access is worth it.
+
+## Proof Boundary
+- Generated preview: visible now
+- Sources and citations: opened only when relevant
+- Files, media, automations, vault, and device work: reviewed access
+- Claims: marked as demo, assumed, source-ready, or reviewed
+
+## Next Step
+Download the pack or request a scoped 72-hour demo.`;
+  }
   return `# ${profile.title} One-Pager
 
 ## Request
@@ -625,7 +794,7 @@ function createSoftwareWorkspaceStream(prompt: string) {
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "export_pack", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Downloadable Export Pack", severity: "info" } } }, 110);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "export_pack.title": "Downloadable Export Pack", "export_pack.content": exportPackContent(prompt) } }, 80);
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "lead_access", type: "lead_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Request Working Demo", severity: "info" } } }, 110);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "lead_access.title": "Request Working Demo", "lead_access.content": "## Working Demo Request\n\nThe useful preview and downloadable artifacts are ready. Share contact and project scope only if you want Active Mirror to prepare the reviewed 72-hour demo path." } }, 80);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "lead_access.title": "Request Working Demo", "lead_access.content": finishRouteContent(prompt) } }, 80);
       await yieldEnvelope({ envelope: "beginRendering", surface_id }, 80);
       controller.close();
     }
@@ -901,6 +1070,7 @@ export async function POST(request: NextRequest) {
       case "marketing":
         return ndjsonResponse(createMarketingStream(lastUserMessage.content), setCookie);
       case "demo":
+      case "ux":
         return ndjsonResponse(createSoftwareWorkspaceStream(lastUserMessage.content), setCookie);
       case "company":
       case "research":
@@ -1164,11 +1334,11 @@ export async function POST(request: NextRequest) {
             surface_id,
             data: {
               "finish_route.title": "Finish Route",
-              "finish_route.content": exportPackContent(lastUserMessage.content),
+              "finish_route.content": finishRouteContent(lastUserMessage.content),
             }
           });
           lastNodeTitle.finish_route = "Finish Route";
-          lastNodeBody.finish_route = exportPackContent(lastUserMessage.content);
+          lastNodeBody.finish_route = finishRouteContent(lastUserMessage.content);
 
           for await (const partial of result.partialObjectStream) {
             if (streamClosed) break;
