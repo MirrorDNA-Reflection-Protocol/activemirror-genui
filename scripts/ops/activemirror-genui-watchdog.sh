@@ -5,6 +5,7 @@ APP_NAME="${ACTIVEMIRROR_APP_NAME:-activemirror-genui}"
 APP_USER="${ACTIVEMIRROR_APP_USER:-sysadmin}"
 APP_ROOT="${ACTIVEMIRROR_APP_ROOT:-/opt/activemirror-genui-current}"
 APP_PORT="${ACTIVEMIRROR_APP_PORT:-3456}"
+CADDY_CONFIG="${ACTIVEMIRROR_CADDY_CONFIG:-/etc/caddy/Caddyfile}"
 RECEIPT="${ACTIVEMIRROR_WATCHDOG_RECEIPT:-/var/log/activemirror-genui-watchdog.jsonl}"
 HEALTH_URL="http://127.0.0.1:${APP_PORT}"
 ISSUES=()
@@ -57,6 +58,79 @@ run_healthcheck() {
   fi
 }
 
+validate_caddy_config() {
+  local log_path="$1"
+  caddy validate --config "$CADDY_CONFIG" >"$log_path" 2>&1
+}
+
+repair_stock_caddy_config() {
+  local log_path="$1"
+  if ! grep -Eq "http\\.encoders\\.br|unrecognized directive: rate_limit" "$log_path"; then
+    return 1
+  fi
+
+  record_action "backup_caddyfile_before_stock_binary_sanitize"
+  cp "$CADDY_CONFIG" "${CADDY_CONFIG}.watchdog-bak-$(date -u +%Y%m%dT%H%M%SZ)" || return 1
+
+  record_action "sanitize_caddyfile_for_stock_binary"
+  /usr/bin/python3 - "$CADDY_CONFIG" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+out = []
+i = 0
+while i < len(lines):
+    line = lines[i]
+    stripped = line.lstrip()
+    if stripped.startswith("rate_limit") and stripped.rstrip().endswith("{"):
+        depth = line.count("{") - line.count("}")
+        i += 1
+        while i < len(lines) and depth > 0:
+            depth += lines[i].count("{") - lines[i].count("}")
+            i += 1
+        continue
+    line = line.replace("encode br zstd gzip", "encode zstd gzip")
+    line = line.replace("encode zstd br gzip", "encode zstd gzip")
+    line = line.replace("encode br gzip", "encode gzip")
+    out.append(line)
+    i += 1
+path.write_text("".join(out), encoding="utf-8")
+PY
+}
+
+ensure_caddy_config_valid() {
+  local log_path
+  log_path="$(mktemp)"
+  if validate_caddy_config "$log_path"; then
+    rm -f "$log_path"
+    return 0
+  fi
+
+  record_issue "caddy_config_invalid"
+  if repair_stock_caddy_config "$log_path"; then
+    if validate_caddy_config "$log_path"; then
+      record_action "caddy_config_repaired"
+      rm -f "$log_path"
+      return 0
+    fi
+  fi
+
+  record_issue "caddy_config_unrepaired"
+  rm -f "$log_path"
+  return 1
+}
+
+restart_caddy_if_config_valid() {
+  local action="$1"
+  if ensure_caddy_config_valid; then
+    record_action "$action"
+    systemctl restart caddy >/dev/null 2>&1 || true
+    sleep 2
+  fi
+}
+
 if ! pm2_online; then
   record_issue "pm2_${APP_NAME}_not_online"
   start_or_reload_pm2_app
@@ -71,16 +145,12 @@ fi
 
 if ! systemctl is-active --quiet caddy; then
   record_issue "caddy_inactive"
-  record_action "restart_caddy"
-  systemctl restart caddy >/dev/null 2>&1 || true
-  sleep 2
+  restart_caddy_if_config_valid "restart_caddy"
 fi
 
 if ! curl -fsS --max-time 8 --resolve genui.activemirror.ai:443:127.0.0.1 -k https://genui.activemirror.ai/ >/dev/null; then
   record_issue "local_caddy_genui_https_unhealthy"
-  record_action "restart_caddy_after_https_probe"
-  systemctl restart caddy >/dev/null 2>&1 || true
-  sleep 2
+  restart_caddy_if_config_valid "restart_caddy_after_https_probe"
 fi
 
 check_tunnel_ready() {
