@@ -81,6 +81,21 @@ test.describe('Active Mirror public GenUI', () => {
     await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
   });
 
+  test('mobile front door uses compact capture flow', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 820 });
+    await page.goto('/?qa=1');
+
+    await expect(page.getByTestId('mobile-front-door')).toBeVisible();
+    await expect(page.getByTestId('desktop-front-door')).toBeHidden();
+    await expect(page.getByText('Pocket capture')).toBeVisible();
+    await expect(page.getByTestId('mobile-trust-strip')).toBeVisible();
+
+    await page.getByTestId('mobile-route-research-prove').click();
+    await page.getByRole('button', { name: /Generate surface/i }).click();
+    await expect(page.getByText(/Add the actual target first/i)).toBeVisible();
+    await expect(page.getByText('Generated Workspace', { exact: true })).toHaveCount(0);
+  });
+
   test('mobile viewport keeps generated workspace readable', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 820 });
     await page.goto('/?qa=1');

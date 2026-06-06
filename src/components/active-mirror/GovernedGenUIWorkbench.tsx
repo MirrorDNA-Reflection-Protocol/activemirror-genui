@@ -37,19 +37,25 @@ const DEFAULT_GOVERNED_PROMPT =
 
 const ROUTES = [
   {
+    id: "finish-task",
     label: "Finish a task",
+    mobileLabel: "Finish",
     body: "Draft the plan, checklist, message, brief, or next move.",
     icon: CheckCircle2,
     placeholder: "Example: I need a client-ready proposal by tomorrow for a 72-hour AI demo.",
   },
   {
+    id: "build-workspace",
     label: "Build a workspace",
+    mobileLabel: "Build",
     body: "Turn an idea into a small app, form, workflow, or spec.",
     icon: Workflow,
     placeholder: "Example: Build a customer intake workspace for a small clinic.",
   },
   {
+    id: "research-prove",
     label: "Research or prove",
+    mobileLabel: "Prove",
     body: "Prepare source checks, assumptions, unknowns, and a brief.",
     icon: Globe,
     placeholder: "Example: Prove whether browser-based AI workspaces are already shipping.",
@@ -77,6 +83,12 @@ const TRUST_ITEMS = [
     body: "Files, accounts, devices, sends, and vault memory require approval.",
     icon: LockKeyhole,
   },
+];
+
+const MOBILE_TRUST_ITEMS = [
+  { label: "Proof on", icon: ShieldCheck },
+  { label: "Gated", icon: LockKeyhole },
+  { label: "Exportable", icon: FileText },
 ];
 
 export default function GovernedGenUIWorkbench({
@@ -139,8 +151,58 @@ export default function GovernedGenUIWorkbench({
           </div>
         </header>
 
-        <main className="grid flex-1 items-center gap-6 py-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-8 lg:py-10">
-          <section className="max-w-2xl">
+        <main className="grid flex-1 gap-5 py-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-8 lg:py-10">
+          <section data-testid="mobile-front-door" className="lg:hidden">
+            <div className="flex items-center justify-between gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-700/15 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-900">
+                <Sparkles className="h-3.5 w-3.5" />
+                Pocket capture
+              </div>
+              <span className="rounded-md bg-white px-2.5 py-1 text-xs font-semibold text-[#525b52] shadow-sm shadow-black/[0.04]">
+                Ready now
+              </span>
+            </div>
+
+            <h2 className="mt-4 max-w-[360px] text-3xl font-semibold leading-tight tracking-normal text-[#151815]">
+              Give it one real target.
+            </h2>
+            <p className="mt-2 max-w-[340px] text-sm leading-6 text-[#667064]">
+              Active Mirror returns the first workspace with proof, limits, and the next step attached.
+            </p>
+
+            <div className="mt-4 grid grid-cols-3 gap-2" aria-label="Mobile route picker">
+              {ROUTES.map((route) => {
+                const Icon = route.icon;
+                return (
+                  <button
+                    key={route.label}
+                    type="button"
+                    data-testid={`mobile-route-${route.id}`}
+                    aria-label={route.label}
+                    onClick={() => chooseRoute(route)}
+                    className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl border px-2 text-center text-xs font-semibold shadow-sm shadow-black/[0.03] transition-colors ${
+                      selectedRoute?.label === route.label
+                        ? "border-cyan-500/50 bg-cyan-50 text-cyan-950"
+                        : "border-[#d9ddd2] bg-white text-[#2f352f] hover:border-cyan-500/40 hover:bg-cyan-50"
+                    }`}
+                  >
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#171a18] text-white">
+                      <Icon className="h-3.5 w-3.5" />
+                    </span>
+                    <span className="leading-4">{route.mobileLabel}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {selectedRoute ? (
+              <div className="mt-1 rounded-lg border border-cyan-500/25 bg-cyan-50 px-3 py-2 text-xs leading-5 text-cyan-950">
+                <span className="font-semibold">{selectedRoute.label}:</span> {selectedRoute.body}
+              </div>
+            ) : null}
+          </section>
+
+          <section data-testid="desktop-front-door" className="hidden max-w-2xl lg:block">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-700/15 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-900">
               <Sparkles className="h-3.5 w-3.5" />
               Ask once. Get the first working surface.
@@ -159,6 +221,7 @@ export default function GovernedGenUIWorkbench({
                   <button
                     key={route.label}
                     type="button"
+                    data-testid={`desktop-route-${route.id}`}
                     onClick={() => chooseRoute(route)}
                     className={`group min-h-[104px] rounded-lg border p-3.5 text-left shadow-sm shadow-black/[0.03] transition-colors sm:min-h-[132px] sm:p-4 ${
                       selectedRoute?.label === route.label
@@ -177,14 +240,22 @@ export default function GovernedGenUIWorkbench({
             </div>
           </section>
 
-          <aside className="rounded-xl border border-[#d9ddd2] bg-white p-4 shadow-xl shadow-black/[0.06]">
+          <aside className="rounded-2xl border border-[#d9ddd2] bg-white p-3 shadow-lg shadow-black/[0.06] lg:rounded-xl lg:p-4 lg:shadow-xl">
             <div className="mb-3">
-              <div className="text-xs font-semibold uppercase text-[#7a8276]">Start here</div>
+              <div className="text-xs font-semibold uppercase text-[#7a8276]">
+                <span className="lg:hidden">Capture</span>
+                <span className="hidden lg:inline">Start here</span>
+              </div>
               <label htmlFor="active-mirror-front-door" className="mt-1 block text-lg font-semibold text-[#171a18]">
-                {selectedRoute ? `What should Active Mirror ${selectedRoute.label.toLowerCase()}?` : "What should Active Mirror make or finish?"}
+                <span className="lg:hidden">
+                  {selectedRoute ? `Add the ${selectedRoute.label.toLowerCase()} target` : "Type the exact thing you need"}
+                </span>
+                <span className="hidden lg:inline">
+                  {selectedRoute ? `What should Active Mirror ${selectedRoute.label.toLowerCase()}?` : "What should Active Mirror make or finish?"}
+                </span>
               </label>
             </div>
-            <div className="rounded-lg border border-[#d9ddd2] bg-[#f8f9f5] p-2">
+            <div className="rounded-xl border border-[#d9ddd2] bg-[#f8f9f5] p-2 lg:rounded-lg">
               <textarea
                 id="active-mirror-front-door"
                 ref={inputRef}
@@ -201,9 +272,9 @@ export default function GovernedGenUIWorkbench({
                 }}
                 placeholder={isListening ? "Listening..." : selectedRoute?.placeholder || "Example: I need a client-ready proposal for a 72-hour AI demo."}
                 rows={7}
-                className="min-h-[190px] w-full resize-none bg-transparent px-2 py-2 text-sm leading-6 text-[#171a18] outline-none placeholder:text-[#8a9286]"
+                className="min-h-[150px] w-full resize-none bg-transparent px-2 py-2 text-[16px] leading-6 text-[#171a18] outline-none placeholder:text-[#8a9286] lg:min-h-[190px] lg:text-sm"
               />
-              <div className="flex items-center justify-between gap-3 border-t border-[#d9ddd2] pt-2">
+              <div className="grid grid-cols-[44px_minmax(0,1fr)] items-center gap-2 border-t border-[#d9ddd2] pt-2 lg:flex lg:justify-between lg:gap-3">
                 <button
                   type="button"
                   onClick={onToggleListening}
@@ -219,7 +290,7 @@ export default function GovernedGenUIWorkbench({
                   type="button"
                   onClick={guardedSubmit}
                   disabled={disableSubmit && !isListening}
-                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#171a18] px-4 text-sm font-semibold text-white transition-colors hover:bg-cyan-800 disabled:bg-[#c9cec4] disabled:text-[#7a8276]"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#171a18] px-4 text-sm font-semibold text-white transition-colors hover:bg-cyan-800 disabled:bg-[#c9cec4] disabled:text-[#7a8276] lg:min-h-10"
                 >
                   Generate surface
                   <ArrowUp className="h-4 w-4" />
@@ -237,7 +308,24 @@ export default function GovernedGenUIWorkbench({
           </aside>
         </main>
 
-        <section className="border-t border-[#d9ddd2] py-4">
+        <section data-testid="mobile-trust-strip" className="pb-4 lg:hidden">
+          <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#d9ddd2] bg-white p-2 shadow-sm shadow-black/[0.04]">
+            {MOBILE_TRUST_ITEMS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.label} className="flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg bg-[#f8f9f5] px-2 text-center">
+                  <Icon className="h-4 w-4 text-cyan-800" />
+                  <span className="text-[11px] font-semibold leading-4 text-[#2f352f]">{item.label}</span>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-xs leading-5 text-[#667064]">
+            Private files, account actions, devices, and sends stay gated; offline private body work is marked body_unavailable.
+          </p>
+        </section>
+
+        <section className="hidden border-t border-[#d9ddd2] py-4 lg:block">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {TRUST_ITEMS.map((item) => {
               const Icon = item.icon;
