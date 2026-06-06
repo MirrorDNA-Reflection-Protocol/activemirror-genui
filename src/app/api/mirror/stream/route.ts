@@ -813,6 +813,47 @@ function proofBoundaryContent(prompt: string) {
 Use the artifact, ask for one specific refinement, or request the gated route that should actually run.`;
 }
 
+function isBlankFrontDoorPrompt(prompt: string) {
+  return /\b(?:finish this task|build this workspace|research or prove this):\s*\./i.test(prompt);
+}
+
+function createFrontDoorIntakeStream() {
+  const encoder = new TextEncoder();
+  return new ReadableStream({
+    async start(controller) {
+      const surface_id = "intake_" + Math.random().toString(36).substring(7);
+      const yieldEnvelope = async (envelope: StreamEnvelope, delay: number = 0) => {
+        if (delay > 0) await sleep(delay);
+        enqueueEnvelope(controller, encoder, envelope);
+      };
+
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "root_grid", type: "fluid_grid", props: { layout: "adaptive_split", transition: "spring" } } });
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Waiting for the actual target before generating." } }, 60);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "front_door_intake", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Add the Target", severity: "info" } } }, 80);
+      await yieldEnvelope({
+        envelope: "dataModelUpdate",
+        surface_id,
+        data: {
+          "front_door_intake.title": "Add the Target",
+          "front_door_intake.content": `# Add the Target
+
+Active Mirror needs the actual thing before it can generate useful work.
+
+Reply with one sentence:
+
+- **Finish:** the task, audience, and deadline.
+- **Build:** the workspace idea and who will use it.
+- **Research:** the claim, source, company, topic, or question to prove.
+
+No browser lookup, file access, computer use, private memory, or external send ran.`
+        }
+      }, 80);
+      await yieldEnvelope({ envelope: "beginRendering", surface_id }, 60);
+      controller.close();
+    }
+  });
+}
+
 function isGovernedGenUIPrompt(prompt: string) {
   return /\b(governed|governance|provenance|canonical|doctrine|contract|contracts|receipt|receipts|kv cache|browser cache|computer use|approval queue|source registry)\b/i.test(prompt) &&
     /\b(genui|workspace|surface|workbench|launch|active mirror|browser cache|kv cache|model routing|computer use|doctrine|provenance)\b/i.test(prompt);
@@ -1284,6 +1325,10 @@ export async function POST(request: NextRequest) {
         ),
         setCookie
       );
+    }
+
+    if (isBlankFrontDoorPrompt(lastUserMessage.content)) {
+      return ndjsonResponse(createFrontDoorIntakeStream(), setCookie);
     }
 
     if (isGovernedGenUIPrompt(lastUserMessage.content)) {

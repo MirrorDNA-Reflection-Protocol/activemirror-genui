@@ -2,6 +2,16 @@ import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
 test.describe('Active Mirror public GenUI', () => {
+  test('front door route requires a real target before generation', async ({ page }) => {
+    await page.goto('/?qa=1');
+
+    await page.getByRole('button', { name: /Research or prove/i }).click();
+    await page.getByRole('button', { name: /Generate surface/i }).click();
+
+    await expect(page.getByText(/Add the actual target first/i)).toBeVisible();
+    await expect(page.getByText('Generated Workspace', { exact: true })).toHaveCount(0);
+  });
+
   test('official demo route opens a product workspace without private setup leakage', async ({ page }) => {
     await page.goto('/?qa=1');
 

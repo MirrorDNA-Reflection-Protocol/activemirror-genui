@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode, RefObject } from "react";
+import { useState } from "react";
 import {
   ArrowRight,
   ArrowUp,
@@ -39,22 +40,19 @@ const ROUTES = [
     label: "Finish a task",
     body: "Draft the plan, checklist, message, brief, or next move.",
     icon: CheckCircle2,
-    prompt:
-      "I need to finish this task: . Mirror the goal, generate the first useful artifact, and give me the next action.",
+    placeholder: "Example: I need a client-ready proposal by tomorrow for a 72-hour AI demo.",
   },
   {
     label: "Build a workspace",
     body: "Turn an idea into a small app, form, workflow, or spec.",
     icon: Workflow,
-    prompt:
-      "I want to build this workspace: . Mirror the user, generate the working surface, and include the file/export path.",
+    placeholder: "Example: Build a customer intake workspace for a small clinic.",
   },
   {
     label: "Research or prove",
     body: "Prepare source checks, assumptions, unknowns, and a brief.",
     icon: Globe,
-    prompt:
-      "I need to research or prove this: . Prepare the source route, assumptions, unknowns, and a concise evidence brief.",
+    placeholder: "Example: Prove whether browser-based AI workspaces are already shipping.",
   },
 ];
 
@@ -94,10 +92,23 @@ export default function GovernedGenUIWorkbench({
   onInstall,
   installLabel,
 }: GovernedGenUIWorkbenchProps) {
+  const [selectedRoute, setSelectedRoute] = useState<(typeof ROUTES)[number] | null>(null);
+  const [needsInput, setNeedsInput] = useState(false);
+
   const submitValue = () => onSubmit(value || DEFAULT_GOVERNED_PROMPT);
 
-  const chooseRoute = (prompt: string) => {
-    onValueChange(prompt);
+  const guardedSubmit = () => {
+    if (selectedRoute && !value.trim()) {
+      setNeedsInput(true);
+      inputRef.current?.focus();
+      return;
+    }
+    submitValue();
+  };
+
+  const chooseRoute = (route: (typeof ROUTES)[number]) => {
+    setSelectedRoute(route);
+    setNeedsInput(false);
     requestAnimationFrame(() => inputRef.current?.focus());
   };
 
@@ -148,8 +159,12 @@ export default function GovernedGenUIWorkbench({
                   <button
                     key={route.label}
                     type="button"
-                    onClick={() => chooseRoute(route.prompt)}
-                    className="group min-h-[104px] rounded-lg border border-[#d9ddd2] bg-white p-3.5 text-left shadow-sm shadow-black/[0.03] transition-colors hover:border-cyan-500/40 hover:bg-cyan-50 sm:min-h-[132px] sm:p-4"
+                    onClick={() => chooseRoute(route)}
+                    className={`group min-h-[104px] rounded-lg border p-3.5 text-left shadow-sm shadow-black/[0.03] transition-colors sm:min-h-[132px] sm:p-4 ${
+                      selectedRoute?.label === route.label
+                        ? "border-cyan-500/50 bg-cyan-50"
+                        : "border-[#d9ddd2] bg-white hover:border-cyan-500/40 hover:bg-cyan-50"
+                    }`}
                   >
                     <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-md bg-[#171a18] text-white transition-colors group-hover:bg-cyan-700 sm:mb-3 sm:h-9 sm:w-9">
                       <Icon className="h-4 w-4" />
@@ -166,7 +181,7 @@ export default function GovernedGenUIWorkbench({
             <div className="mb-3">
               <div className="text-xs font-semibold uppercase text-[#7a8276]">Start here</div>
               <label htmlFor="active-mirror-front-door" className="mt-1 block text-lg font-semibold text-[#171a18]">
-                What should Active Mirror make or finish?
+                {selectedRoute ? `What should Active Mirror ${selectedRoute.label.toLowerCase()}?` : "What should Active Mirror make or finish?"}
               </label>
             </div>
             <div className="rounded-lg border border-[#d9ddd2] bg-[#f8f9f5] p-2">
@@ -174,14 +189,17 @@ export default function GovernedGenUIWorkbench({
                 id="active-mirror-front-door"
                 ref={inputRef}
                 value={value}
-                onChange={(event) => onValueChange(event.target.value)}
+                onChange={(event) => {
+                  setNeedsInput(false);
+                  onValueChange(event.target.value);
+                }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && !event.shiftKey) {
                     event.preventDefault();
-                    submitValue();
+                    guardedSubmit();
                   }
                 }}
-                placeholder={isListening ? "Listening..." : "Example: I need a client-ready proposal for a 72-hour AI demo."}
+                placeholder={isListening ? "Listening..." : selectedRoute?.placeholder || "Example: I need a client-ready proposal for a 72-hour AI demo."}
                 rows={7}
                 className="min-h-[190px] w-full resize-none bg-transparent px-2 py-2 text-sm leading-6 text-[#171a18] outline-none placeholder:text-[#8a9286]"
               />
@@ -199,7 +217,7 @@ export default function GovernedGenUIWorkbench({
                 </button>
                 <button
                   type="button"
-                  onClick={submitValue}
+                  onClick={guardedSubmit}
                   disabled={disableSubmit && !isListening}
                   className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#171a18] px-4 text-sm font-semibold text-white transition-colors hover:bg-cyan-800 disabled:bg-[#c9cec4] disabled:text-[#7a8276]"
                 >
@@ -208,6 +226,11 @@ export default function GovernedGenUIWorkbench({
                 </button>
               </div>
             </div>
+            {needsInput ? (
+              <p className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
+                Add the actual target first. Active Mirror needs the task, workspace idea, or claim to avoid generating a canned route.
+              </p>
+            ) : null}
             <p className="mt-3 text-xs leading-5 text-[#7a8276]">
               {mirrorSeedId ? `Local session seed: ${mirrorSeedId.slice(0, 11)}. No tracking profile.` : "Session state stays local unless a vault is approved."}
             </p>
