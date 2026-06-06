@@ -9,9 +9,10 @@ test.describe('Active Mirror public GenUI', () => {
 
     await expect(page.getByRole('heading', { name: 'Official Product Demo Workspace' }).first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole('heading', { name: 'Demo Control Room' }).first()).toBeVisible();
-    await expect(page.getByText('Downloadable Export Pack', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('First Useful Artifact', { exact: true }).first()).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Official Demo One-Pager' }).first()).toBeVisible();
-    await expect(page.getByText('Official Demo Pack').first()).toBeVisible();
+    await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
+    await expect(page.getByText('Downloadable Export Pack', { exact: true })).toHaveCount(0);
     await expect(page.getByText(/private implementation/i)).toHaveCount(0);
     await expect(page.getByText(/plumbing/i)).toHaveCount(0);
   });
@@ -25,7 +26,8 @@ test.describe('Active Mirror public GenUI', () => {
 
     await expect(page.getByRole('heading', { name: 'UX Repair Workspace' }).first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole('heading', { name: 'Usability Fix Board' }).first()).toBeVisible();
-    await expect(page.getByText('UX Cleanup Pack').first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'UX Repair One-Pager' }).first()).toBeVisible();
+    await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
     await expect(page.getByText('Request desk')).toHaveCount(0);
     await expect(page.getByText('Working surface')).toHaveCount(0);
   });
@@ -33,15 +35,16 @@ test.describe('Active Mirror public GenUI', () => {
   test('generates a spec workspace and downloads the pack', async ({ page }) => {
     await page.goto('/?qa=1');
 
-    await expect(page.getByRole('heading', { name: 'Active Mirror' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Active Mirror', exact: true })).toBeVisible();
     await expect(page.getByTestId('qa-test-strip')).toBeVisible();
 
-    await page.getByRole('button', { name: 'Spec' }).click();
+    await page.getByTestId('qa-test-strip').getByRole('button', { name: 'Spec', exact: true }).click();
 
     await expect(page.getByText('Generated Workspace')).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText('Capability Dock')).toBeVisible();
-    await expect(page.getByText('Downloadable Spec', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Working Spec', { exact: true }).first()).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Working Demo Spec' }).first()).toBeVisible();
+    await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
+    await expect(page.getByText('Capability Dock', { exact: true })).toHaveCount(0);
 
     const downloadPromise = page.waitForEvent('download');
     await page.getByRole('button', { name: /Download pack/i }).click();
@@ -63,9 +66,9 @@ test.describe('Active Mirror public GenUI', () => {
     await textarea.press('Enter');
 
     await expect(page.getByRole('heading', { name: 'Research Browser Workspace' }).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText('Browser Source', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Chart Surface', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Evidence Brief', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Generated Signal Map', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
   });
 
   test('mobile viewport keeps generated workspace readable', async ({ page }) => {
@@ -80,7 +83,8 @@ test.describe('Active Mirror public GenUI', () => {
     await expect(workspaceChrome).toBeVisible({ timeout: 30_000 });
     await workspaceChrome.scrollIntoViewIfNeeded();
     await expect(page.getByRole('button', { name: /active:\/\/generated\/automation-builder-workspace/i }).first()).toBeVisible();
-    await expect(page.getByText('Capability Dock', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Automation Builder', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('First Useful Artifact', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
+    await expect(page.getByText('Capability Dock', { exact: true })).toHaveCount(0);
   });
 });
