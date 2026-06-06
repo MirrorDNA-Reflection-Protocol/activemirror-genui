@@ -19,6 +19,15 @@ import {
   workspaceProfile,
 } from "@/lib/mirror/lingos";
 import { buildMirrorSystemPrompt } from "@/lib/mirror/systemPrompt";
+import {
+  ACTIVE_MIRROR_AVAILABILITY_CONTRACT,
+  ACTIVE_MIRROR_BOOT_SEQUENCE,
+  ACTIVE_MIRROR_BOOTLOADER_CONTRACT,
+  ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL,
+  ACTIVE_MIRROR_REFLECTION_CONTRACT,
+  ACTIVE_MIRROR_STORAGE_CONTRACT,
+  ACTIVE_MIRROR_STORAGE_ROWS,
+} from "@/lib/mirror/contracts/activeMirrorBootloader";
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const FREE_TURN_COOKIE = "am_free_turns";
@@ -778,13 +787,28 @@ function governedPreviewContent(prompt: string) {
 ## Request
 ${intent}
 
+## Boot Status
+| Layer | State | Public note |
+| --- | --- | --- |
+| Canonical contract | Loaded | Private bootloader source is active; raw paths withheld |
+| Built-in skill | Active | ${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.name} v${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.version} |
+| Boot packet | Compiled | Authority, doctrine, gates, storage, route, and receipt rules |
+| Runtime surface | Ready | Deterministic scaffold first, model route only when needed |
+| Tool actions | Approval required | Browser, files, devices, sends, and computer use stay gated |
+| Durable memory | Opt-in only | Public preview remains ephemeral unless vault setup is approved |
+| Private body | Conditional | If offline, private/fresh actions become body_unavailable |
+
 ## Source Registry
 | Source | Role | Public pointer |
 | --- | --- | --- |
+| Active Mirror Bootloader | Private instruction contract | loaded internally; raw topology withheld |
 | MirrorDNA Standard | Canonical behavior source | https://github.com/MirrorDNA-Reflection-Protocol/MirrorDNA-Standard |
 | AI Behavioral Governance | Doctrine and harm boundary | https://github.com/MirrorDNA-Reflection-Protocol/ai-behavioral-governance |
 | SCD Protocol | Compression and contract packet pattern | https://github.com/MirrorDNA-Reflection-Protocol/SCD-Protocol |
 | Active Mirror GenUI repo | Public workbench implementation | https://github.com/MirrorDNA-Reflection-Protocol/activemirror-genui |
+
+## Boot Sequence
+${ACTIVE_MIRROR_BOOT_SEQUENCE.map((step, index) => `${index + 1}. ${step}`).join("\n")}
 
 ## Surface Contract
 Every generated surface must show what is generated, sourced, estimated, unknown, gated, approved, or exported. Browser lookup, file access, computer use, media render, external send, and device actions remain approval-gated until they actually run.
@@ -798,6 +822,11 @@ Every generated surface must show what is generated, sourced, estimated, unknown
 | Computer use | Prepared route only; explicit approval required |
 | Receipt | Surface id, source state, approval state, and export state |
 
+## Storage Model
+| Store | Location | What it keeps | Rule |
+| --- | --- | --- | --- |
+${ACTIVE_MIRROR_STORAGE_ROWS.map((row) => `| ${row.store} | ${row.location} | ${row.keeps} | ${row.rule} |`).join("\n")}
+
 ## Finish State
 The first useful workspace is open. The next step is to download the doctrine pack or request reviewed execution for live browser, files, computer use, or team deployment.`;
 }
@@ -807,6 +836,15 @@ function governedDoctrineContent() {
 
 ## Operating Law
 Purpose precedes identity. Identity precedes memory. Memory precedes inference. Inference never precedes responsibility.
+
+## Bootloader Contract
+${ACTIVE_MIRROR_BOOTLOADER_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
+
+## Reflective Mirror Loop
+${ACTIVE_MIRROR_REFLECTION_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
+
+## Availability Contract
+${ACTIVE_MIRROR_AVAILABILITY_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
 
 ## Public Surface Rules
 - Facts, estimates, and unknowns stay separate.
@@ -832,6 +870,9 @@ function governedApprovalContent() {
 | --- | --- | --- |
 | Browser/source lookup | Prepared | User opens source or asks for live lookup |
 | KV/cache replay | Ready | Canonical key or receipt id |
+| Bootloader source | Loaded/private | Public output shows only sanitized status |
+| Built-in doctrine skill | Loaded | Stateful doctrine applies to this session |
+| Private body/fresh lattice | Conditional | body_unavailable if private authority plane is offline |
 | File export | Ready | User downloads generated pack |
 | Computer use | Blocked | Explicit approval, scoped target, receipt |
 | Account or external send | Blocked | Review, permission, and revocation path |
@@ -858,15 +899,32 @@ ${intent}
 \`\`\`json
 {
   "surface": "governed-genui-workbench",
+  "bootloader": "private_contract_loaded_paths_withheld",
+  "built_in_skill": {
+    "id": "${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.id}",
+    "version": "${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.version}",
+    "state": "${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.state}"
+  },
+  "boot_sequence": ${JSON.stringify(ACTIVE_MIRROR_BOOT_SEQUENCE, null, 2).replace(/\n/g, "\n  ")},
   "provenance": "required",
   "doctrine_contract": "required",
   "browser_cache": "local_replay",
   "kv_cache": "canonical_receipt_lookup",
+  "vault_memory": "opt_in_only",
+  "file_access": "approval_required",
   "model_route": "on_demand",
   "computer_use": "approval_required",
+  "external_send": "approval_required",
+  "offline_private_body": "body_unavailable",
   "receipt": "required"
 }
 \`\`\`
+
+## Built-In Skill
+**${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.name}** keeps doctrine, provenance, reflection, storage, approvals, and receipts stateful across the generated surface. It is public-safe and versioned; raw private source files remain outside the public site.
+
+## Storage Contract
+${ACTIVE_MIRROR_STORAGE_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
 
 ## Export Notes
 This pack is generated in the public preview. Live browser checks, private files, account actions, computer use, and deployment actions require separate approval and receipts.`;
@@ -883,7 +941,7 @@ function createGovernedGenUIStream(prompt: string) {
       };
 
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "root_grid", type: "fluid_grid", props: { layout: "adaptive_split", transition: "spring" } } });
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Canonical provenance route selected." } }, 40);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Bootloader contract loaded; private paths withheld." } }, 40);
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "generated_preview", type: "browser_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Governed GenUI Workbench", severity: "info" } } }, 60);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "generated_preview.title": "Governed GenUI Workbench", "generated_preview.content": governedPreviewContent(prompt) } }, 40);
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "doctrine_contract", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Canonical Doctrine Contract", severity: "info" } } }, 60);

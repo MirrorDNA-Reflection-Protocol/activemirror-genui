@@ -9,7 +9,6 @@ import {
   FileText,
   GitBranch,
   Globe,
-  KeyRound,
   Layers3,
   LockKeyhole,
   Mic,
@@ -22,6 +21,11 @@ import {
   Workflow,
 } from "lucide-react";
 import Image from "next/image";
+import {
+  ACTIVE_MIRROR_BOOT_SEQUENCE,
+  ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL,
+  ACTIVE_MIRROR_STORAGE_ROWS,
+} from "@/lib/mirror/contracts/activeMirrorBootloader";
 
 type GovernedGenUIWorkbenchProps = {
   value: string;
@@ -38,13 +42,19 @@ type GovernedGenUIWorkbenchProps = {
 };
 
 const DEFAULT_GOVERNED_PROMPT =
-  "Open a governed GenUI workspace for Active Mirror with provenance, canonical doctrine contracts, browser cache, KV cache, model routing, computer-use gates, approvals, files, and receipts.";
+  "Mirror my intent and generate the Active Mirror workspace I need on demand. Use the canonical doctrine skill, bootloader contract, provenance, storage split, approvals, files, and receipts.";
 
 const STARTERS = [
   {
     label: "Governed",
     icon: ShieldCheck,
     prompt: DEFAULT_GOVERNED_PROMPT,
+  },
+  {
+    label: "Mirror",
+    icon: Sparkles,
+    prompt:
+      "Mirror my goal, constraints, urgency, and preferred working style. Then generate the useful surface, proof boundary, file tray, and smallest next action.",
   },
   {
     label: "Sources",
@@ -85,6 +95,16 @@ const sourceRows = [
     href: "https://github.com/MirrorDNA-Reflection-Protocol/MirrorDNA-Standard",
   },
   {
+    name: "Active Mirror Bootloader",
+    state: "private/safe",
+    href: "https://github.com/MirrorDNA-Reflection-Protocol",
+  },
+  {
+    name: "Doctrine Skill",
+    state: "built-in",
+    href: "https://github.com/MirrorDNA-Reflection-Protocol",
+  },
+  {
     name: "AI Behavioral Governance",
     state: "doctrine",
     href: "https://github.com/MirrorDNA-Reflection-Protocol/ai-behavioral-governance",
@@ -97,18 +117,24 @@ const sourceRows = [
 ];
 
 const doctrineRows = [
+  ["Mirror", "Reflect the user, then generate the useful surface"],
   ["Purpose", "Identity before memory, memory before inference"],
   ["Authority", "Human approval before external action"],
   ["Evidence", "Facts, estimates, and unknowns stay separate"],
-  ["Execution", "Browser, files, devices, and sends are gated"],
+  ["Boundary", "Reflection is not obedience; preview is not execution"],
 ];
 
 const runtimeRows = [
+  ["Boot skill", "Canonical doctrine stays loaded and versioned"],
   ["Browser cache", "Instant replay for recent surfaces"],
-  ["KV cache", "Canonical surface receipt lookup"],
-  ["Model route", "Live model only when generation needs it"],
-  ["Computer use", "Prepared, approval-gated, receipt-backed"],
+  ["Hetzner", "Always-on public surface and safe receipts"],
+  ["Private body", "Fresh private actions can become body_unavailable"],
+  ["Computer use", "Approval-gated and receipt-backed"],
 ];
+
+const visibleStorageRows = ACTIVE_MIRROR_STORAGE_ROWS.filter((row) =>
+  ["Private lattice", "Bootloader contract", "Browser cache", "KV cache", "Vault", "Offline fallback"].includes(row.store)
+);
 
 export default function GovernedGenUIWorkbench({
   value,
@@ -153,7 +179,7 @@ export default function GovernedGenUIWorkbench({
           </div>
         </header>
 
-        <div className="grid flex-1 gap-4 py-4 lg:grid-cols-[360px_minmax(0,1fr)_340px]">
+        <div className="grid flex-1 gap-4 py-4 lg:grid-cols-[360px_minmax(0,1fr)_360px]">
           <aside className="flex min-h-0 flex-col gap-4">
             <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4 shadow-2xl shadow-black/20">
               <div className="mb-3 flex items-center justify-between gap-3">
@@ -233,9 +259,9 @@ export default function GovernedGenUIWorkbench({
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
               <div>
                 <div className="text-xs font-semibold uppercase text-slate-500">Generated Surface</div>
-                <div className="text-sm font-semibold text-white">Governed launch workspace</div>
+                <div className="text-sm font-semibold text-white">Reflective work OS</div>
               </div>
-              <span className="rounded-md bg-cyan-300/10 px-2.5 py-1 text-xs font-semibold text-cyan-200">GenUI</span>
+              <span className="rounded-md bg-cyan-300/10 px-2.5 py-1 text-xs font-semibold text-cyan-200">Mirror loop</span>
             </div>
             <div className="grid gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_280px]">
               <section className="rounded-lg border border-white/10 bg-[#0c1219] p-4">
@@ -244,9 +270,17 @@ export default function GovernedGenUIWorkbench({
                     <Layers3 className="h-5 w-5" />
                   </span>
                   <div>
-                    <h2 className="text-base font-semibold text-white">Sense &gt; Interpret &gt; Reflect &gt; Act &gt; Stabilize</h2>
-                    <p className="text-xs leading-5 text-slate-500">Every generated surface carries source state, doctrine state, route state, approval state, and receipt state.</p>
+                    <h2 className="text-base font-semibold text-white">Sense &gt; Reflect &gt; Generate &gt; Gate &gt; Receipt</h2>
+                    <p className="text-xs leading-5 text-slate-500">Active Mirror mirrors the user, generates the needed surface, and marks what is real, gated, stored, or unavailable.</p>
                   </div>
+                </div>
+
+                <div className="mb-4 rounded-lg border border-cyan-300/15 bg-cyan-300/[0.06] p-3">
+                  <div className="mb-2 text-xs font-semibold uppercase text-cyan-200">Built-in skill</div>
+                  <div className="text-sm font-semibold text-white">{ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.name}</div>
+                  <p className="mt-1 text-xs leading-5 text-slate-400">
+                    Stateful doctrine, provenance, reflection, storage, approvals, and receipts. Version {ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.version}.
+                  </p>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -259,6 +293,18 @@ export default function GovernedGenUIWorkbench({
                       <p className="text-xs leading-5 text-slate-400">{body}</p>
                     </article>
                   ))}
+                </div>
+
+                <div className="mt-4 rounded-lg border border-white/10 bg-black/25 p-3">
+                  <div className="mb-3 text-xs font-semibold uppercase text-slate-500">Boot sequence</div>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {ACTIVE_MIRROR_BOOT_SEQUENCE.slice(0, 6).map((step, index) => (
+                      <div key={step} className="rounded-md border border-white/10 bg-white/[0.035] p-2">
+                        <div className="text-[10px] font-semibold uppercase text-cyan-200">{String(index + 1).padStart(2, "0")}</div>
+                        <div className="mt-1 text-xs leading-4 text-slate-300">{step}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="mt-4 rounded-lg border border-white/10 bg-black/25">
@@ -283,7 +329,7 @@ export default function GovernedGenUIWorkbench({
 
               <aside className="grid gap-3">
                 {runtimeRows.map(([label, body], index) => {
-                  const Icon = [Database, KeyRound, Bot, LockKeyhole][index] || Route;
+                  const Icon = [ShieldCheck, Database, Bot, LockKeyhole][index] || Route;
                   return (
                     <article key={label} className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
                       <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-white">
@@ -301,10 +347,29 @@ export default function GovernedGenUIWorkbench({
           <aside className="grid min-h-0 gap-4">
             <section className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+                <Database className="h-4 w-4 text-emerald-200" />
+                Storage Split
+              </div>
+              <div className="space-y-2 text-xs leading-5">
+                {visibleStorageRows.map((row) => (
+                  <div key={row.store} className="rounded-md bg-black/25 p-3 text-slate-300">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-white">{row.store}</span>
+                      <span className="max-w-[150px] truncate rounded bg-white/10 px-1.5 py-0.5 text-[10px] uppercase text-slate-400">{row.rule}</span>
+                    </div>
+                    <div className="mt-1 text-slate-500">{row.location}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
                 <GitBranch className="h-4 w-4 text-amber-200" />
                 Approval Queue
               </div>
               <div className="space-y-2 text-xs leading-5">
+                <div className="rounded-md bg-black/25 p-3 text-slate-300">Private body/fresh lattice: conditional, body_unavailable if offline</div>
                 <div className="rounded-md bg-black/25 p-3 text-slate-300">Browser/source lookup: prepared, not run</div>
                 <div className="rounded-md bg-black/25 p-3 text-slate-300">File export: generated, user-initiated download</div>
                 <div className="rounded-md bg-black/25 p-3 text-slate-300">Computer use: blocked until explicit approval</div>
@@ -318,7 +383,7 @@ export default function GovernedGenUIWorkbench({
                 Doctrine Contract
               </div>
               <p className="text-xs leading-5 text-slate-400">
-                Public surfaces show what is generated, sourced, gated, unknown, approved, or exported. No hidden execution, no fake receipts, no unsupported claims.
+                Public surfaces show what is reflected, generated, sourced, gated, unknown, approved, stored, unavailable, or exported. No hidden execution, no fake receipts, no unsupported claims.
               </p>
             </section>
           </aside>
