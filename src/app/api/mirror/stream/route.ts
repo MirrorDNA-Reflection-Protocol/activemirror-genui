@@ -775,6 +775,44 @@ ${intent}
 These values are a generated planning map, not verified market data. Replace them with sourced numbers after browser lookup or user-provided files are approved.`;
 }
 
+function shouldOfferLeadAccess(prompt: string) {
+  return /\b(72-hour|72 hour|working demo|deploy|deployment|vault|computer use|device|team|enterprise|external send|account action|paid|contact|paul@activemirror\.ai)\b/i.test(prompt);
+}
+
+function primaryArtifactTitle(prompt: string) {
+  const profile = workspaceProfile(prompt);
+  if (profile.title.includes("Research")) return "Evidence Brief";
+  if (profile.title.includes("Site Audit")) return "Fix Brief";
+  if (/\b(spec|implementation|build plan|technical plan|contract|proposal)\b/i.test(prompt)) return "Working Spec";
+  if (/\b(email|message|copy|script)\b/i.test(prompt)) return "Draft Artifact";
+  return "First Useful Artifact";
+}
+
+function primaryArtifactContent(prompt: string) {
+  if (/\b(spec|implementation|build plan|technical plan|contract)\b/i.test(prompt)) {
+    return createGeneratedSpecContent(prompt);
+  }
+  return createGeneratedDocumentContent(prompt);
+}
+
+function proofBoundaryContent(prompt: string) {
+  const profile = workspaceProfile(prompt);
+  return `## Proof + Next Step
+
+**Ready now**
+- Generated workspace: ${profile.title}
+- Artifact: ${primaryArtifactTitle(prompt)}
+- Download: available from the workspace pack
+
+**Still gated**
+- Live browser/source checks run only when requested.
+- Private files, vault memory, computer use, account actions, and external sends require approval.
+- If the private body is offline, fresh private actions stay marked body_unavailable.
+
+**Next action**
+Use the artifact, ask for one specific refinement, or request the gated route that should actually run.`;
+}
+
 function isGovernedGenUIPrompt(prompt: string) {
   return /\b(governed|governance|provenance|canonical|doctrine|contract|contracts|receipt|receipts|kv cache|browser cache|computer use|approval queue|source registry)\b/i.test(prompt) &&
     /\b(genui|workspace|surface|workbench|launch|active mirror|browser cache|kv cache|model routing|computer use|doctrine|provenance)\b/i.test(prompt);
@@ -964,30 +1002,27 @@ function createSoftwareWorkspaceStream(prompt: string) {
     async start(controller) {
       const surface_id = "workspace_" + Math.random().toString(36).substring(7);
       const profile = workspaceProfile(prompt);
-      const pluginLanes = pluginLanesForPrompt(prompt);
       const yieldEnvelope = async (envelope: StreamEnvelope, delay: number = 0) => {
         if (delay > 0) await sleep(delay);
         enqueueEnvelope(controller, encoder, envelope);
       };
 
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "root_grid", type: "fluid_grid", props: { layout: "adaptive_split", transition: "spring" } } });
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Opening the right workspace." } }, 80);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Mirroring the request into one useful workspace." } }, 80);
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "generated_preview", type: "browser_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: profile.title, severity: "info" } } }, 110);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "generated_preview.content": generatedPreviewContent(prompt) } }, 80);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "capability_dock", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Capability Dock", severity: "info", surface_kind: "plugin_dock" } } }, 110);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "capability_dock.title": "Capability Dock", "capability_dock.content": JSON.stringify({ lanes: pluginLanes }, null, 2) } }, 80);
       if (shouldEmitChart(prompt)) {
         await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "signal_map", type: "chart_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Generated Signal Map", severity: "info" } } }, 110);
         await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "signal_map.title": "Generated Signal Map", "signal_map.content": generatedChartContent(prompt) } }, 80);
       }
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "one_pager", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Downloadable One-Pager", severity: "info" } } }, 110);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "one_pager.title": "Downloadable One-Pager", "one_pager.content": createGeneratedDocumentContent(prompt) } }, 80);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "demo_spec", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Downloadable Spec", severity: "info" } } }, 110);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "demo_spec.title": "Downloadable Spec", "demo_spec.content": createGeneratedSpecContent(prompt) } }, 80);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "export_pack", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Downloadable Export Pack", severity: "info" } } }, 110);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "export_pack.title": "Downloadable Export Pack", "export_pack.content": exportPackContent(prompt) } }, 80);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "lead_access", type: "lead_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Request Working Demo", severity: "info" } } }, 110);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "lead_access.title": "Request Working Demo", "lead_access.content": finishRouteContent(prompt) } }, 80);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "primary_artifact", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: primaryArtifactTitle(prompt), severity: "info" } } }, 110);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "primary_artifact.title": primaryArtifactTitle(prompt), "primary_artifact.content": primaryArtifactContent(prompt) } }, 80);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "proof_boundary", type: "governance_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Proof + Next Step", severity: "info" } } }, 90);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "proof_boundary.title": "Proof + Next Step", "proof_boundary.content": proofBoundaryContent(prompt) } }, 70);
+      if (shouldOfferLeadAccess(prompt)) {
+        await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "lead_access", type: "lead_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Request Reviewed Access", severity: "info" } } }, 90);
+        await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "lead_access.title": "Request Reviewed Access", "lead_access.content": finishRouteContent(prompt) } }, 70);
+      }
       await yieldEnvelope({ envelope: "beginRendering", surface_id }, 80);
       controller.close();
     }
@@ -1268,11 +1303,10 @@ export async function POST(request: NextRequest) {
         return ndjsonResponse(createMarketingStream(lastUserMessage.content), setCookie);
       case "demo":
       case "ux":
-        return ndjsonResponse(createSoftwareWorkspaceStream(lastUserMessage.content), setCookie);
       case "company":
       case "research":
       case "build":
-        break;
+        return ndjsonResponse(createSoftwareWorkspaceStream(lastUserMessage.content), setCookie);
       case "gate":
         return ndjsonResponse(
           createGovernanceStream(

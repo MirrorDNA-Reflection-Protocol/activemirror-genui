@@ -309,7 +309,7 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
                 <div>
                   <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Generated Workspace</div>
                   <div className="text-sm font-semibold text-gray-950">
-                    {isGovernedWorkspace ? "Provenance, doctrine, approvals, and receipts" : "Preview, spec, export, and demo path"}
+                    {isGovernedWorkspace ? "Provenance, doctrine, approvals, and receipts" : "Preview, artifact, proof, and next step"}
                   </div>
                 </div>
                 <div className="hidden items-center gap-2 text-[11px] font-medium text-gray-500 sm:flex">

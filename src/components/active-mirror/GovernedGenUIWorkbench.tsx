@@ -2,30 +2,20 @@
 
 import type { ReactNode, RefObject } from "react";
 import {
+  ArrowRight,
   ArrowUp,
-  Bot,
   CheckCircle2,
-  Database,
   FileText,
-  GitBranch,
   Globe,
-  Layers3,
   LockKeyhole,
   Mic,
   MicOff,
-  MonitorCog,
-  Route,
-  Search,
   ShieldCheck,
   Sparkles,
   Workflow,
 } from "lucide-react";
 import Image from "next/image";
-import {
-  ACTIVE_MIRROR_BOOT_SEQUENCE,
-  ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL,
-  ACTIVE_MIRROR_STORAGE_ROWS,
-} from "@/lib/mirror/contracts/activeMirrorBootloader";
+import { ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL } from "@/lib/mirror/contracts/activeMirrorBootloader";
 
 type GovernedGenUIWorkbenchProps = {
   value: string;
@@ -42,99 +32,54 @@ type GovernedGenUIWorkbenchProps = {
 };
 
 const DEFAULT_GOVERNED_PROMPT =
-  "Mirror my intent and generate the Active Mirror workspace I need on demand. Use the canonical doctrine skill, bootloader contract, provenance, storage split, approvals, files, and receipts.";
+  "Help me finish one real task. Mirror what I need, generate the first useful surface, and show what is ready, gated, missing, or exportable.";
 
-const STARTERS = [
+const ROUTES = [
   {
-    label: "Governed",
-    icon: ShieldCheck,
-    prompt: DEFAULT_GOVERNED_PROMPT,
-  },
-  {
-    label: "Mirror",
-    icon: Sparkles,
+    label: "Finish a task",
+    body: "Draft the plan, checklist, message, brief, or next move.",
+    icon: CheckCircle2,
     prompt:
-      "Mirror my goal, constraints, urgency, and preferred working style. Then generate the useful surface, proof boundary, file tray, and smallest next action.",
+      "I need to finish this task: . Mirror the goal, generate the first useful artifact, and give me the next action.",
   },
   {
-    label: "Sources",
-    icon: Search,
-    prompt:
-      "Open a provenance workspace for Active Mirror. Show source registry, canonical contract status, facts, estimates, unknowns, and receipt boundaries.",
-  },
-  {
-    label: "Build",
+    label: "Build a workspace",
+    body: "Turn an idea into a small app, form, workflow, or spec.",
     icon: Workflow,
     prompt:
-      "Generate a governed product build workspace with doctrine gates, files, approvals, browser cache, KV cache, and a downloadable implementation pack.",
+      "I want to build this workspace: . Mirror the user, generate the working surface, and include the file/export path.",
   },
   {
-    label: "Research",
+    label: "Research or prove",
+    body: "Prepare source checks, assumptions, unknowns, and a brief.",
     icon: Globe,
     prompt:
-      "Research generated UI and browser OS tools. Open source targets, mark assumptions, and export a concise evidence brief.",
+      "I need to research or prove this: . Prepare the source route, assumptions, unknowns, and a concise evidence brief.",
+  },
+];
+
+const TRUST_ITEMS = [
+  {
+    label: "Reflects first",
+    body: "Goal, constraints, and useful output are mirrored before the surface appears.",
+    icon: Sparkles,
   },
   {
-    label: "Files",
+    label: "Generates work",
+    body: "The first result is a document, workflow, research desk, chart, or file pack.",
     icon: FileText,
-    prompt:
-      "Create an artifact pack for Active Mirror with canonical doctrine contract, provenance map, approval queue, export files, and receipt schema.",
   },
   {
-    label: "Computer",
-    icon: MonitorCog,
-    prompt:
-      "Show the computer-use route for Active Mirror: browser control, local helper, file access, approval gate, revocation path, and receipts.",
+    label: "Proof stays visible",
+    body: "Facts, assumptions, unknowns, sources, and receipts are separated.",
+    icon: ShieldCheck,
+  },
+  {
+    label: "Private actions gated",
+    body: "Files, accounts, devices, sends, and vault memory require approval.",
+    icon: LockKeyhole,
   },
 ];
-
-const sourceRows = [
-  {
-    name: "MirrorDNA Standard",
-    state: "canonical",
-    href: "https://github.com/MirrorDNA-Reflection-Protocol/MirrorDNA-Standard",
-  },
-  {
-    name: "Active Mirror Bootloader",
-    state: "private/safe",
-    href: "https://github.com/MirrorDNA-Reflection-Protocol",
-  },
-  {
-    name: "Doctrine Skill",
-    state: "built-in",
-    href: "https://github.com/MirrorDNA-Reflection-Protocol",
-  },
-  {
-    name: "AI Behavioral Governance",
-    state: "doctrine",
-    href: "https://github.com/MirrorDNA-Reflection-Protocol/ai-behavioral-governance",
-  },
-  {
-    name: "SCD Protocol",
-    state: "compression",
-    href: "https://github.com/MirrorDNA-Reflection-Protocol/SCD-Protocol",
-  },
-];
-
-const doctrineRows = [
-  ["Mirror", "Reflect the user, then generate the useful surface"],
-  ["Purpose", "Identity before memory, memory before inference"],
-  ["Authority", "Human approval before external action"],
-  ["Evidence", "Facts, estimates, and unknowns stay separate"],
-  ["Boundary", "Reflection is not obedience; preview is not execution"],
-];
-
-const runtimeRows = [
-  ["Boot skill", "Canonical doctrine stays loaded and versioned"],
-  ["Browser cache", "Instant replay for recent surfaces"],
-  ["Hetzner", "Always-on public surface and safe receipts"],
-  ["Private body", "Fresh private actions can become body_unavailable"],
-  ["Computer use", "Approval-gated and receipt-backed"],
-];
-
-const visibleStorageRows = ACTIVE_MIRROR_STORAGE_ROWS.filter((row) =>
-  ["Private lattice", "Bootloader contract", "Browser cache", "KV cache", "Vault", "Offline fallback"].includes(row.store)
-);
 
 export default function GovernedGenUIWorkbench({
   value,
@@ -151,243 +96,152 @@ export default function GovernedGenUIWorkbench({
 }: GovernedGenUIWorkbenchProps) {
   const submitValue = () => onSubmit(value || DEFAULT_GOVERNED_PROMPT);
 
+  const chooseRoute = (prompt: string) => {
+    onValueChange(prompt);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
   return (
-    <section className="relative min-h-full w-full bg-[#090d12] text-slate-100">
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:40px_40px]" />
-      <div className="mx-auto flex min-h-dvh w-full max-w-[1480px] flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <section className="relative min-h-full w-full overflow-hidden bg-[#f4f6f1] text-[#171a18]">
+      <div className="mx-auto flex min-h-dvh w-full max-w-[1180px] flex-col px-4 py-4 sm:px-6 lg:px-8">
+        <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#d9ddd2] pb-4">
           <div className="flex min-w-0 items-center gap-3">
             <Image src="/logo.png" alt="Active Mirror" width={36} height={36} className="h-9 w-9 object-contain" priority />
             <div className="min-w-0">
-              <h1 className="text-lg font-semibold tracking-normal text-white sm:text-xl">Active Mirror</h1>
-              <p className="text-xs leading-5 text-slate-400">Governed GenUI workbench</p>
+              <h1 className="text-base font-semibold tracking-normal text-[#171a18] sm:text-lg">Active Mirror</h1>
+              <p className="text-xs leading-5 text-[#667064]">Reflective work OS</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 font-medium text-emerald-200">
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-700/15 bg-emerald-100 px-2.5 py-1 font-medium text-emerald-800">
               <CheckCircle2 className="h-3.5 w-3.5" />
-              Provenance on
+              Live preview
             </span>
             <button
               type="button"
               onClick={onInstall}
-              className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-2.5 py-1 font-medium text-slate-300 transition-colors hover:border-white/20 hover:bg-white/5"
+              className="inline-flex items-center gap-1.5 rounded-md border border-[#d9ddd2] bg-white/60 px-2.5 py-1 font-medium text-[#525b52] transition-colors hover:border-[#bfc6ba] hover:bg-white"
             >
-              <Database className="h-3.5 w-3.5" />
+              <ArrowRight className="h-3.5 w-3.5" />
               {installLabel}
             </button>
           </div>
         </header>
 
-        <div className="grid flex-1 gap-4 py-4 lg:grid-cols-[360px_minmax(0,1fr)_360px]">
-          <aside className="flex min-h-0 flex-col gap-4">
-            <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4 shadow-2xl shadow-black/20">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-xs font-semibold uppercase text-slate-500">Command</div>
-                  <div className="text-sm font-semibold text-white">Ask for the surface</div>
-                </div>
-                <Sparkles className="h-4 w-4 text-cyan-300" />
-              </div>
-              <div className="rounded-lg border border-white/10 bg-black/35 p-2">
-                <div className="flex items-end gap-2">
-                  <button
-                    type="button"
-                    onClick={onToggleListening}
-                    aria-label={isListening ? "Stop voice input" : "Start voice input"}
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-colors ${
-                      isListening ? "bg-red-500 text-white" : "text-slate-400 hover:bg-white/10 hover:text-white"
-                    }`}
-                    title={isListening ? "Stop voice input" : "Start voice input"}
-                  >
-                    {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                  </button>
-                  <textarea
-                    ref={inputRef}
-                    value={value}
-                    onChange={(event) => onValueChange(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && !event.shiftKey) {
-                        event.preventDefault();
-                        submitValue();
-                      }
-                    }}
-                    placeholder={isListening ? "Listening..." : "Open the governed launch workspace..."}
-                    rows={4}
-                    className="min-h-[112px] flex-1 resize-none bg-transparent px-1 py-2 text-sm leading-6 text-white outline-none placeholder:text-slate-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={submitValue}
-                    disabled={disableSubmit && !isListening}
-                    aria-label="Generate governed surface"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-cyan-300 text-slate-950 transition-colors hover:bg-cyan-200 disabled:bg-slate-700 disabled:text-slate-500"
-                    title="Generate governed surface"
-                  >
-                    <ArrowUp className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-              <p className="mt-3 text-xs leading-5 text-slate-500">
-                {mirrorSeedId ? `MirrorSeed local: ${mirrorSeedId.slice(0, 11)}. No tracking profile.` : "Session state stays local unless a vault is approved."}
-              </p>
+        <main className="grid flex-1 items-center gap-6 py-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-8 lg:py-10">
+          <section className="max-w-2xl">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-700/15 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-900">
+              <Sparkles className="h-3.5 w-3.5" />
+              Ask once. Get the first working surface.
             </div>
+            <h2 className="max-w-[720px] text-4xl font-semibold tracking-normal text-[#151815] sm:text-5xl lg:text-6xl">
+              Say what you need. Active Mirror makes the workspace.
+            </h2>
+            <p className="mt-5 max-w-xl text-base leading-7 text-[#5f685d] sm:text-lg">
+              It reflects the request, generates the useful artifact, and keeps proof, limits, and approvals visible.
+            </p>
 
-            <div className="grid grid-cols-2 gap-2">
-              {STARTERS.map((starter) => {
-                const Icon = starter.icon;
+            <div className="mt-6 grid gap-2.5 sm:mt-8 sm:grid-cols-3 sm:gap-3">
+              {ROUTES.map((route) => {
+                const Icon = route.icon;
                 return (
                   <button
-                    key={starter.label}
+                    key={route.label}
                     type="button"
-                    onClick={() => onSubmit(starter.prompt)}
-                    className="group flex h-16 items-center gap-3 rounded-lg border border-white/10 bg-white/[0.035] px-3 text-left transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
+                    onClick={() => chooseRoute(route.prompt)}
+                    className="group min-h-[104px] rounded-lg border border-[#d9ddd2] bg-white p-3.5 text-left shadow-sm shadow-black/[0.03] transition-colors hover:border-cyan-500/40 hover:bg-cyan-50 sm:min-h-[132px] sm:p-4"
                   >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10 text-cyan-200">
+                    <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-md bg-[#171a18] text-white transition-colors group-hover:bg-cyan-700 sm:mb-3 sm:h-9 sm:w-9">
                       <Icon className="h-4 w-4" />
-                    </span>
-                    <span className="min-w-0 text-sm font-medium text-slate-200">{starter.label}</span>
+                    </div>
+                    <div className="text-sm font-semibold text-[#171a18]">{route.label}</div>
+                    <p className="mt-2 text-xs leading-5 text-[#667064]">{route.body}</p>
                   </button>
                 );
               })}
             </div>
+          </section>
 
-            {qaSlot}
-          </aside>
-
-          <main className="min-h-[560px] overflow-hidden rounded-lg border border-white/10 bg-[#111821] shadow-2xl shadow-black/30">
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-              <div>
-                <div className="text-xs font-semibold uppercase text-slate-500">Generated Surface</div>
-                <div className="text-sm font-semibold text-white">Reflective work OS</div>
-              </div>
-              <span className="rounded-md bg-cyan-300/10 px-2.5 py-1 text-xs font-semibold text-cyan-200">Mirror loop</span>
+          <aside className="rounded-xl border border-[#d9ddd2] bg-white p-4 shadow-xl shadow-black/[0.06]">
+            <div className="mb-3">
+              <div className="text-xs font-semibold uppercase text-[#7a8276]">Start here</div>
+              <label htmlFor="active-mirror-front-door" className="mt-1 block text-lg font-semibold text-[#171a18]">
+                What should Active Mirror make or finish?
+              </label>
             </div>
-            <div className="grid gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_280px]">
-              <section className="rounded-lg border border-white/10 bg-[#0c1219] p-4">
-                <div className="mb-4 flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-300 text-slate-950">
-                    <Layers3 className="h-5 w-5" />
+            <div className="rounded-lg border border-[#d9ddd2] bg-[#f8f9f5] p-2">
+              <textarea
+                id="active-mirror-front-door"
+                ref={inputRef}
+                value={value}
+                onChange={(event) => onValueChange(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    submitValue();
+                  }
+                }}
+                placeholder={isListening ? "Listening..." : "Example: I need a client-ready proposal for a 72-hour AI demo."}
+                rows={7}
+                className="min-h-[190px] w-full resize-none bg-transparent px-2 py-2 text-sm leading-6 text-[#171a18] outline-none placeholder:text-[#8a9286]"
+              />
+              <div className="flex items-center justify-between gap-3 border-t border-[#d9ddd2] pt-2">
+                <button
+                  type="button"
+                  onClick={onToggleListening}
+                  aria-label={isListening ? "Stop voice input" : "Start voice input"}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-colors ${
+                    isListening ? "bg-red-500 text-white" : "text-[#667064] hover:bg-white hover:text-[#171a18]"
+                  }`}
+                  title={isListening ? "Stop voice input" : "Start voice input"}
+                >
+                  {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={submitValue}
+                  disabled={disableSubmit && !isListening}
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[#171a18] px-4 text-sm font-semibold text-white transition-colors hover:bg-cyan-800 disabled:bg-[#c9cec4] disabled:text-[#7a8276]"
+                >
+                  Generate surface
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <p className="mt-3 text-xs leading-5 text-[#7a8276]">
+              {mirrorSeedId ? `Local session seed: ${mirrorSeedId.slice(0, 11)}. No tracking profile.` : "Session state stays local unless a vault is approved."}
+            </p>
+          </aside>
+        </main>
+
+        <section className="border-t border-[#d9ddd2] py-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {TRUST_ITEMS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.label} className="flex gap-3">
+                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white text-cyan-800 shadow-sm shadow-black/[0.04]">
+                    <Icon className="h-4 w-4" />
                   </span>
                   <div>
-                    <h2 className="text-base font-semibold text-white">Sense &gt; Reflect &gt; Generate &gt; Gate &gt; Receipt</h2>
-                    <p className="text-xs leading-5 text-slate-500">Active Mirror mirrors the user, generates the needed surface, and marks what is real, gated, stored, or unavailable.</p>
+                    <div className="text-sm font-semibold text-[#171a18]">{item.label}</div>
+                    <p className="mt-1 text-xs leading-5 text-[#667064]">{item.body}</p>
                   </div>
                 </div>
+              );
+            })}
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[#667064]">
+            <span className="rounded-md bg-white px-2.5 py-1 shadow-sm shadow-black/[0.03]">
+              Doctrine skill loaded: {ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.version}
+            </span>
+            <span className="rounded-md bg-white px-2.5 py-1 shadow-sm shadow-black/[0.03]">
+              Private body offline: private actions show body_unavailable
+            </span>
+          </div>
+        </section>
 
-                <div className="mb-4 rounded-lg border border-cyan-300/15 bg-cyan-300/[0.06] p-3">
-                  <div className="mb-2 text-xs font-semibold uppercase text-cyan-200">Built-in skill</div>
-                  <div className="text-sm font-semibold text-white">{ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.name}</div>
-                  <p className="mt-1 text-xs leading-5 text-slate-400">
-                    Stateful doctrine, provenance, reflection, storage, approvals, and receipts. Version {ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.version}.
-                  </p>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {doctrineRows.map(([label, body]) => (
-                    <article key={label} className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
-                      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-white">
-                        <ShieldCheck className="h-4 w-4 text-emerald-300" />
-                        {label}
-                      </div>
-                      <p className="text-xs leading-5 text-slate-400">{body}</p>
-                    </article>
-                  ))}
-                </div>
-
-                <div className="mt-4 rounded-lg border border-white/10 bg-black/25 p-3">
-                  <div className="mb-3 text-xs font-semibold uppercase text-slate-500">Boot sequence</div>
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    {ACTIVE_MIRROR_BOOT_SEQUENCE.slice(0, 6).map((step, index) => (
-                      <div key={step} className="rounded-md border border-white/10 bg-white/[0.035] p-2">
-                        <div className="text-[10px] font-semibold uppercase text-cyan-200">{String(index + 1).padStart(2, "0")}</div>
-                        <div className="mt-1 text-xs leading-4 text-slate-300">{step}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-4 rounded-lg border border-white/10 bg-black/25">
-                  <div className="grid grid-cols-[1fr_auto] border-b border-white/10 px-3 py-2 text-xs font-semibold uppercase text-slate-500">
-                    <span>Provenance source</span>
-                    <span>State</span>
-                  </div>
-                  {sourceRows.map((row) => (
-                    <a
-                      key={row.name}
-                      href={row.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="grid grid-cols-[1fr_auto] gap-3 border-b border-white/5 px-3 py-3 text-sm last:border-b-0 hover:bg-white/[0.035]"
-                    >
-                      <span className="min-w-0 truncate text-slate-200">{row.name}</span>
-                      <span className="rounded-md bg-white/10 px-2 py-0.5 text-xs font-medium text-slate-300">{row.state}</span>
-                    </a>
-                  ))}
-                </div>
-              </section>
-
-              <aside className="grid gap-3">
-                {runtimeRows.map(([label, body], index) => {
-                  const Icon = [ShieldCheck, Database, Bot, LockKeyhole][index] || Route;
-                  return (
-                    <article key={label} className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
-                      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-white">
-                        <Icon className="h-4 w-4 text-cyan-200" />
-                        {label}
-                      </div>
-                      <p className="text-xs leading-5 text-slate-400">{body}</p>
-                    </article>
-                  );
-                })}
-              </aside>
-            </div>
-          </main>
-
-          <aside className="grid min-h-0 gap-4">
-            <section className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-                <Database className="h-4 w-4 text-emerald-200" />
-                Storage Split
-              </div>
-              <div className="space-y-2 text-xs leading-5">
-                {visibleStorageRows.map((row) => (
-                  <div key={row.store} className="rounded-md bg-black/25 p-3 text-slate-300">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-white">{row.store}</span>
-                      <span className="max-w-[150px] truncate rounded bg-white/10 px-1.5 py-0.5 text-[10px] uppercase text-slate-400">{row.rule}</span>
-                    </div>
-                    <div className="mt-1 text-slate-500">{row.location}</div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-                <GitBranch className="h-4 w-4 text-amber-200" />
-                Approval Queue
-              </div>
-              <div className="space-y-2 text-xs leading-5">
-                <div className="rounded-md bg-black/25 p-3 text-slate-300">Private body/fresh lattice: conditional, body_unavailable if offline</div>
-                <div className="rounded-md bg-black/25 p-3 text-slate-300">Browser/source lookup: prepared, not run</div>
-                <div className="rounded-md bg-black/25 p-3 text-slate-300">File export: generated, user-initiated download</div>
-                <div className="rounded-md bg-black/25 p-3 text-slate-300">Computer use: blocked until explicit approval</div>
-                <div className="rounded-md bg-black/25 p-3 text-slate-300">External send: blocked until review</div>
-              </div>
-            </section>
-
-            <section className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-                <Route className="h-4 w-4 text-cyan-200" />
-                Doctrine Contract
-              </div>
-              <p className="text-xs leading-5 text-slate-400">
-                Public surfaces show what is reflected, generated, sourced, gated, unknown, approved, stored, unavailable, or exported. No hidden execution, no fake receipts, no unsupported claims.
-              </p>
-            </section>
-          </aside>
-        </div>
+        {qaSlot ? <div className="pb-4">{qaSlot}</div> : null}
       </div>
     </section>
   );
