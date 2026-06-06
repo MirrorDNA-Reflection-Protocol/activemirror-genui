@@ -1,11 +1,11 @@
 {
   "name": "Active Mirror",
   "short_name": "Active Mirror",
-  "description": "A generated work OS for documents, browser research, charts, proof, files, vaults, and governed AI workflows.",
+  "description": "A governed GenUI workbench for provenance, doctrine contracts, approvals, generated surfaces, files, and receipts.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#090d12",
+  "theme_color": "#090d12",
   "orientation": "portrait-primary",
   "categories": ["productivity", "business", "utilities"],
   "icons": [

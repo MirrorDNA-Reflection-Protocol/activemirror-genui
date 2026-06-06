@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://activemirror.ai"),
   title: {
-    default: "Active Mirror — Generated Work OS",
+    default: "Active Mirror - Governed GenUI Workbench",
     template: "%s | Active Mirror",
   },
-  description: "Active Mirror is a generated work OS: ask for a document, browser lookup, chart, proof trail, file, vault, or workflow and get an interactive governed surface.",
+  description: "Active Mirror is a governed GenUI workbench for generated surfaces, provenance, doctrine contracts, approvals, files, browser routes, and receipts.",
   keywords: [
     "generative UI",
     "GenUI browser OS",
@@ -39,8 +39,8 @@ export const metadata: Metadata = {
     "N1 Intelligence",
   ],
   openGraph: {
-    title: "Active Mirror — Generated Work OS",
-    description: "Documents, browser lookups, charts, proof trails, files, vaults, and workflows materialize as governed interactive surfaces.",
+    title: "Active Mirror - Governed GenUI Workbench",
+    description: "Generated surfaces with provenance, doctrine contracts, approvals, source routes, files, and receipts.",
     siteName: "Active Mirror",
     type: "website",
     url: "https://activemirror.ai",
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Active Mirror — Generated Work OS",
-    description: "Ask. Get the working surface: document, browser, chart, proof, file, vault, or workflow.",
+    title: "Active Mirror - Governed GenUI Workbench",
+    description: "Ask for the governed surface: provenance, doctrine, approvals, files, browser route, and receipt.",
     images: ["/mirror-icon-512.png"],
   },
   manifest: "/manifest.json",
@@ -66,7 +66,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#ffffff",
+  themeColor: "#090d12",
 };
 
 export default function RootLayout({
@@ -77,7 +77,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

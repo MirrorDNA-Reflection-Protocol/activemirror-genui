@@ -64,6 +64,7 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
   const displaySurfaces = surfaceNodes.filter((n) => n?.type !== 'governance_node');
   const hasSurfaces = displaySurfaces.length > 0;
   const stackSurfaces = hasSurfaces && isNarrow;
+  const isGovernedWorkspace = (dataModel["generated_preview.title"] || "").toLowerCase().includes("governed genui");
 
   const closeSurface = (id: string) => {
     setClosedSurfaces(prev => new Set([...prev, id]));
@@ -307,10 +308,14 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
               <div className="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white/85 px-4 py-3 backdrop-blur">
                 <div>
                   <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Generated Workspace</div>
-                  <div className="text-sm font-semibold text-gray-950">Preview, spec, export, and demo path</div>
+                  <div className="text-sm font-semibold text-gray-950">
+                    {isGovernedWorkspace ? "Provenance, doctrine, approvals, and receipts" : "Preview, spec, export, and demo path"}
+                  </div>
                 </div>
                 <div className="hidden items-center gap-2 text-[11px] font-medium text-gray-500 sm:flex">
-                  <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">Solution path</span>
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">
+                    {isGovernedWorkspace ? "Governed route" : "Solution path"}
+                  </span>
                   <button
                     type="button"
                     onClick={downloadWorkspacePack}

@@ -23,6 +23,15 @@ function slugFromTitle(title: string) {
 }
 
 function previewModules(markdown: string) {
+  if (/Source Registry/i.test(markdown) && /Surface Contract/i.test(markdown)) {
+    return [
+      { title: "Source registry", body: "Canonical repositories and public pointers are visible before claims become durable." },
+      { title: "Doctrine contract", body: "Generated, sourced, estimated, unknown, gated, approved, and exported states stay separate." },
+      { title: "Runtime route", body: "Browser cache, KV cache, model route, computer use, and receipts are explicit." },
+      { title: "Approval boundary", body: "Browser, files, devices, external sends, and computer use stay gated until reviewed." },
+    ];
+  }
+
   const modules = Array.from(markdown.matchAll(/-\s+\*\*([^:*]+):\*\*\s*([^\n]+)/g))
     .map((match) => ({
       title: match[1].trim(),
@@ -43,6 +52,7 @@ function previewModules(markdown: string) {
 
 function surfaceSubtitle(title: string) {
   const lower = title.toLowerCase();
+  if (lower.includes("governed genui")) return "Provenance, doctrine, runtime route, approvals, files, and receipts are visible before deeper execution.";
   if (lower.includes("ux repair")) return "The feedback became a focused repair path with one visible fix, one proof line, and one export.";
   if (lower.includes("official product demo")) return "The request became a working product surface with proof, export, and a clear next step.";
   if (lower.includes("research")) return "Source targets, assumptions, and a concise brief are separated before live lookup runs.";

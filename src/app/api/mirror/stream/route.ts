@@ -23,6 +23,7 @@ import { buildMirrorSystemPrompt } from "@/lib/mirror/systemPrompt";
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const FREE_TURN_COOKIE = "am_free_turns";
 const MAX_BODY_BYTES = Number(process.env.MIRROR_MAX_BODY_BYTES || 16_384);
+const OPENAI_MODEL = process.env.MIRROR_OPENAI_MODEL || process.env.OPENAI_FREE_MODEL || "gpt-5.5";
 const ALLOWED_HOST_SUFFIXES = [".activemirror.ai", ".pages.dev"];
 const ALLOWED_EXACT_HOSTS = new Set(["activemirror.ai", "localhost", "127.0.0.1", "::1"]);
 
@@ -765,6 +766,140 @@ ${intent}
 These values are a generated planning map, not verified market data. Replace them with sourced numbers after browser lookup or user-provided files are approved.`;
 }
 
+function isGovernedGenUIPrompt(prompt: string) {
+  return /\b(governed|governance|provenance|canonical|doctrine|contract|contracts|receipt|receipts|kv cache|browser cache|computer use|approval queue|source registry)\b/i.test(prompt) &&
+    /\b(genui|workspace|surface|workbench|launch|active mirror|browser cache|kv cache|model routing|computer use|doctrine|provenance)\b/i.test(prompt);
+}
+
+function governedPreviewContent(prompt: string) {
+  const intent = cleanIntent(prompt);
+  return `# Governed GenUI Workbench
+
+## Request
+${intent}
+
+## Source Registry
+| Source | Role | Public pointer |
+| --- | --- | --- |
+| MirrorDNA Standard | Canonical behavior source | https://github.com/MirrorDNA-Reflection-Protocol/MirrorDNA-Standard |
+| AI Behavioral Governance | Doctrine and harm boundary | https://github.com/MirrorDNA-Reflection-Protocol/ai-behavioral-governance |
+| SCD Protocol | Compression and contract packet pattern | https://github.com/MirrorDNA-Reflection-Protocol/SCD-Protocol |
+| Active Mirror GenUI repo | Public workbench implementation | https://github.com/MirrorDNA-Reflection-Protocol/activemirror-genui |
+
+## Surface Contract
+Every generated surface must show what is generated, sourced, estimated, unknown, gated, approved, or exported. Browser lookup, file access, computer use, media render, external send, and device actions remain approval-gated until they actually run.
+
+## Runtime Route
+| Lane | Behavior |
+| --- | --- |
+| Browser cache | Instant replay for recent local surfaces |
+| KV cache | Canonical receipt and surface lookup when available |
+| Model route | Live model only when deterministic doctrine scaffolding is insufficient |
+| Computer use | Prepared route only; explicit approval required |
+| Receipt | Surface id, source state, approval state, and export state |
+
+## Finish State
+The first useful workspace is open. The next step is to download the doctrine pack or request reviewed execution for live browser, files, computer use, or team deployment.`;
+}
+
+function governedDoctrineContent() {
+  return `# Canonical Doctrine Contract
+
+## Operating Law
+Purpose precedes identity. Identity precedes memory. Memory precedes inference. Inference never precedes responsibility.
+
+## Public Surface Rules
+- Facts, estimates, and unknowns stay separate.
+- If a fact is not verified by source, label it as generated or unknown.
+- Do not claim a file, browser action, deployment, approval, receipt, or external send happened unless it actually happened.
+- Browser automation, local files, device control, account actions, and computer use require explicit approval and revocation path.
+- Use the smallest model/tool route that can finish the job.
+
+## Doctrine Checks
+| Check | Contract |
+| --- | --- |
+| Authority | Paul or the current user approves actions that affect accounts, files, devices, people, or money |
+| Harm | Stop, reduce scope, or ask for review when harm is foreseeable or unclear |
+| Provenance | Every durable claim gets a source, receipt, or source_gap |
+| Export | Downloads are user-initiated and carry their generated/proof state |
+| Continuity | Browser cache is local; vault memory requires opt-in setup |`;
+}
+
+function governedApprovalContent() {
+  return `# Approval Queue
+
+| Action | Current state | Next gate |
+| --- | --- | --- |
+| Browser/source lookup | Prepared | User opens source or asks for live lookup |
+| KV/cache replay | Ready | Canonical key or receipt id |
+| File export | Ready | User downloads generated pack |
+| Computer use | Blocked | Explicit approval, scoped target, receipt |
+| Account or external send | Blocked | Review, permission, and revocation path |
+| Team/enterprise route | Scoped | Admin roles, logs, and legal boundary |
+
+## Receipt Fields
+- request id
+- generated surface id
+- source state
+- model or deterministic route
+- approval state
+- file/export state
+- what did not run`;
+}
+
+function governedArtifactPackContent(prompt: string) {
+  const intent = cleanIntent(prompt);
+  return `# Active Mirror Doctrine Pack
+
+## Prompt
+${intent}
+
+## Canonical Packet
+\`\`\`json
+{
+  "surface": "governed-genui-workbench",
+  "provenance": "required",
+  "doctrine_contract": "required",
+  "browser_cache": "local_replay",
+  "kv_cache": "canonical_receipt_lookup",
+  "model_route": "on_demand",
+  "computer_use": "approval_required",
+  "receipt": "required"
+}
+\`\`\`
+
+## Export Notes
+This pack is generated in the public preview. Live browser checks, private files, account actions, computer use, and deployment actions require separate approval and receipts.`;
+}
+
+function createGovernedGenUIStream(prompt: string) {
+  const encoder = new TextEncoder();
+  return new ReadableStream({
+    async start(controller) {
+      const surface_id = "governed_" + Math.random().toString(36).substring(7);
+      const yieldEnvelope = async (envelope: StreamEnvelope, delay: number = 0) => {
+        if (delay > 0) await sleep(delay);
+        enqueueEnvelope(controller, encoder, envelope);
+      };
+
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "root_grid", type: "fluid_grid", props: { layout: "adaptive_split", transition: "spring" } } });
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Canonical provenance route selected." } }, 40);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "generated_preview", type: "browser_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Governed GenUI Workbench", severity: "info" } } }, 60);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "generated_preview.title": "Governed GenUI Workbench", "generated_preview.content": governedPreviewContent(prompt) } }, 40);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "doctrine_contract", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Canonical Doctrine Contract", severity: "info" } } }, 60);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "doctrine_contract.title": "Canonical Doctrine Contract", "doctrine_contract.content": governedDoctrineContent() } }, 40);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "approval_queue", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Approval Queue", severity: "info" } } }, 60);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "approval_queue.title": "Approval Queue", "approval_queue.content": governedApprovalContent() } }, 40);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "artifact_pack", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Doctrine Export Pack", severity: "info" } } }, 60);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "artifact_pack.title": "Doctrine Export Pack", "artifact_pack.content": governedArtifactPackContent(prompt) } }, 40);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "trust_boundary", type: "governance_node", parent_id: "root_grid", props: { agent_id: "Chetana + MirrorGate", title: "Trust Boundary", severity: "info" } } }, 60);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "trust_boundary.content": "This route used deterministic doctrine scaffolding first. No browser action, file access, computer use, external send, or private memory write ran." } }, 40);
+      await yieldEnvelope({ envelope: "beginRendering", surface_id }, 40);
+      controller.close();
+    }
+  });
+}
+
 function createSoftwareWorkspaceStream(prompt: string) {
   const encoder = new TextEncoder();
   return new ReadableStream({
@@ -1058,6 +1193,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (isGovernedGenUIPrompt(lastUserMessage.content)) {
+      return ndjsonResponse(createGovernedGenUIStream(lastUserMessage.content), setCookie);
+    }
+
     switch (intent.lingos.route) {
       case "video":
         return ndjsonResponse(createVideoWorkbenchStream(lastUserMessage.content), setCookie);
@@ -1099,7 +1238,7 @@ export async function POST(request: NextRequest) {
     let result: MirrorStreamResult;
     try {
       result = await streamObject({
-        model: openai(process.env.MIRROR_OPENAI_MODEL || "gpt-4.1"),
+        model: openai(OPENAI_MODEL),
         system: SYSTEM_PROMPT,
         messages,
         schema: mirrorSurfaceSchema,
