@@ -13,6 +13,11 @@ test.describe('Active Mirror public GenUI', () => {
     await expect(kernel).toContainText('consent-gated');
     await expect(kernel).toContainText('Doctrine: accuracy without fabrication');
     await expect(kernel).toContainText('Canonical runtime');
+    const ratchet = page.getByTestId('mirror-ratchet-proof');
+    await expect(ratchet).toBeVisible();
+    await expect(ratchet).toContainText('MirrorRatchet');
+    await expect(ratchet).toContainText('frontier-model failure modes');
+    await expect(ratchet).toContainText('Covers: fabricated certainty');
     await expect(page.getByText('/Users/mirror-pro')).toHaveCount(0);
 
     const response = await page.request.get('/api/mirror/kernel');
@@ -34,6 +39,14 @@ test.describe('Active Mirror public GenUI', () => {
     expect(systemResponse.ok()).toBeTruthy();
     const systemStatus = await systemResponse.json();
     expect(systemStatus.localSupervisor).toBe('2026.06.08-local-supervisor-canonical-accuracy-v2');
+
+    const ratchetResponse = await page.request.get('/api/mirror/ratchet');
+    expect(ratchetResponse.ok()).toBeTruthy();
+    const ratchetStatus = await ratchetResponse.json();
+    expect(ratchetStatus.version).toBe('2026.06.08-mirror-ratchet-v1');
+    expect(ratchetStatus.targetPasses).toBe(1000);
+    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('fabricated certainty');
+    expect(ratchetStatus.claimBoundary).toContain('not a claim of superior raw model IQ');
   });
 
   test('body receipt bridge is public-readable and write-gated by default', async ({ page }) => {

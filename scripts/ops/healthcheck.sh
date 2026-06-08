@@ -38,6 +38,11 @@ body_receipt_code="$(curl_code GET "$BASE_URL/api/mirror/body-receipt")"
 [[ "$body_receipt_code" == "200" ]] || fail "body receipt endpoint returned HTTP $body_receipt_code"
 grep -q "body-receipt-bridge" "$TMP_DIR/body" || fail "body receipt endpoint did not expose bridge version"
 
+ratchet_code="$(curl_code GET "$BASE_URL/api/mirror/ratchet")"
+[[ "$ratchet_code" == "200" ]] || fail "ratchet endpoint returned HTTP $ratchet_code"
+grep -q "mirror-ratchet" "$TMP_DIR/body" || fail "ratchet endpoint did not expose ratchet version"
+grep -q "frontierFailureCoverage" "$TMP_DIR/body" || fail "ratchet endpoint did not expose frontier failure coverage"
+
 query_code="$(curl_code POST "$BASE_URL/api/mirror/query" \
   -H "content-type: application/json" \
   --data "{\"messages\":[{\"role\":\"user\",\"content\":\"$PROMPT\"}]}")"

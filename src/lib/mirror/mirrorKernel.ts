@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { readPublicBodyReceiptSummary, type PublicBodyReceiptSummary } from "./bodyReceipt";
+import { getMirrorRatchetStatus, type MirrorRatchetStatus } from "./mirrorRatchet";
 
 export const ACTIVE_MIRROR_KERNEL_PROOF_VERSION = "2026.06.08-mirrorkernel-body-receipt-v3";
 
@@ -46,6 +47,7 @@ export type MirrorKernelPublicStatus = {
   doctrine: string[];
   capabilityKernel: CapabilityKernelStatus;
   bodyReceipt: PublicBodyReceiptSummary;
+  ratchet: MirrorRatchetStatus;
   kerneld: KerneldStatus;
   privacyBoundary: string;
 };
@@ -133,6 +135,7 @@ export async function getMirrorKernelPublicStatus(): Promise<MirrorKernelPublicS
     capabilityKernelReceipt.status === "missing" && bodyReceipt.capabilityKernel
       ? bodyReceipt.capabilityKernel
       : capabilityKernelReceipt;
+  const ratchet = getMirrorRatchetStatus();
 
   const state =
     kerneld.status === "online"
@@ -227,6 +230,7 @@ export async function getMirrorKernelPublicStatus(): Promise<MirrorKernelPublicS
     ],
     capabilityKernel,
     bodyReceipt,
+    ratchet,
     kerneld,
     privacyBoundary:
       "Public site receives only a redacted kernel proof packet. Fresh private body truth is marked body_unavailable unless the body is reachable.",

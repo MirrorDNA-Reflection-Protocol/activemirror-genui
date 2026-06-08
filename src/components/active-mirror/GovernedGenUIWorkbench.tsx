@@ -373,8 +373,82 @@ export default function GovernedGenUIWorkbench({
         </section>
 
         <MirrorKernelProofStrip status={kernelStatus} />
+        <MirrorRatchetStrip status={kernelStatus} />
 
         {qaSlot ? <div className="pb-4">{qaSlot}</div> : null}
+      </div>
+    </section>
+  );
+}
+
+function MirrorRatchetStrip({ status }: { status: MirrorKernelPublicStatus | null }) {
+  const ratchet = status?.ratchet;
+  if (!ratchet) return null;
+  const visibleChecks = ratchet.checks.slice(0, 6);
+
+  return (
+    <section
+      data-testid="mirror-ratchet-proof"
+      className="mb-4 rounded-xl border border-[#d9ddd2] bg-white p-3 shadow-sm shadow-black/[0.04] lg:p-4"
+      aria-label="MirrorRatchet frontier failure coverage"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-cyan-50 text-cyan-800">
+              <ShieldCheck className="h-4 w-4" />
+            </span>
+            <div>
+              <h2 className="text-sm font-semibold tracking-normal text-[#171a18]">MirrorRatchet</h2>
+              <p className="text-xs leading-5 text-[#667064]">
+                Covers frontier-model failure modes with canonical controls.
+              </p>
+            </div>
+          </div>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-[#667064]">
+            {ratchet.claimBoundary}
+          </p>
+        </div>
+        <div className="grid min-w-[180px] grid-cols-2 gap-2 text-xs">
+          <div className="rounded-lg border border-[#d9ddd2] bg-[#f8f9f5] px-3 py-2">
+            <div className="font-semibold text-[#171a18]">{ratchet.score.coveragePct}%</div>
+            <div className="mt-0.5 text-[11px] text-[#667064]">failure coverage</div>
+          </div>
+          <div className="rounded-lg border border-[#d9ddd2] bg-[#f8f9f5] px-3 py-2">
+            <div className="font-semibold text-[#171a18]">{ratchet.targetPasses}</div>
+            <div className="mt-0.5 text-[11px] text-[#667064]">ratchet target</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {visibleChecks.map((item) => (
+          <div key={item.id} className="rounded-lg border border-[#d9ddd2] bg-[#f8f9f5] p-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="truncate text-xs font-semibold text-[#171a18]">{item.label}</div>
+              <span
+                className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                  item.state === "passing"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : item.state === "queued"
+                      ? "bg-amber-100 text-amber-800"
+                      : "bg-red-100 text-red-800"
+                }`}
+              >
+                {item.state}
+              </span>
+            </div>
+            <p className="mt-1 text-[11px] leading-4 text-[#667064]">{item.activeMirrorControl}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-[#667064]">
+        {ratchet.frontierFailureCoverage.covered.slice(0, 7).map((item) => (
+          <span key={item} className="rounded-md bg-cyan-50 px-2.5 py-1 text-cyan-900">
+            Covers: {item}
+          </span>
+        ))}
       </div>
     </section>
   );
