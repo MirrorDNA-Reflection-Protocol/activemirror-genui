@@ -62,9 +62,21 @@ function hasFocusHarnessIntent(lower: string) {
   return /\b(neurodivergent|nd mode|adhd|autism|autistic|spectrum|assistive|at mode|focus mode|low-noise|low noise|time box|timebox)\b/.test(lower);
 }
 
+function hasFinishModeIntent(lower: string) {
+  return /\b(scattered|too many ideas|overwhelmed|finish one|park the rest|momentum|one useful artifact|one artifact now|done-enough|done enough)\b/.test(lower);
+}
+
 function hasOfficialDemoIntent(lower: string) {
-  return /\b(official demo|official active mirror|product demo|working product|people can demo|canonical demo|official working product|strategy route|build plan|72-hour demo|72 hour demo)\b/.test(lower) ||
+  return /\b(official demo|official active mirror|product demo|working product|people can demo|canonical demo|official working product|strategy route)\b/.test(lower) ||
     /\b(implementation and strategy|strategy and implementation)\b/.test(lower);
+}
+
+function hasClientIntakeIntent(lower: string) {
+  return /\b(client intake|customer intake|intake workspace|intake form|collect goals|collect files|file slots|approval states|approvals|handoff pack|demo scope|72-hour demo scope|72 hour demo scope)\b/.test(lower);
+}
+
+function hasPublicSectorEvidenceIntent(lower: string) {
+  return /\b(public-sector|public sector|government|civic|gcc|procurement|digital identity|service-delivery|service delivery|evidence brief|evidence desk|reviewer-ready|reviewer ready)\b/.test(lower);
 }
 
 function hasUxFeedbackIntent(lower: string) {
@@ -150,14 +162,14 @@ export function compileLingOS(prompt: string): LingOSCompilation {
   const hasAudio = /\b(audio|voice|podcast|narration|speech|text-to-speech|tts|sound|multilingual audio)\b/.test(lower);
   const hasSmallBusiness = /\b(small business|smb|local business|shop|restaurant|clinic|salon|agency|solo operator|owner operator|retailer|tradesperson)\b/.test(lower);
   const hasOfficialDemo = hasOfficialDemoIntent(lower);
-  const hasBuildArtifact = hasSmallBusiness || hasAutomationIntent(lower) || hasDocumentIntent(lower) || hasDeckIntent(lower) || hasLeadIntent(lower) || hasFocusHarnessIntent(lower) || /\b(demo|app preview|generated app|workspace|form|calculator)\b/.test(lower);
+  const hasBuildArtifact = hasSmallBusiness || hasClientIntakeIntent(lower) || hasAutomationIntent(lower) || hasDocumentIntent(lower) || hasDeckIntent(lower) || hasLeadIntent(lower) || hasFinishModeIntent(lower) || hasFocusHarnessIntent(lower) || /\b(demo|app preview|generated app|workspace|form|calculator)\b/.test(lower);
   const hasMarketing = /\b(marketing|positioning|campaign|launch|sales|copy|brand|pricing|commercial|mirrorprod)\b/.test(lower);
 
   if (/\b(hack|exploit|bypass|steal|phish|malware|credential|password|token|private key|dox|scrape personal|unhackable)\b/.test(lower)) {
     return { route: "gate", tokens: [...tokens, "GATE", "STOP"], needsProof: true };
   }
   if (hasUxFeedbackIntent(lower)) return { route: "ux", tokens: [...tokens, "UX", "FIX", "POLISH"], needsProof: false };
-  if (hasOfficialDemo) return { route: "demo", tokens: [...tokens, "DEMO", "WORK", "PROOF", "EXPORT"], needsProof: true };
+  if (hasOfficialDemo && !hasClientIntakeIntent(lower)) return { route: "demo", tokens: [...tokens, "DEMO", "WORK", "PROOF", "EXPORT"], needsProof: true };
   if (hasVideo) return { route: "video", tokens: [...tokens, "MEDIA", "VIDEO", hasLookup ? "SRC" : "BRIEF", "GATE"], needsProof: hasLookup };
   if (hasAudio) return { route: "audio", tokens: [...tokens, "MEDIA", "AUDIO", "SCRIPT", "GATE"], needsProof: false };
   if (/\b(multilingual|multi-language|multilanguage|translate|translation|localize|localized|locale|language|hindi|arabic|spanish|french|tamil|telugu|marathi|bengali)\b/.test(lower)) {
@@ -182,7 +194,7 @@ export function requestIntent(prompt: string) {
     lingos: route,
     ecosystem: /\b(ecosystem|operating map|chetana|mirrorgate protects|full working demo|show me your system)\b/.test(lower),
     company: Boolean(extractCompanyTarget(prompt)),
-    software: hasOfficialDemoIntent(lower) || hasUxFeedbackIntent(lower) || /\b(software-on-demand|software on demand|app preview|generated app|generate an app|website preview|workspace|dashboard|calculator|form|explainer|one-pager|deck|download|export pack|individual|team|enterprise|public-sector|public sector|government|small business|smb|local business|shop|restaurant|clinic|salon)\b/.test(lower) || hasAutomationIntent(lower) || hasDocumentIntent(lower) || hasLeadIntent(lower) || hasFocusHarnessIntent(lower) || hasSiteAuditIntent(lower),
+    software: hasOfficialDemoIntent(lower) || hasClientIntakeIntent(lower) || hasPublicSectorEvidenceIntent(lower) || hasUxFeedbackIntent(lower) || /\b(software-on-demand|software on demand|app preview|generated app|generate an app|website preview|workspace|dashboard|calculator|form|explainer|one-pager|deck|download|export pack|individual|team|enterprise|public-sector|public sector|government|small business|smb|local business|shop|restaurant|clinic|salon)\b/.test(lower) || hasAutomationIntent(lower) || hasDocumentIntent(lower) || hasLeadIntent(lower) || hasFinishModeIntent(lower) || hasFocusHarnessIntent(lower) || hasSiteAuditIntent(lower),
     marketing: /\b(marketing|positioning|campaign|launch|sales|copy|brand|pricing|commercial|mirrorprod)\b/.test(lower),
     lookup: /\b(lookup|internet|online|source|sources|citation|citations|research|browse|browser|current|latest|news|who is|what is available)\b/.test(lower),
     multilingual: /\b(multilingual|multi-language|multilanguage|translate|translation|localize|localized|locale|language|hindi|arabic|spanish|french|tamil|telugu|marathi|bengali)\b/.test(lower),
@@ -202,6 +214,15 @@ export function workspaceProfile(prompt: string): WorkspaceProfile {
       promise: "A cleaner workspace opens with the next action, the current issue, the visible fix, and one downloadable cleanup plan instead of repeated generic surfaces.",
       primaryAction: "Simplify flow",
       modules: ["What feels hard", "Immediate fix", "Cleaner workspace", "Proof and export"],
+    };
+  }
+  if (hasClientIntakeIntent(lower)) {
+    return {
+      title: "Client Intake Workspace",
+      audience: "Client-facing team",
+      promise: "A working intake builder opens with goals, file slots, approval states, demo scope, exportable handoff, and reviewed activation path.",
+      primaryAction: "Build intake",
+      modules: ["Goal capture", "File slots", "Approval states", "72-hour scope", "Handoff pack"],
     };
   }
   if (hasOfficialDemoIntent(lower)) {
@@ -264,6 +285,15 @@ export function workspaceProfile(prompt: string): WorkspaceProfile {
       modules: ["Customer intake", "Offer page", "Quote and invoice", "Follow-up automation", "Download pack"],
     };
   }
+  if (hasPublicSectorEvidenceIntent(lower)) {
+    return {
+      title: "Public-Sector Evidence Desk",
+      audience: lower.includes("gcc") ? "GCC public-sector buyer" : "Public-sector buyer",
+      promise: "A reviewer-ready evidence workspace opens with source routes, facts, assumptions, unknowns, procurement risks, and approval gates.",
+      primaryAction: "Prepare evidence brief",
+      modules: ["Source route", "Facts", "Assumptions", "Unknowns", "Procurement review"],
+    };
+  }
   if (hasLeadIntent(lower)) {
     return {
       title: "Lead Capture Workspace",
@@ -306,6 +336,15 @@ export function workspaceProfile(prompt: string): WorkspaceProfile {
       modules: ["Slide map", "Visual direction", "Speaker notes", "Proof notes", "Export path"],
     };
   }
+  if (hasFinishModeIntent(lower)) {
+    return {
+      title: "Finish Mode Workspace",
+      audience: "Focused operator",
+      promise: "A low-noise finish surface opens with one artifact now, parked ideas, a proof boundary, and the smallest next action.",
+      primaryAction: "Finish one artifact",
+      modules: ["One artifact", "Parked ideas", "Decision", "Proof line", "Next action"],
+    };
+  }
   if (hasFocusHarnessIntent(lower)) {
     return {
       title: "Focus Harness Workspace",
@@ -340,15 +379,6 @@ export function workspaceProfile(prompt: string): WorkspaceProfile {
       promise: "A buyer-ready pilot surface with trust-by-design notes, rollout plan, and reviewed access path.",
       primaryAction: "Scope pilot",
       modules: ["Use-case intake", "Trust brief", "Pilot plan", "Access gate"],
-    };
-  }
-  if (/\bgovernment|public-sector|public sector|civic\b/.test(lower)) {
-    return {
-      title: "Public-Service Workspace",
-      audience: "Public sector",
-      promise: "A civic-service preview with consent boundary, evidence checklist, proof surface, and reviewed access path.",
-      primaryAction: "Prepare brief",
-      modules: ["Service brief", "Consent boundary", "Evidence checklist", "Review path"],
     };
   }
   if (/\bexplainer|one-pager|deck\b/.test(lower)) {
@@ -408,6 +438,18 @@ export function pluginLanesForPrompt(prompt: string): PluginLane[] {
       description: "Creates a browser-style source surface when current facts, public pages, or citations matter.",
       proof: profile.lookupUrl ? "Source target is openable; claims stay assumptions until reviewed." : "No source opened yet; public claims remain assumptions.",
       targetUrl: profile.lookupUrl,
+    });
+  }
+
+  if (hasPublicSectorEvidenceIntent(lower)) {
+    addLane({
+      id: "evidence",
+      label: "Evidence Desk",
+      icon: "review",
+      state: "review_required",
+      action: "Separate proof states",
+      description: "Prepares facts, assumptions, unknowns, source routes, procurement risks, and reviewer-ready next steps.",
+      proof: "Source routes are not treated as verified sources until reviewed.",
     });
   }
 

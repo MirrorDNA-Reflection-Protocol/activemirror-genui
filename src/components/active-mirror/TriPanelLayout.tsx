@@ -298,9 +298,9 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
       <AnimatePresence>
         {hasSurfaces && (
           <motion.div
-            initial={stackSurfaces ? { opacity: 0 } : { opacity: 0, width: 0 }}
-            animate={stackSurfaces ? { opacity: 1 } : { opacity: 1, width: 'auto' }}
-            exit={stackSurfaces ? { opacity: 0 } : { opacity: 0, width: 0 }}
+            initial={stackSurfaces ? { opacity: 0, width: '100%' } : { opacity: 0, width: 0 }}
+            animate={stackSurfaces ? { opacity: 1, width: '100%' } : { opacity: 1, width: 'auto' }}
+            exit={stackSurfaces ? { opacity: 0, width: '100%' } : { opacity: 0, width: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 200 }}
             className={`flex-1 min-h-0 ${stackSurfaces ? 'w-full border-t' : 'h-full border-l'} border-gray-100 overflow-hidden`}
           >

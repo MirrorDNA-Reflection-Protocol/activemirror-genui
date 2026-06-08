@@ -49,6 +49,72 @@ export const ACTIVE_MIRROR_SELF_BOUNDARY_CONTRACT = [
   "Capability is not permission. Available plugins, models, computer-use routes, and device rails stay blocked until the current user approves a scoped action.",
 ] as const;
 
+export const ACTIVE_MIRROR_PRODUCT_CONSTITUTION = [
+  "Active Mirror is a governed reflective work OS, not a chatbot. The model proposes; the product compiles intent into work.",
+  "A local deterministic supervisor is the authority layer. Frontier models are proposer engines, never runtime authorities.",
+  "The killer loop is: messy prompt -> reflection -> generated workspace -> proof line -> export -> next action.",
+  "A build prompt must generate the requested builder or workspace, not a generic official demo.",
+  "A finish prompt must reduce choices, create one useful artifact, park the rest, and provide one next action.",
+  "A proof or public-sector prompt must show facts, assumptions, unknowns, source route, procurement/review gates, and no fake scores.",
+  "Paid access and lead capture appear only after a useful preview or artifact exists.",
+  "Every public surface must show what is ready, generated, assumed, source_gap, approval_required, body_unavailable, or did_not_run.",
+] as const;
+
+export const ACTIVE_MIRROR_SIGNATURE_SKILLS = [
+  "Build Me a Workspace",
+  "Research or Prove",
+  "Finish Mode",
+  "Client Intake Builder",
+  "Evidence Brief",
+  "Automation Studio",
+  "Site Audit",
+  "Public-Sector Review",
+  "Translation and Localization",
+  "Media Workbench",
+  "Governed GenUI",
+  "Vault Boot Packet",
+] as const;
+
+export const ACTIVE_MIRROR_WRAPPER_STACK = [
+  "Local Supervisor Wrapper",
+  "Reflection Wrapper",
+  "Doctrine Wrapper",
+  "Router Wrapper",
+  "Surface Wrapper",
+  "Provenance Wrapper",
+  "Consent Wrapper",
+  "Memory Wrapper",
+  "Export Wrapper",
+  "Receipt Wrapper",
+  "Trust Recovery Wrapper",
+  "Cost Wrapper",
+  "Voice Wrapper",
+] as const;
+
+export const ACTIVE_MIRROR_LOCAL_SUPERVISOR_CONTRACT = [
+  "The local supervisor is deterministic policy, not a free-form chat model. It owns route, context, tool permissions, storage, and receipt requirements.",
+  "An optional local model may run only as an advisory classifier at deterministic settings. Its output cannot grant permission, promote facts, or override contracts.",
+  "The frontier model is proposer_only. It may draft, transform, summarize, or plan only inside the context envelope selected by the local supervisor.",
+  "Private files, vault memory, computer use, account actions, external sends, spending, deployments, and durable memory writes remain blocked until scoped approval exists.",
+  "Every frontier response is locally scrubbed for private paths, unsupported execution claims, fake proof, source promotion, unsafe instructions, and gated-action leakage before render.",
+  "If the local supervisor and the frontier model disagree, the local supervisor wins and the output becomes blocked, downscoped, or source_gap.",
+  "Receipts record supervisor version, route, model role, context envelope, approvals, storage route, artifact state, and did_not_run.",
+] as const;
+
+export const ACTIVE_MIRROR_RELEASE_EVALUATION = [
+  "First useful surface appears before explanation",
+  "Build prompts create concrete builders, not the official demo",
+  "Research prompts label source routes as unverified until opened",
+  "Scattered/focus prompts produce one artifact and parked ideas",
+  "Public-sector evidence avoids fake scores",
+  "Every output shows proof and gated actions",
+  "Private paths are absent",
+  "Generated artifacts are downloadable",
+  "Mobile feels purpose-built",
+  "Local supervisor gates frontier output before durable render",
+  "Voice is direct, reflective, and non-generic",
+] as const;
+
 export const ACTIVE_MIRROR_AVAILABILITY_CONTRACT = [
   "Hetzner is the always-on public execution plane for the website, deterministic surfaces, sanitized boot packet, public-safe cache, and lead/access routes.",
   "This machine/private body is the authority plane for raw lattice truth, private vault, local files, runtime topology, device limbs, and production-control mutations.",

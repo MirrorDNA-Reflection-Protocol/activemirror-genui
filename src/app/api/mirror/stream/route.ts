@@ -24,10 +24,16 @@ import {
   ACTIVE_MIRROR_BOOT_SEQUENCE,
   ACTIVE_MIRROR_BOOTLOADER_CONTRACT,
   ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL,
+  ACTIVE_MIRROR_LOCAL_SUPERVISOR_CONTRACT,
+  ACTIVE_MIRROR_PRODUCT_CONSTITUTION,
+  ACTIVE_MIRROR_RELEASE_EVALUATION,
   ACTIVE_MIRROR_REFLECTION_CONTRACT,
   ACTIVE_MIRROR_STORAGE_CONTRACT,
   ACTIVE_MIRROR_STORAGE_ROWS,
+  ACTIVE_MIRROR_SIGNATURE_SKILLS,
+  ACTIVE_MIRROR_WRAPPER_STACK,
 } from "@/lib/mirror/contracts/activeMirrorBootloader";
+import { createLocalSupervisorDecision } from "@/lib/mirror/localSupervisor";
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const FREE_TURN_COOKIE = "am_free_turns";
@@ -282,6 +288,79 @@ This should feel like software appearing on demand: one live surface, one proof 
 Use this as the official live demo. Keep the screen compact: show generated work first, then proof, export, and reviewed access.`;
   }
 
+  if (lowerTitle.includes("client intake")) {
+    return `# ${profile.title}
+
+## Intake Form Builder
+The workspace turns "${intent}" into a client-facing intake tool. It captures the request, files, approvals, 72-hour demo scope, and handoff pack before any private action runs.
+
+| Area | What opens | State |
+| --- | --- | --- |
+| Goal capture | Outcome, audience, urgency, success measure | Ready |
+| File slots | Links, uploads, source notes, missing inputs | Prepared |
+| Approval states | Client review, internal review, send/export gates | Visible |
+| 72-hour scope | First demo surface, required assets, blockers | Drafted |
+| Handoff pack | Markdown brief, checklist, email, receipt fields | Ready |
+
+## Working Areas
+- **Client request:** Converts vague asks into structured goals and constraints.
+- **File lane:** Prepares file slots without claiming private file access.
+- **Approval queue:** Shows what can be drafted, exported, sent, or gated.
+- **Demo scope:** Produces the minimum viable 72-hour build path.
+- **Handoff pack:** Gives the team a usable artifact before lead capture.
+
+## Finish Route
+Export the intake pack now. Use reviewed access for live files, account sends, client data, or implementation.`;
+  }
+
+  if (lowerTitle.includes("finish mode")) {
+    return `# ${profile.title}
+
+## Finish Board
+The workspace treats "${intent}" as a momentum problem. It narrows the field, creates one useful artifact, parks the rest, and gives one next action.
+
+| Lane | What opens | State |
+| --- | --- | --- |
+| One artifact | The single output to finish now | Ready |
+| Parked ideas | Useful but not-now items | Saved for later |
+| Decision | What to ignore for this turn | Visible |
+| Proof line | What is real, assumed, or gated | Visible |
+| Next action | One small move after export | Ready |
+
+## Working Areas
+- **Now:** Finish one artifact before expanding scope.
+- **Parked:** Keep the idea list without letting it hijack the turn.
+- **Done-enough gate:** Stop when the artifact is usable.
+- **Export:** Save the artifact so momentum is not lost.
+
+## Finish Route
+Use the artifact, do the next action, then reopen the parked list only after this lane is complete.`;
+  }
+
+  if (lowerTitle.includes("public-sector evidence")) {
+    return `# ${profile.title}
+
+## Evidence Desk
+The workspace prepares "${intent}" as a reviewer-ready evidence brief. It does not treat generated scores as proof and does not claim source verification until a source is opened or provided.
+
+| Panel | What opens | State |
+| --- | --- | --- |
+| Source route | Target sources and search lanes | Prepared |
+| Facts | Claims allowed only after source review | source_gap |
+| Assumptions | Plausible framing that still needs proof | Labeled |
+| Unknowns | Missing evidence, definitions, dates, owners | Visible |
+| Procurement review | security, privacy, accessibility, legal, cost | Required |
+
+## Working Areas
+- **Source route:** Prepares official/program/source targets without pretending lookup ran.
+- **Evidence matrix:** Separates facts, assumptions, unknowns, and review questions.
+- **Procurement lane:** Captures risk, buyer questions, and reviewer gates.
+- **Brief tray:** Exports a concise evidence brief and source checklist.
+
+## Finish Route
+Export the evidence brief now. Run live source checks or official-record review only through approved access.`;
+  }
+
   if (lowerTitle.includes("public-service")) {
     return `# ${profile.title}
 
@@ -532,6 +611,66 @@ function exportPackContent(prompt: string) {
 **Next action**
 Download this pack or send a short demo brief to paul@activemirror.ai.`;
   }
+  if (profile.title.includes("Client Intake")) {
+    return `## Client Intake Export Pack
+
+**Workspace:** ${profile.title}
+
+**Included**
+- Intake questions for goals, constraints, audience, urgency, and success measure
+- File and source slots with missing-input labels
+- Approval states for draft, reviewed, export, send, and implementation
+- 72-hour demo scope with assets, blockers, and first surface
+- Handoff email and receipt fields
+
+**Gates**
+- No private files were opened.
+- No client message was sent.
+- No account or device action ran.
+- Implementation starts only after reviewed access.
+
+**Next action**
+Use this pack as the client intake brief or request a scoped working demo.`;
+  }
+  if (profile.title.includes("Finish Mode")) {
+    return `## Finish Mode Export Pack
+
+**Now artifact**
+Finish one usable artifact from: ${intent}
+
+**Parked ideas**
+- Any unrelated feature idea
+- Any later research branch
+- Any implementation task not needed for the first artifact
+
+**Done-enough gate**
+- The artifact names the user, output, proof state, and next action.
+- The next step is small enough to do now.
+- No extra branches are opened until this lane is done.
+
+**Next action**
+Use the artifact, complete the next action, then reopen parked ideas.`;
+  }
+  if (profile.title.includes("Public-Sector Evidence")) {
+    return `## Public-Sector Evidence Pack
+
+**Workspace:** ${profile.title}
+
+**Included**
+- Source route checklist
+- Facts / assumptions / unknowns matrix
+- Procurement risk questions
+- Reviewer-ready next step
+- Receipt fields for future live-source verification
+
+**Gates**
+- Source routes are not verified sources.
+- Generated comparisons are not evidence.
+- Procurement, legal, accessibility, privacy, security, and cost review remain required.
+
+**Next action**
+Export this brief, then run official source checks or attach approved source files.`;
+  }
   return `## Working Demo Offer
 
 Active Mirror extracted a first spec for: ${intent}
@@ -637,6 +776,95 @@ Ask or speak a task. Active Mirror generates the working surface, proof line, ex
 - Browser, media, vault, automation, and device lanes stay gated until relevant.
 - The demo request appears only after a useful output exists.`;
   }
+  if (profile.title.includes("Client Intake")) {
+    return `# Client Intake Workspace Spec
+
+## Request
+${intent}
+
+## Screen
+Client-facing intake builder with goal capture, file slots, approval states, 72-hour scope, and exportable handoff pack.
+
+## Required Fields
+- Client/company
+- Desired outcome
+- Audience/user
+- Deadline and urgency
+- Success measure
+- Source links or files needed
+- Approval owner
+- Send/export permissions
+
+## Approval States
+| State | Meaning |
+| --- | --- |
+| Draft | Generated from the request |
+| Needs input | Missing client detail or file |
+| Review required | Client, legal, security, or brand approval |
+| Export ready | Download is safe |
+| Send blocked | External send requires explicit approval |
+
+## 72-Hour Scope
+1. Confirm the first useful surface.
+2. Collect approved files/source routes.
+3. Build the intake workspace and handoff pack.
+4. Review proof, approvals, and next action.
+
+## Acceptance Criteria
+- The user sees an intake tool, not product marketing copy.
+- File and approval lanes are visible but gated.
+- The handoff pack can be downloaded before paid depth.`;
+  }
+  if (profile.title.includes("Finish Mode")) {
+    return `# Finish Mode Spec
+
+## Request
+${intent}
+
+## Objective
+Finish one useful artifact now, park everything else, and give one next action.
+
+## Screen
+- One artifact lane
+- Parked ideas lane
+- Done-enough gate
+- Proof line
+- Next action
+
+## Rules
+- Do not branch into more than one deliverable.
+- Do not turn emotional state into generic encouragement.
+- Use direct language and reduce choices.
+- Preserve parked ideas without making them active work.
+
+## Acceptance Criteria
+- One artifact is ready to use.
+- Parked ideas are named but inactive.
+- The next action is specific and small.`;
+  }
+  if (profile.title.includes("Public-Sector Evidence")) {
+    return `# Public-Sector Evidence Desk Spec
+
+## Request
+${intent}
+
+## Screen
+Reviewer-ready evidence desk with source route, fact table, assumptions, unknowns, procurement risks, and approval gates.
+
+## Evidence Matrix
+| Type | Rule |
+| --- | --- |
+| Fact | Requires official source, approved file, or citation after lookup |
+| Assumption | Plausible framing; must stay labeled |
+| Unknown | Missing evidence, date, owner, scope, or definition |
+| Review | Procurement, legal, security, privacy, accessibility, cost |
+
+## Acceptance Criteria
+- No generated signal scores are shown as evidence.
+- Source routes are labeled unverified until opened.
+- Procurement and reviewer gates are visible.
+- The brief can be exported before live lookup.`;
+  }
   return `# Working Demo Spec
 
 ## Request
@@ -722,6 +950,99 @@ The visitor does not need to learn the product first. They describe the outcome,
 ## Next Step
 Download the pack or request a scoped 72-hour demo.`;
   }
+  if (profile.title.includes("Client Intake")) {
+    return `# Client Intake Handoff Pack
+
+## Request
+${intent}
+
+## Intake Questions
+1. What outcome should the client leave with?
+2. Who will use the workspace?
+3. What files, links, or examples are needed?
+4. What must be reviewed before export or send?
+5. What is the first 72-hour demo surface?
+
+## Approval Queue
+| Item | State | Note |
+| --- | --- | --- |
+| Goals | Ready | Captured from prompt |
+| Files | approval_required | User must attach or approve access |
+| Client send | blocked | Requires explicit approval |
+| Demo scope | drafted | Ready for review |
+| Export pack | ready | Downloadable artifact |
+
+## 72-Hour Demo Scope
+- Day 1: confirm intake fields and first surface
+- Day 2: build workspace preview and proof line
+- Day 3: package handoff, exports, and reviewed access path
+
+## Next Action
+Use this handoff pack with the client or ask Active Mirror to refine one field group.`;
+  }
+  if (profile.title.includes("Finish Mode")) {
+    return `# Finish Mode Artifact
+
+## Request
+${intent}
+
+## One Artifact Now
+A one-page product constitution patch: define the killer loop, the first public skill set, and the regression checks that stop the site from becoming generic.
+
+## Parked Ideas
+- Deep connector marketplace
+- Full vault onboarding
+- Device helper setup
+- Enterprise admin console
+- Public-sector source automation
+
+## Done-Enough Gate
+- The artifact is useful without another brainstorming turn.
+- The parked list is preserved but inactive.
+- The next action is a single implementation or review step.
+
+## Next Action
+Review the artifact title and choose one section to refine.`;
+  }
+  if (profile.title.includes("Public-Sector Evidence")) {
+    return `# Public-Sector Evidence Brief
+
+## Request
+${intent}
+
+## Source Route
+- Official government program pages
+- Digital identity authority or ministry pages
+- Service-delivery strategy documents
+- Procurement or tender portals
+- Accessibility, privacy, and security guidance
+
+## Facts
+No facts are verified yet in this preview. Live source checks or approved files are required before factual claims are promoted.
+
+## Assumptions
+- The buyer likely needs procurement-safe language.
+- Digital identity and service delivery require privacy, accessibility, security, and reviewer gates.
+- A concise evidence brief is more useful than a generic document draft.
+
+## Unknowns
+- Which GCC country or agency is in scope
+- Which programs should be compared
+- Which dates, budgets, vendors, or outcomes are allowed
+- Which official sources are approved
+
+## Procurement Risks
+| Risk | Review Gate |
+| --- | --- |
+| Unsupported claim | Source verification |
+| Sensitive data | Privacy review |
+| Accessibility gap | Accessibility review |
+| Security posture | Security review |
+| Vendor comparison | Procurement/legal review |
+
+## Reviewer-Ready Next Step
+Name the country/agency and approve source lookup. Active Mirror should then promote sourced facts, keep assumptions labeled, and export the reviewed brief.`;
+  }
   return `# ${profile.title} One-Pager
 
 ## Request
@@ -755,6 +1076,8 @@ Please scope the files, source lookup, media, vault, and review path required to
 }
 
 function shouldEmitChart(prompt: string) {
+  const profile = workspaceProfile(prompt);
+  if (profile.title.includes("Public-Sector Evidence")) return false;
   return /\b(chart|graph|trend|market|analytics|metrics|kpi|compare|comparison|data|forecast|audit|readiness)\b/i.test(prompt);
 }
 
@@ -782,6 +1105,9 @@ function shouldOfferLeadAccess(prompt: string) {
 function primaryArtifactTitle(prompt: string) {
   const profile = workspaceProfile(prompt);
   if (profile.title.includes("Research")) return "Evidence Brief";
+  if (profile.title.includes("Public-Sector Evidence")) return "Evidence Brief";
+  if (profile.title.includes("Client Intake")) return "Client Intake Pack";
+  if (profile.title.includes("Finish Mode")) return "Finished Artifact";
   if (profile.title.includes("Site Audit")) return "Fix Brief";
   if (/\b(spec|implementation|build plan|technical plan|contract|proposal)\b/i.test(prompt)) return "Working Spec";
   if (/\b(email|message|copy|script)\b/i.test(prompt)) return "Draft Artifact";
@@ -855,12 +1181,13 @@ No browser lookup, file access, computer use, private memory, or external send r
 }
 
 function isGovernedGenUIPrompt(prompt: string) {
-  return /\b(governed|governance|provenance|canonical|doctrine|contract|contracts|receipt|receipts|kv cache|browser cache|computer use|approval queue|source registry)\b/i.test(prompt) &&
-    /\b(genui|workspace|surface|workbench|launch|active mirror|browser cache|kv cache|model routing|computer use|doctrine|provenance)\b/i.test(prompt);
+  return /\b(governed|governance|provenance|canonical|doctrine|contract|contracts|receipt|receipts|kv cache|browser cache|computer use|approval queue|source registry|local model|frontier model|local supervisor|supervisor|wrap|gate)\b/i.test(prompt) &&
+    /\b(genui|workspace|surface|workbench|launch|active mirror|browser cache|kv cache|model routing|computer use|doctrine|provenance|local model|frontier model|supervisor|gate)\b/i.test(prompt);
 }
 
 function governedPreviewContent(prompt: string) {
   const intent = cleanIntent(prompt);
+  const supervisor = createLocalSupervisorDecision(prompt);
   return `# Governed GenUI Workbench
 
 ## Request
@@ -870,12 +1197,27 @@ ${intent}
 | Layer | State | Public note |
 | --- | --- | --- |
 | Canonical contract | Loaded | Private bootloader source is active; raw paths withheld |
+| Local supervisor | Active | ${supervisor.version}; deterministic authority before model route |
 | Built-in skill | Active | ${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.name} v${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.version} |
 | Boot packet | Compiled | Authority, doctrine, gates, storage, route, and receipt rules |
 | Runtime surface | Ready | Deterministic scaffold first, model route only when needed |
+| Frontier model | ${supervisor.frontierRole === "proposer_only" ? "Gated" : "Not called"} | Frontier output is proposer_only and cannot grant permissions |
 | Tool actions | Approval required | Browser, files, devices, sends, and computer use stay gated |
 | Durable memory | Opt-in only | Public preview remains ephemeral unless vault setup is approved |
 | Private body | Conditional | If offline, private/fresh actions become body_unavailable |
+
+## Local Supervisor Route
+| Field | Decision |
+| --- | --- |
+| Mode | ${supervisor.mode} |
+| Route | ${supervisor.route} |
+| Workspace | ${supervisor.workspace} |
+| Frontier role | ${supervisor.frontierRole} |
+| Local model role | ${supervisor.localModelRole} |
+| Approvals needed | ${supervisor.approvalsRequired.length ? supervisor.approvalsRequired.join(", ") : "none for public preview"} |
+
+## Local Gate Contract
+${ACTIVE_MIRROR_LOCAL_SUPERVISOR_CONTRACT.map((rule, index) => `${index + 1}. ${rule}`).join("\n")}
 
 ## Source Registry
 | Source | Role | Public pointer |
@@ -897,7 +1239,10 @@ Every generated surface must show what is generated, sourced, estimated, unknown
 | --- | --- |
 | Browser cache | Instant replay for recent local surfaces |
 | KV cache | Canonical receipt and surface lookup when available |
+| Local supervisor | Deterministic route, context, tool, storage, approval, and receipt gate |
+| Local model | Optional advisory classifier only; cannot override policy |
 | Model route | Live model only when deterministic doctrine scaffolding is insufficient |
+| Frontier model | Proposer-only drafting route behind local verification |
 | Computer use | Prepared route only; explicit approval required |
 | Receipt | Surface id, source state, approval state, and export state |
 
@@ -915,6 +1260,12 @@ function governedDoctrineContent() {
 
 ## Operating Law
 Purpose precedes identity. Identity precedes memory. Memory precedes inference. Inference never precedes responsibility.
+
+## Product Constitution
+${ACTIVE_MIRROR_PRODUCT_CONSTITUTION.map((rule) => `- ${rule}`).join("\n")}
+
+## Local Supervisor Contract
+${ACTIVE_MIRROR_LOCAL_SUPERVISOR_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
 
 ## Bootloader Contract
 ${ACTIVE_MIRROR_BOOTLOADER_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
@@ -939,7 +1290,16 @@ ${ACTIVE_MIRROR_AVAILABILITY_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
 | Harm | Stop, reduce scope, or ask for review when harm is foreseeable or unclear |
 | Provenance | Every durable claim gets a source, receipt, or source_gap |
 | Export | Downloads are user-initiated and carry their generated/proof state |
-| Continuity | Browser cache is local; vault memory requires opt-in setup |`;
+| Continuity | Browser cache is local; vault memory requires opt-in setup |
+
+## Signature Skills
+${ACTIVE_MIRROR_SIGNATURE_SKILLS.map((skill) => `- ${skill}`).join("\n")}
+
+## Wrapper Stack
+${ACTIVE_MIRROR_WRAPPER_STACK.map((wrapper) => `- ${wrapper}`).join("\n")}
+
+## Release Evaluation Gates
+${ACTIVE_MIRROR_RELEASE_EVALUATION.map((check) => `- ${check}`).join("\n")}`;
 }
 
 function governedApprovalContent() {
@@ -947,6 +1307,9 @@ function governedApprovalContent() {
 
 | Action | Current state | Next gate |
 | --- | --- | --- |
+| Local supervisor | Active | Deterministic gate must approve route and context |
+| Local model advisory | Optional | Classifier output cannot grant permissions |
+| Frontier model | Proposer only | Local verifier must pass output before durable render |
 | Browser/source lookup | Prepared | User opens source or asks for live lookup |
 | KV/cache replay | Ready | Canonical key or receipt id |
 | Bootloader source | Loaded/private | Public output shows only sanitized status |
@@ -959,9 +1322,10 @@ function governedApprovalContent() {
 
 ## Receipt Fields
 - request id
+- local supervisor version
 - generated surface id
 - source state
-- model or deterministic route
+- model role or deterministic route
 - approval state
 - file/export state
 - what did not run`;
@@ -969,6 +1333,7 @@ function governedApprovalContent() {
 
 function governedArtifactPackContent(prompt: string) {
   const intent = cleanIntent(prompt);
+  const supervisor = createLocalSupervisorDecision(prompt);
   return `# Active Mirror Doctrine Pack
 
 ## Prompt
@@ -985,6 +1350,7 @@ ${intent}
     "state": "${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.state}"
   },
   "boot_sequence": ${JSON.stringify(ACTIVE_MIRROR_BOOT_SEQUENCE, null, 2).replace(/\n/g, "\n  ")},
+  "local_supervisor": ${JSON.stringify(supervisor, null, 2).replace(/\n/g, "\n  ")},
   "provenance": "required",
   "doctrine_contract": "required",
   "browser_cache": "local_replay",
@@ -992,6 +1358,7 @@ ${intent}
   "vault_memory": "opt_in_only",
   "file_access": "approval_required",
   "model_route": "on_demand",
+  "frontier_model": "proposer_only",
   "computer_use": "approval_required",
   "external_send": "approval_required",
   "offline_private_body": "body_unavailable",
@@ -1001,6 +1368,9 @@ ${intent}
 
 ## Built-In Skill
 **${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.name}** keeps doctrine, provenance, reflection, storage, approvals, and receipts stateful across the generated surface. It is public-safe and versioned; raw private source files remain outside the public site.
+
+## Local Supervisor
+${ACTIVE_MIRROR_LOCAL_SUPERVISOR_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
 
 ## Storage Contract
 ${ACTIVE_MIRROR_STORAGE_CONTRACT.map((rule) => `- ${rule}`).join("\n")}

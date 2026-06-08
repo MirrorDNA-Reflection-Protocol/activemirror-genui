@@ -4,9 +4,14 @@ import {
   ACTIVE_MIRROR_BOOT_SEQUENCE,
   ACTIVE_MIRROR_BOOTLOADER_CONTRACT,
   ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL,
+  ACTIVE_MIRROR_LOCAL_SUPERVISOR_CONTRACT,
+  ACTIVE_MIRROR_PRODUCT_CONSTITUTION,
+  ACTIVE_MIRROR_RELEASE_EVALUATION,
   ACTIVE_MIRROR_REFLECTION_CONTRACT,
   ACTIVE_MIRROR_SELF_BOUNDARY_CONTRACT,
+  ACTIVE_MIRROR_SIGNATURE_SKILLS,
   ACTIVE_MIRROR_STORAGE_CONTRACT,
+  ACTIVE_MIRROR_WRAPPER_STACK,
 } from "./contracts/activeMirrorBootloader";
 
 export const ACTIVE_MIRROR_SOURCE_ROOTS = [
@@ -55,6 +60,8 @@ export const ACTIVE_MIRROR_PROMPT_TOKENS = {
   "AM:EVOLVE": "Evolution is doctrine: scan, learn, compress, improve, verify, and ship bounded upgrades with receipts. Continuous improvement is governed, not random drift.",
   "AM:TOKENIZE": "Tokenisation is the future: compress doctrine, gates, hooks, tools, skills, and receipts into auditable symbolic packets instead of repeating full prompts.",
   "AM:PRISTINE": "Public output must be pristine: no scaffold labels, no implementation prompts, no system-prompt leakage, no fake proof, no unsupported execution, no sensitive data collection, no brittle demos.",
+  "AM:CONSTITUTION": "Product constitution: messy prompt -> reflection -> generated workspace -> proof line -> export -> next action. Build prompts create the requested builder. Finish prompts produce one useful artifact and parked ideas. Evidence prompts show facts, assumptions, unknowns, source routes, and review gates without fake scores.",
+  "AM:LOCALGOV": "Local supervisor law: deterministic local policy owns route, context, tool gates, storage, approvals, and receipts. The frontier model is proposer_only and cannot override the local gate.",
 } as const;
 
 export const ACTIVE_MIRROR_PRIVATE_PROMPT_TOKENS = {
@@ -95,6 +102,16 @@ REFLECTION_CONTRACT:
 ${ACTIVE_MIRROR_REFLECTION_CONTRACT.map((rule, index) => `${index + 1}. ${rule}`).join("\n")}
 SELF_BOUNDARY_CONTRACT:
 ${ACTIVE_MIRROR_SELF_BOUNDARY_CONTRACT.map((rule, index) => `${index + 1}. ${rule}`).join("\n")}
+PRODUCT_CONSTITUTION:
+${ACTIVE_MIRROR_PRODUCT_CONSTITUTION.map((rule, index) => `${index + 1}. ${rule}`).join("\n")}
+LOCAL_SUPERVISOR_CONTRACT:
+${ACTIVE_MIRROR_LOCAL_SUPERVISOR_CONTRACT.map((rule, index) => `${index + 1}. ${rule}`).join("\n")}
+SIGNATURE_SKILLS:
+${ACTIVE_MIRROR_SIGNATURE_SKILLS.map((skill, index) => `${index + 1}. ${skill}`).join("\n")}
+WRAPPER_STACK:
+${ACTIVE_MIRROR_WRAPPER_STACK.map((wrapper, index) => `${index + 1}. ${wrapper}`).join("\n")}
+RELEASE_EVALUATION:
+${ACTIVE_MIRROR_RELEASE_EVALUATION.map((check, index) => `${index + 1}. ${check}`).join("\n")}
 AVAILABILITY_CONTRACT:
 ${ACTIVE_MIRROR_AVAILABILITY_CONTRACT.map((rule, index) => `${index + 1}. ${rule}`).join("\n")}
 BUILT_IN_SKILL:
@@ -115,6 +132,7 @@ OUTPUT_SCHEMA:
 RULES:
 - HONESTY+ALWAYS is first law: real vs generated vs gated vs unknown must stay explicit.
 - Bootloader law: canonical contract first, compact boot packet second, generated surface third, gated execution fourth, receipt last.
+- Local supervisor law: deterministic local policy decides route, context, tools, storage, approvals, and receipts; frontier output is proposer_only and must pass local verification before durable render.
 - Mirror law: reflect the user's intent and constraints before output, then generate the concrete thing they need instead of explaining the product.
 - Self-boundary law: reflection is not obedience, simulation is not execution, personalization is not surveillance, and capability is not permission.
 - Availability law: Hetzner can stay online with the last public-safe boot packet; private body, vault, file, phone, and fresh lattice actions are body_unavailable while the private body is offline.

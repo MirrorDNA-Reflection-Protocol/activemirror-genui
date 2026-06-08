@@ -27,6 +27,20 @@ test.describe('Active Mirror public GenUI', () => {
     await expect(page.getByText(/plumbing/i)).toHaveCount(0);
   });
 
+  test('local supervisor route gates frontier model as proposer only', async ({ page }) => {
+    await page.goto('/?qa=1');
+
+    const textarea = page.locator('textarea').first();
+    await textarea.fill('Wrap and gate a local deterministic model that manages the frontier model in Active Mirror with doctrine, provenance, approvals, and receipts.');
+    await textarea.press('Enter');
+
+    await expect(page.getByRole('heading', { name: 'Governed GenUI Workbench' }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText('Local Supervisor Route', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Local Gate Contract', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('frontier_proposer').first()).toBeVisible();
+    await expect(page.getByText('proposer_only').first()).toBeVisible();
+  });
+
   test('ux feedback opens repair workspace instead of generic filler', async ({ page }) => {
     await page.goto('/?qa=1');
 
@@ -40,6 +54,51 @@ test.describe('Active Mirror public GenUI', () => {
     await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
     await expect(page.getByText('Request desk')).toHaveCount(0);
     await expect(page.getByText('Working surface')).toHaveCount(0);
+  });
+
+  test('build prompt opens client intake builder instead of official demo', async ({ page }) => {
+    await page.goto('/?qa=1');
+
+    const textarea = page.locator('textarea').first();
+    await textarea.fill('Build me a client intake workspace for a boutique AI consulting firm. It should collect goals, files, approvals, and produce a 72-hour demo scope.');
+    await textarea.press('Enter');
+
+    await expect(page.getByRole('heading', { name: 'Client Intake Workspace' }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('heading', { name: 'Intake Form Builder' }).first()).toBeVisible();
+    await expect(page.getByText('Client Intake Pack', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Handoff pack', { exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Official Product Demo Workspace' })).toHaveCount(0);
+  });
+
+  test('scattered prompt opens finish mode with one artifact and parked ideas', async ({ page }) => {
+    await page.goto('/?qa=1');
+
+    const textarea = page.locator('textarea').first();
+    await textarea.fill('I have too many Active Mirror ideas and I am scattered. Help me finish one useful artifact now, park the rest, and give me the next action.');
+    await textarea.press('Enter');
+
+    await expect(page.getByRole('heading', { name: 'Finish Mode Workspace' }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('heading', { name: 'Finish Board' }).first()).toBeVisible();
+    await expect(page.getByText('Finished Artifact', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Parked ideas', { exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Live Workspace Preview' })).toHaveCount(0);
+  });
+
+  test('public-sector proof prompt opens evidence desk without generated scores', async ({ page }) => {
+    await page.goto('/?qa=1');
+
+    const textarea = page.locator('textarea').first();
+    await textarea.fill('Prepare a GCC public-sector AI evidence brief. Compare digital identity and service-delivery programs, separate facts from assumptions and unknowns, and show a procurement-ready next step.');
+    await textarea.press('Enter');
+
+    await expect(page.getByRole('heading', { name: 'Public-Sector Evidence Desk' }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('heading', { name: 'Evidence Desk' }).first()).toBeVisible();
+    await expect(page.getByText('Evidence Brief', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Facts', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Assumptions', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Unknowns', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Generated Signal Map', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Demand signal')).toHaveCount(0);
   });
 
   test('generates a spec workspace and downloads the pack', async ({ page }) => {
@@ -111,5 +170,18 @@ test.describe('Active Mirror public GenUI', () => {
     await expect(page.getByText('First Useful Artifact', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
     await expect(page.getByText('Capability Dock', { exact: true })).toHaveCount(0);
+  });
+
+  test('mobile finish mode shows the generated surface, not only the chat receipt', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 820 });
+    await page.goto('/?qa=1');
+
+    const textarea = page.locator('textarea').first();
+    await textarea.fill('I have too many Active Mirror ideas and I am scattered. Help me finish one useful artifact now, park the rest, and give me the next action.');
+    await textarea.press('Enter');
+
+    await expect(page.getByRole('heading', { name: 'Finish Mode Workspace' }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('heading', { name: 'Finish Board' }).first()).toBeVisible();
+    await expect(page.getByText('Parked ideas', { exact: true }).first()).toBeVisible();
   });
 });
