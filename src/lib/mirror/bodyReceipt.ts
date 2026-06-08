@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, createPublicKey, timingSafeEqual, verify } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
@@ -6,7 +6,7 @@ export const ACTIVE_MIRROR_BODY_RECEIPT_SCHEMA_VERSION =
   "active_mirror.body_public_receipt.v1";
 
 export const ACTIVE_MIRROR_BODY_RECEIPT_VERSION =
-  "2026.06.08-body-receipt-bridge-v1";
+  "2026.06.08-body-receipt-signature-v2";
 
 export type PublicBodyReceiptCapabilityKernel = {
   status: "compiled" | "missing" | "body_unavailable";
@@ -52,10 +52,22 @@ export type PublicBodyReceiptSummary = {
   bodyState?: PublicBodyReceipt["bodyState"];
   sourceState?: PublicBodyReceipt["sourceState"];
   signatureState:
+    | "verified"
+    | "invalid_signature"
     | "present_unverified"
     | "hash_only"
     | "missing"
     | "not_available";
+  verificationMode:
+    | "ed25519_verified"
+    | "ed25519_invalid"
+    | "public_key_not_configured"
+    | "unsigned"
+    | "hash_only"
+    | "body_receipt_missing"
+    | "body_receipt_invalid";
+  signatureKeyId?: string;
+  payloadHash?: string;
   chainHead?: string;
   capabilityKernel?: PublicBodyReceiptCapabilityKernel;
   continuity?: PublicBodyReceipt["continuity"];
@@ -73,6 +85,10 @@ const BODY_RECEIPT_PATH =
     ? join(process.env.HOME, ".activemirror", "public", "mirror-body-receipt.json")
     : "");
 
+const BODY_RECEIPT_PUBLIC_KEY = process.env.MIRROR_BODY_RECEIPT_PUBLIC_KEY || "";
+const BODY_RECEIPT_PUBLIC_KEY_ID = process.env.MIRROR_BODY_RECEIPT_PUBLIC_KEY_ID || "";
+const ED25519_SPKI_DER_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
+
 function parseDate(value?: string) {
   if (!value) return null;
   const time = Date.parse(value);
@@ -89,6 +105,53 @@ function safeStringArray(value: unknown, maxItems = 8) {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function stableForSigning(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map((item) => stableForSigning(item));
+  if (!isRecord(value)) return value;
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([, item]) => item !== undefined)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, item]) => [key, stableForSigning(item)]),
+  );
+}
+
+export function publicBodyReceiptSigningPayload(receipt: PublicBodyReceipt) {
+  const unsignedReceipt = { ...receipt };
+  delete unsignedReceipt.signature;
+  return JSON.stringify(stableForSigning(unsignedReceipt));
+}
+
+function publicBodyReceiptPayloadHash(receipt: PublicBodyReceipt) {
+  return `sha256:${createHash("sha256").update(publicBodyReceiptSigningPayload(receipt)).digest("hex")}`;
+}
+
+function publicKeyFromEnv() {
+  const rawKey = BODY_RECEIPT_PUBLIC_KEY.trim();
+  if (!rawKey) return null;
+
+  const normalized = rawKey.replace(/\\n/g, "\n");
+  if (normalized.includes("BEGIN PUBLIC KEY")) {
+    return createPublicKey(normalized);
+  }
+
+  const decoded = Buffer.from(normalized, "base64");
+  if (decoded.length === 32) {
+    return createPublicKey({
+      key: Buffer.concat([ED25519_SPKI_DER_PREFIX, decoded]),
+      format: "der",
+      type: "spki",
+    });
+  }
+
+  return createPublicKey({
+    key: decoded,
+    format: "der",
+    type: "spki",
+  });
 }
 
 function hasPrivateLeak(value: unknown): boolean {
@@ -247,6 +310,92 @@ function receiptExpired(receipt: PublicBodyReceipt, now = new Date()) {
   return Boolean(expiresAt && expiresAt.getTime() < now.getTime());
 }
 
+function bodyReceiptSignatureStatus(receipt: PublicBodyReceipt): Pick<
+  PublicBodyReceiptSummary,
+  "signatureState" | "verificationMode" | "signatureKeyId" | "payloadHash" | "chainHead"
+> {
+  const signature = receipt.signature;
+  if (!signature) {
+    return {
+      signatureState: "missing",
+      verificationMode: "unsigned",
+    };
+  }
+
+  const computedPayloadHash = publicBodyReceiptPayloadHash(receipt);
+  const payloadHash = signature.payloadHash || computedPayloadHash;
+  const common = {
+    ...(signature.keyId ? { signatureKeyId: signature.keyId } : {}),
+    payloadHash,
+    ...(signature.chainHead ? { chainHead: signature.chainHead } : {}),
+  };
+
+  if (!signature.signature) {
+    return {
+      signatureState: signature.payloadHash || signature.chainHead ? "hash_only" : "missing",
+      verificationMode: signature.payloadHash || signature.chainHead ? "hash_only" : "unsigned",
+      ...common,
+    };
+  }
+
+  if (signature.algorithm !== "ed25519") {
+    return {
+      signatureState: "present_unverified",
+      verificationMode: "public_key_not_configured",
+      ...common,
+    };
+  }
+
+  if (!BODY_RECEIPT_PUBLIC_KEY) {
+    return {
+      signatureState: "present_unverified",
+      verificationMode: "public_key_not_configured",
+      ...common,
+    };
+  }
+
+  if (BODY_RECEIPT_PUBLIC_KEY_ID && signature.keyId && signature.keyId !== BODY_RECEIPT_PUBLIC_KEY_ID) {
+    return {
+      signatureState: "invalid_signature",
+      verificationMode: "ed25519_invalid",
+      ...common,
+    };
+  }
+
+  if (signature.payloadHash && signature.payloadHash !== computedPayloadHash) {
+    return {
+      signatureState: "invalid_signature",
+      verificationMode: "ed25519_invalid",
+      ...common,
+    };
+  }
+
+  try {
+    const publicKey = publicKeyFromEnv();
+    if (!publicKey) {
+      return {
+        signatureState: "invalid_signature",
+        verificationMode: "ed25519_invalid",
+        ...common,
+      };
+    }
+    const signatureBytes = Buffer.from(signature.signature, "base64");
+    const verified = verify(null, Buffer.from(publicBodyReceiptSigningPayload(receipt)), publicKey, signatureBytes);
+
+    return {
+      signatureState: verified ? "verified" : "invalid_signature",
+      verificationMode: verified ? "ed25519_verified" : "ed25519_invalid",
+      ...common,
+    };
+  } catch {
+    return {
+      signatureState: "invalid_signature",
+      verificationMode: "ed25519_invalid",
+      ...common,
+    };
+  }
+}
+
 export function summarizePublicBodyReceipt(
   receipt: PublicBodyReceipt,
   now = new Date(),
@@ -255,11 +404,7 @@ export function summarizePublicBodyReceipt(
   const ageSeconds = issuedAt
     ? Math.max(0, Math.floor((now.getTime() - issuedAt.getTime()) / 1000))
     : undefined;
-  const signatureState = receipt.signature?.signature
-    ? "present_unverified"
-    : receipt.signature?.payloadHash || receipt.signature?.chainHead
-      ? "hash_only"
-      : "missing";
+  const signatureStatus = bodyReceiptSignatureStatus(receipt);
 
   return {
     version: ACTIVE_MIRROR_BODY_RECEIPT_VERSION,
@@ -270,8 +415,7 @@ export function summarizePublicBodyReceipt(
     ...(ageSeconds !== undefined ? { ageSeconds } : {}),
     bodyState: receipt.bodyState,
     sourceState: receipt.sourceState,
-    signatureState,
-    ...(receipt.signature?.chainHead ? { chainHead: receipt.signature.chainHead } : {}),
+    ...signatureStatus,
     ...(receipt.capabilityKernel ? { capabilityKernel: receipt.capabilityKernel } : {}),
     ...(receipt.continuity ? { continuity: receipt.continuity } : {}),
     ...(receipt.proof ? { proof: receipt.proof } : {}),
@@ -286,6 +430,7 @@ export async function readPublicBodyReceiptSummary(): Promise<PublicBodyReceiptS
       version: ACTIVE_MIRROR_BODY_RECEIPT_VERSION,
       status: "missing",
       signatureState: "not_available",
+      verificationMode: "body_receipt_missing",
       note: "No public body receipt path is configured.",
     };
   }
@@ -299,6 +444,7 @@ export async function readPublicBodyReceiptSummary(): Promise<PublicBodyReceiptS
         version: ACTIVE_MIRROR_BODY_RECEIPT_VERSION,
         status: "invalid",
         signatureState: "not_available",
+        verificationMode: "body_receipt_invalid",
         note: `Stored public body receipt is invalid: ${validated.error}.`,
       };
     }
@@ -308,6 +454,7 @@ export async function readPublicBodyReceiptSummary(): Promise<PublicBodyReceiptS
       version: ACTIVE_MIRROR_BODY_RECEIPT_VERSION,
       status: "missing",
       signatureState: "not_available",
+      verificationMode: "body_receipt_missing",
       note: "No accepted public body receipt is currently available.",
     };
   }

@@ -36,7 +36,8 @@ grep -q "MirrorKernel" "$TMP_DIR/body" || fail "kernel endpoint did not identify
 
 body_receipt_code="$(curl_code GET "$BASE_URL/api/mirror/body-receipt")"
 [[ "$body_receipt_code" == "200" ]] || fail "body receipt endpoint returned HTTP $body_receipt_code"
-grep -q "body-receipt-bridge" "$TMP_DIR/body" || fail "body receipt endpoint did not expose bridge version"
+grep -q "body-receipt" "$TMP_DIR/body" || fail "body receipt endpoint did not expose receipt version"
+grep -q "verificationMode" "$TMP_DIR/body" || fail "body receipt endpoint did not expose verification mode"
 
 ratchet_code="$(curl_code GET "$BASE_URL/api/mirror/ratchet")"
 [[ "$ratchet_code" == "200" ]] || fail "ratchet endpoint returned HTTP $ratchet_code"

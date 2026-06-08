@@ -58,7 +58,8 @@ The public site may receive a sanitized body receipt from the private Active Mir
 
 - Receipts with private paths, known secret names, `.env` references, or API-key shaped values are rejected.
 - Expired receipts stay visible as `expired`; they do not imply a fresh body.
-- A receipt with a signature is reported as `present_unverified` until public-key verification is wired.
+- Ed25519 signatures are verified when `MIRROR_BODY_RECEIPT_PUBLIC_KEY` is configured. The public key may be PEM, base64 SPKI DER, or base64 raw 32-byte Ed25519 public key.
+- A receipt with a signature is reported as `present_unverified` when no public key is configured, and `invalid_signature` when the configured key or payload hash does not verify.
 - A receipt with only hash or chain fields is reported as `hash_only`.
 - Missing or invalid receipts do not block public preview generation, but private/fresh actions remain `body_unavailable`.
 

@@ -6,7 +6,7 @@ import {
   ACTIVE_MIRROR_STORAGE_CONTRACT,
 } from "./contracts/activeMirrorBootloader";
 
-export const ACTIVE_MIRROR_RATCHET_VERSION = "2026.06.08-mirror-ratchet-v3";
+export const ACTIVE_MIRROR_RATCHET_VERSION = "2026.06.08-mirror-ratchet-v4";
 
 type RatchetState = "passing" | "queued" | "blocked";
 
@@ -99,6 +99,13 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
       "Public-safe hash-chain ledger is user-owned and exportable from /api/mirror/proof-ledger.",
     ),
     check(
+      "receipt-signature",
+      "Body receipt signature verification",
+      "passing",
+      "Signed-looking audit packets can be displayed without actual cryptographic verification.",
+      "Ed25519 public-key verification is wired; missing keys are labeled present_unverified, not trusted.",
+    ),
+    check(
       "generated-surface",
       "Generated surface first",
       hasRule(ACTIVE_MIRROR_PRODUCT_CONSTITUTION, /generated workspace/) ? "passing" : "blocked",
@@ -157,6 +164,7 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
         "generic chat instead of generated work",
         "private-context leakage",
         "vendor-owned proof ledger",
+        "unverified audit signatures",
         "revocation cascade opacity",
         "hidden system failure stream",
       ],
@@ -192,7 +200,7 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
     ],
     nextQueue: [
       "Install production body receipt publisher and token.",
-      "Verify public-key signatures instead of present_unverified signature state.",
+      "Install production body receipt public key and signed publisher.",
       "Add identity-continuity score across model swaps.",
       "Connect revocation cascade and critique stream to signed private body events.",
     ],

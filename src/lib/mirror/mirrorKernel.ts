@@ -6,7 +6,7 @@ import { getIdentityContinuityStatus, type IdentityContinuityStatus } from "./id
 import { getMirrorRatchetStatus, type MirrorRatchetStatus } from "./mirrorRatchet";
 import { getRevocationCascadeStatus, type RevocationCascadeStatus } from "./revocationCascade";
 
-export const ACTIVE_MIRROR_KERNEL_PROOF_VERSION = "2026.06.08-mirrorkernel-sovereign-contracts-v4";
+export const ACTIVE_MIRROR_KERNEL_PROOF_VERSION = "2026.06.08-mirrorkernel-signature-v5";
 
 type CapabilityKernelStatus = {
   status: "compiled" | "missing" | "body_unavailable";

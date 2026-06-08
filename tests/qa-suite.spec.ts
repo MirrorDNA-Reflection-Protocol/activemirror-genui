@@ -32,11 +32,12 @@ test.describe('Active Mirror public GenUI', () => {
     expect(response.ok()).toBeTruthy();
     const status = await response.json();
     expect(status.name).toBe('MirrorKernel');
-    expect(status.version).toBe('2026.06.08-mirrorkernel-sovereign-contracts-v4');
+    expect(status.version).toBe('2026.06.08-mirrorkernel-signature-v5');
     expect(status.epistemicMode.runtimeLayer).toBe('canonical_verifier');
     expect(status.truthfulUtilityPolicy.principle).toBe('accuracy_without_fabrication');
     expect(status.actualization.productWedge).toContain('without giving it all of me');
-    expect(status.bodyReceipt.version).toBe('2026.06.08-body-receipt-bridge-v1');
+    expect(status.bodyReceipt.version).toBe('2026.06.08-body-receipt-signature-v2');
+    expect(status.bodyReceipt.verificationMode).toBe('body_receipt_missing');
     expect(status.doctrine).toContain('Accuracy without fabrication: blocked or unverified routes return facts, assumptions, unknowns, source gaps, and the next safe step.');
     expect(status.doctrine).toContain('A public body receipt is proof of sanitized sync only; it does not grant private action authority.');
     expect(status.controlPlane.some((item: { label: string }) => item.label === 'Accuracy mode')).toBeTruthy();
@@ -57,10 +58,11 @@ test.describe('Active Mirror public GenUI', () => {
     const ratchetResponse = await page.request.get('/api/mirror/ratchet');
     expect(ratchetResponse.ok()).toBeTruthy();
     const ratchetStatus = await ratchetResponse.json();
-    expect(ratchetStatus.version).toBe('2026.06.08-mirror-ratchet-v3');
+    expect(ratchetStatus.version).toBe('2026.06.08-mirror-ratchet-v4');
     expect(ratchetStatus.targetPasses).toBe(1000);
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('fabricated certainty');
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('vendor-owned proof ledger');
+    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('unverified audit signatures');
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('revocation cascade opacity');
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('hidden system failure stream');
     expect(ratchetStatus.frontierFailureCoverage.queued).toContain('model-swap identity drift');
@@ -115,8 +117,9 @@ test.describe('Active Mirror public GenUI', () => {
     const bodyReceiptResponse = await page.request.get('/api/mirror/body-receipt');
     expect(bodyReceiptResponse.ok()).toBeTruthy();
     const bodyReceipt = await bodyReceiptResponse.json();
-    expect(bodyReceipt.version).toBe('2026.06.08-body-receipt-bridge-v1');
+    expect(bodyReceipt.version).toBe('2026.06.08-body-receipt-signature-v2');
     expect(bodyReceipt.status).toBe('missing');
+    expect(bodyReceipt.verificationMode).toBe('body_receipt_missing');
     expect(bodyReceipt.note).toContain('No accepted public body receipt');
 
     const postResponse = await page.request.post('/api/mirror/body-receipt', {

@@ -58,9 +58,14 @@ const invariants = [
     pattern: /timingSafeEqual[\s\S]*MIRROR_BODY_RECEIPT_TOKEN/,
   },
   {
+    id: "body_receipt_ed25519_verification",
+    file: "bodyReceipt",
+    pattern: /MIRROR_BODY_RECEIPT_PUBLIC_KEY[\s\S]*publicBodyReceiptSigningPayload[\s\S]*ed25519_verified/,
+  },
+  {
     id: "ratchet_frontier_failure_coverage",
     file: "ratchet",
-    pattern: /frontierFailureCoverage[\s\S]*fabricated certainty[\s\S]*hidden system failure stream/,
+    pattern: /frontierFailureCoverage[\s\S]*fabricated certainty[\s\S]*unverified audit signatures[\s\S]*hidden system failure stream/,
   },
   {
     id: "ratchet_claim_boundary",

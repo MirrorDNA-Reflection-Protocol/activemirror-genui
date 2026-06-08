@@ -88,7 +88,7 @@ export async function getProofLedger(): Promise<ProofLedger> {
     kind: "body_receipt",
     statement:
       bodyReceipt.status === "available"
-        ? "A sanitized public body receipt is available."
+        ? `A sanitized public body receipt is available with signature state ${bodyReceipt.signatureState}.`
         : "No fresh sanitized public body receipt is available.",
     state: bodyReceipt.status === "available" ? "available" : "missing",
     source: "/api/mirror/body-receipt",
@@ -150,7 +150,7 @@ export async function getProofLedger(): Promise<ProofLedger> {
     entries,
     queuedPrivateEvents: [
       "private body receipt publisher",
-      "public-key signature verification",
+      "production body receipt public key",
       "private revocation enforcement receipts",
       "measured cross-model user identity continuity score",
       "signed private decision critique stream",
