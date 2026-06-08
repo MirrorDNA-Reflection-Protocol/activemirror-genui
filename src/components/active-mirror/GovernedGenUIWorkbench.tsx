@@ -384,6 +384,8 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
   const stateLabel =
     status?.state === "active"
       ? "Kernel online"
+      : status?.state === "public_body_synced"
+        ? "Public body synced"
       : status?.state === "compiled_body_gated"
         ? "Compiled, body gated"
         : status
@@ -394,8 +396,17 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
       ? "compiled"
       : status?.capabilityKernel.status || "public-safe";
   const kerneldLabel = status?.kerneld.status || "body_unavailable";
+  const bodyReceiptLabel = status?.bodyReceipt.status || "missing";
   const compiledAt = status?.capabilityKernel.compiledAt
     ? new Date(status.capabilityKernel.compiledAt).toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+  const bodyReceiptAt = status?.bodyReceipt.issuedAt
+    ? new Date(status.bodyReceipt.issuedAt).toLocaleString(undefined, {
         month: "short",
         day: "numeric",
         hour: "2-digit",
@@ -428,7 +439,7 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 text-[11px] font-semibold text-white/78 lg:min-w-[420px]">
+        <div className="grid grid-cols-2 gap-2 text-[11px] font-semibold text-white/78 sm:grid-cols-4 lg:min-w-[560px]">
           <div className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
             <div className="text-white/42">Capability</div>
             <div className="mt-1 text-cyan-100">{capabilityLabel}</div>
@@ -440,6 +451,10 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
           <div className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
             <div className="text-white/42">Models</div>
             <div className="mt-1 text-cyan-100">proposer only</div>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
+            <div className="text-white/42">Body receipt</div>
+            <div className="mt-1 text-cyan-100">{bodyReceiptLabel}</div>
           </div>
         </div>
       </div>
@@ -466,6 +481,16 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
         {compiledAt ? (
           <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
             Last compiled: {compiledAt}
+          </span>
+        ) : null}
+        {bodyReceiptAt ? (
+          <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
+            Body receipt: {bodyReceiptAt}
+          </span>
+        ) : null}
+        {status?.bodyReceipt.signatureState === "present_unverified" || status?.bodyReceipt.signatureState === "hash_only" ? (
+          <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
+            Receipt proof: {status.bodyReceipt.signatureState.replace("_", " ")}
           </span>
         ) : null}
       </div>

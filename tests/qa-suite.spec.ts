@@ -19,11 +19,13 @@ test.describe('Active Mirror public GenUI', () => {
     expect(response.ok()).toBeTruthy();
     const status = await response.json();
     expect(status.name).toBe('MirrorKernel');
-    expect(status.version).toBe('2026.06.08-mirrorkernel-canonical-accuracy-v2');
+    expect(status.version).toBe('2026.06.08-mirrorkernel-body-receipt-v3');
     expect(status.epistemicMode.runtimeLayer).toBe('canonical_verifier');
     expect(status.truthfulUtilityPolicy.principle).toBe('accuracy_without_fabrication');
     expect(status.actualization.productWedge).toContain('without giving it all of me');
+    expect(status.bodyReceipt.version).toBe('2026.06.08-body-receipt-bridge-v1');
     expect(status.doctrine).toContain('Accuracy without fabrication: blocked or unverified routes return facts, assumptions, unknowns, source gaps, and the next safe step.');
+    expect(status.doctrine).toContain('A public body receipt is proof of sanitized sync only; it does not grant private action authority.');
     expect(status.controlPlane.some((item: { label: string }) => item.label === 'Accuracy mode')).toBeTruthy();
     expect(status.controlPlane.some((item: { label: string }) => item.label === 'Canonical promotion')).toBeTruthy();
     expect(status.privacyBoundary).toContain('redacted');
@@ -32,6 +34,28 @@ test.describe('Active Mirror public GenUI', () => {
     expect(systemResponse.ok()).toBeTruthy();
     const systemStatus = await systemResponse.json();
     expect(systemStatus.localSupervisor).toBe('2026.06.08-local-supervisor-canonical-accuracy-v2');
+  });
+
+  test('body receipt bridge is public-readable and write-gated by default', async ({ page }) => {
+    const bodyReceiptResponse = await page.request.get('/api/mirror/body-receipt');
+    expect(bodyReceiptResponse.ok()).toBeTruthy();
+    const bodyReceipt = await bodyReceiptResponse.json();
+    expect(bodyReceipt.version).toBe('2026.06.08-body-receipt-bridge-v1');
+    expect(bodyReceipt.status).toBe('missing');
+    expect(bodyReceipt.note).toContain('No accepted public body receipt');
+
+    const postResponse = await page.request.post('/api/mirror/body-receipt', {
+      data: {
+        schemaVersion: 'active_mirror.body_public_receipt.v1',
+        receiptId: 'am-body-test-20260608T171438Z',
+        issuedAt: '2026-06-08T17:14:38Z',
+        bodyState: 'online',
+        sourceState: 'public_safe_sync',
+      },
+    });
+    expect(postResponse.status()).toBe(503);
+    const postBody = await postResponse.json();
+    expect(postBody.status).toBe('sync_not_configured');
   });
 
   test('front door route requires a real target before generation', async ({ page }) => {
@@ -143,7 +167,7 @@ test.describe('Active Mirror public GenUI', () => {
 
     await page.getByTestId('qa-test-strip').getByRole('button', { name: 'Spec', exact: true }).click();
 
-    await expect(page.getByText('Generated Workspace')).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText('Generated Workspace', { exact: true })).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText('Working Spec', { exact: true }).first()).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Working Demo Spec' }).first()).toBeVisible();
     await expect(page.getByText('Proof + Next Step').first()).toBeVisible();

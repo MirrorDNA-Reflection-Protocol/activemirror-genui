@@ -28,6 +28,15 @@ root_code="$(curl_code GET "$BASE_URL/")"
 system_code="$(curl_code GET "$BASE_URL/api/mirror/system")"
 [[ "$system_code" == "200" ]] || fail "system endpoint returned HTTP $system_code"
 grep -q "Active Mirror public GenUI" "$TMP_DIR/body" || fail "system endpoint did not identify Active Mirror"
+grep -q "canonical_verifier" "$TMP_DIR/body" || fail "system endpoint did not expose canonical verifier status"
+
+kernel_code="$(curl_code GET "$BASE_URL/api/mirror/kernel")"
+[[ "$kernel_code" == "200" ]] || fail "kernel endpoint returned HTTP $kernel_code"
+grep -q "MirrorKernel" "$TMP_DIR/body" || fail "kernel endpoint did not identify MirrorKernel"
+
+body_receipt_code="$(curl_code GET "$BASE_URL/api/mirror/body-receipt")"
+[[ "$body_receipt_code" == "200" ]] || fail "body receipt endpoint returned HTTP $body_receipt_code"
+grep -q "body-receipt-bridge" "$TMP_DIR/body" || fail "body receipt endpoint did not expose bridge version"
 
 query_code="$(curl_code POST "$BASE_URL/api/mirror/query" \
   -H "content-type: application/json" \

@@ -26,6 +26,7 @@ export const ACTIVE_MIRROR_BOOT_SEQUENCE = [
 export const ACTIVE_MIRROR_STORAGE_CONTRACT = [
   "Browser cache stores short-lived local UI state and recent generated surfaces for speed. It is not identity memory.",
   "KV cache stores public-safe receipt lookups, canonical packet ids, and replayable surface metadata when configured.",
+  "Public body receipts store sanitized sync proof from the private body. They never expose raw topology or grant private action authority.",
   "Vault memory stores private continuity only after opt-in approval. Public preview must default to ephemeral session state.",
   "Files are generated artifacts or user-approved inputs. Public preview may prepare export packs, but private file access stays gated.",
   "Receipts store request id, source state, model or deterministic route, approval state, file/export state, and what did not run.",
@@ -132,6 +133,7 @@ export const ACTIVE_MIRROR_AVAILABILITY_CONTRACT = [
   "When the private body is reachable, Active Mirror can request fresh canonical state through governed sync and record receipts.",
   "When the private body is offline, the public site must continue with last-known public-safe contracts and label private/fresh actions as body_unavailable or approval_pending.",
   "A stale-but-valid public boot packet may generate previews, specs, and approval queues. It must not claim fresh private truth or execute private actions.",
+  "A fresh public body receipt may lift public proof state to public_body_synced, but it still cannot approve private files, vault, devices, sends, or account actions.",
   "Resync after reconnection should compare body contract version, skill version, receipts, model pins, and public boot packet before lifting body_unavailable gates.",
 ] as const;
 
@@ -159,6 +161,12 @@ export const ACTIVE_MIRROR_STORAGE_ROWS = [
     location: "Hetzner/public infrastructure when configured",
     keeps: "Receipt ids, canonical packets, replay metadata",
     rule: "Public-safe data only",
+  },
+  {
+    store: "Public body receipt",
+    location: "Hetzner/public runtime",
+    keeps: "Sanitized private-body sync proof",
+    rule: "Proof only; no raw topology or action authority",
   },
   {
     store: "Vault",

@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { readPublicBodyReceiptSummary, type PublicBodyReceiptSummary } from "./bodyReceipt";
 
-export const ACTIVE_MIRROR_KERNEL_PROOF_VERSION = "2026.06.08-mirrorkernel-canonical-accuracy-v2";
+export const ACTIVE_MIRROR_KERNEL_PROOF_VERSION = "2026.06.08-mirrorkernel-body-receipt-v3";
 
 type CapabilityKernelStatus = {
   status: "compiled" | "missing" | "body_unavailable";
@@ -25,7 +26,7 @@ type MirrorKernelControl = {
 export type MirrorKernelPublicStatus = {
   name: "MirrorKernel";
   version: typeof ACTIVE_MIRROR_KERNEL_PROOF_VERSION;
-  state: "active" | "compiled_body_gated" | "body_unavailable";
+  state: "active" | "public_body_synced" | "compiled_body_gated" | "body_unavailable";
   publicClaim: string;
   epistemicMode: {
     modelLayer: "probabilistic_proposer";
@@ -44,6 +45,7 @@ export type MirrorKernelPublicStatus = {
   controlPlane: MirrorKernelControl[];
   doctrine: string[];
   capabilityKernel: CapabilityKernelStatus;
+  bodyReceipt: PublicBodyReceiptSummary;
   kerneld: KerneldStatus;
   privacyBoundary: string;
 };
@@ -122,14 +124,21 @@ async function checkKerneld(): Promise<KerneldStatus> {
 }
 
 export async function getMirrorKernelPublicStatus(): Promise<MirrorKernelPublicStatus> {
-  const [capabilityKernel, kerneld] = await Promise.all([
+  const [capabilityKernelReceipt, bodyReceipt, kerneld] = await Promise.all([
     readCapabilityKernelReceipt(),
+    readPublicBodyReceiptSummary(),
     checkKerneld(),
   ]);
+  const capabilityKernel =
+    capabilityKernelReceipt.status === "missing" && bodyReceipt.capabilityKernel
+      ? bodyReceipt.capabilityKernel
+      : capabilityKernelReceipt;
 
   const state =
     kerneld.status === "online"
       ? "active"
+      : bodyReceipt.status === "available"
+        ? "public_body_synced"
       : capabilityKernel.status === "compiled"
         ? "compiled_body_gated"
         : "body_unavailable";
@@ -210,12 +219,14 @@ export async function getMirrorKernelPublicStatus(): Promise<MirrorKernelPublicS
       "The model proposes; the governed runtime validates and executes.",
       "The frontier knows the world; the mirror knows its user.",
       "Contextual memory actualization is consent-gated.",
+      "A public body receipt is proof of sanitized sync only; it does not grant private action authority.",
       "Accuracy without fabrication: blocked or unverified routes return facts, assumptions, unknowns, source gaps, and the next safe step.",
       "Frontier models are proposer-only.",
       "Private files, vaults, devices, sends, and account actions stay approval-gated.",
       "No proof surface may expose private runtime paths or raw body topology.",
     ],
     capabilityKernel,
+    bodyReceipt,
     kerneld,
     privacyBoundary:
       "Public site receives only a redacted kernel proof packet. Fresh private body truth is marked body_unavailable unless the body is reachable.",
