@@ -17,6 +17,9 @@ const files = {
   bodyReceipt: "src/lib/mirror/bodyReceipt.ts",
   ratchet: "src/lib/mirror/mirrorRatchet.ts",
   proofLedger: "src/lib/mirror/proofLedger.ts",
+  critique: "src/lib/mirror/decisionCritique.ts",
+  revocation: "src/lib/mirror/revocationCascade.ts",
+  identity: "src/lib/mirror/identityContinuity.ts",
   ui: "src/components/active-mirror/GovernedGenUIWorkbench.tsx",
   tests: "tests/qa-suite.spec.ts",
   healthcheck: "scripts/ops/healthcheck.sh",
@@ -57,7 +60,7 @@ const invariants = [
   {
     id: "ratchet_frontier_failure_coverage",
     file: "ratchet",
-    pattern: /frontierFailureCoverage[\s\S]*fabricated certainty[\s\S]*vendor-owned proof ledger/,
+    pattern: /frontierFailureCoverage[\s\S]*fabricated certainty[\s\S]*hidden system failure stream/,
   },
   {
     id: "ratchet_claim_boundary",
@@ -75,6 +78,21 @@ const invariants = [
     pattern: /proofLedgerToMarkdown[\s\S]*Active Mirror Public-Safe Proof Ledger/,
   },
   {
+    id: "critique_stream_admits_failures",
+    file: "critique",
+    pattern: /ACTIVE_MIRROR_DECISION_CRITIQUE_VERSION[\s\S]*systemAdmission[\s\S]*body_unavailable/,
+  },
+  {
+    id: "revocation_cascade_downstream_effects",
+    file: "revocation",
+    pattern: /ACTIVE_MIRROR_REVOCATION_CASCADE_VERSION[\s\S]*downstreamEffect[\s\S]*body_unavailable/,
+  },
+  {
+    id: "identity_continuity_boundary",
+    file: "identity",
+    pattern: /ACTIVE_MIRROR_IDENTITY_CONTINUITY_VERSION[\s\S]*privateUserContinuityScore: null[\s\S]*signed_model_swap_identity_receipt/,
+  },
+  {
     id: "ui_shows_kernel_receipt_and_ratchet",
     file: "ui",
     pattern: /Body receipt[\s\S]*mirror-ratchet-proof|mirror-ratchet-proof[\s\S]*Body receipt/,
@@ -85,9 +103,9 @@ const invariants = [
     pattern: /body receipt bridge[\s\S]*MirrorRatchet|MirrorRatchet[\s\S]*body receipt bridge/,
   },
   {
-    id: "healthcheck_covers_ratchet",
+    id: "healthcheck_covers_public_contracts",
     file: "healthcheck",
-    pattern: /api\/mirror\/ratchet[\s\S]*api\/mirror\/proof-ledger/,
+    pattern: /api\/mirror\/ratchet[\s\S]*api\/mirror\/proof-ledger[\s\S]*api\/mirror\/critique[\s\S]*api\/mirror\/revocation-cascade[\s\S]*api\/mirror\/identity-continuity/,
   },
 ];
 

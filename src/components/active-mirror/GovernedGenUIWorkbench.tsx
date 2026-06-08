@@ -374,8 +374,74 @@ export default function GovernedGenUIWorkbench({
 
         <MirrorKernelProofStrip status={kernelStatus} />
         <MirrorRatchetStrip status={kernelStatus} />
+        <MirrorSovereignContractsStrip status={kernelStatus} />
 
         {qaSlot ? <div className="pb-4">{qaSlot}</div> : null}
+      </div>
+    </section>
+  );
+}
+
+function MirrorSovereignContractsStrip({ status }: { status: MirrorKernelPublicStatus | null }) {
+  if (!status?.critique || !status.revocation || !status.identityContinuity) return null;
+
+  const contracts = [
+    {
+      label: "Self critique",
+      value: `${status.critique.events.length} admissions`,
+      body: "Blocked, gated, missing, and queued system states are exposed instead of polished away.",
+      state: "public_safe",
+    },
+    {
+      label: "Revocation cascade",
+      value: `${status.revocation.events.length} effects`,
+      body: "Memory, source, export, and body receipt revocations have visible downstream consequences.",
+      state: status.revocation.privateEnforcement,
+    },
+    {
+      label: "Identity continuity",
+      value: status.identityContinuity.crossModelDiff.measurementState.replaceAll("_", " "),
+      body: "Public doctrine vector is stable; private cross-model user drift requires a signed receipt.",
+      state: status.identityContinuity.status,
+    },
+  ];
+
+  return (
+    <section
+      data-testid="mirror-sovereign-contracts"
+      className="mb-4 rounded-xl border border-[#d9ddd2] bg-white p-3 shadow-sm shadow-black/[0.04] lg:p-4"
+      aria-label="Active Mirror sovereign proof contracts"
+    >
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h2 className="text-sm font-semibold tracking-normal text-[#171a18]">Sovereign proof contracts</h2>
+          <p className="mt-1 max-w-3xl text-xs leading-5 text-[#667064]">
+            Public-safe routes make the system admit its own limits, show revocation consequences, and preserve identity continuity boundaries.
+          </p>
+        </div>
+        <a
+          href="/api/mirror/proof-ledger?format=markdown"
+          className="inline-flex min-h-9 items-center justify-center rounded-md border border-[#d9ddd2] bg-[#f8f9f5] px-3 text-xs font-semibold text-[#2f352f] transition-colors hover:border-cyan-600/40 hover:bg-cyan-50"
+        >
+          Export proof ledger
+        </a>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        {contracts.map((item) => (
+          <div key={item.label} className="rounded-lg border border-[#d9ddd2] bg-[#f8f9f5] p-2.5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="truncate text-xs font-semibold text-[#171a18]">{item.label}</div>
+                <div className="mt-0.5 text-[11px] font-semibold text-cyan-900">{item.value}</div>
+              </div>
+              <span className="shrink-0 rounded bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#667064]">
+                {item.state.replaceAll("_", " ")}
+              </span>
+            </div>
+            <p className="mt-1.5 text-[11px] leading-4 text-[#667064]">{item.body}</p>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -384,7 +450,13 @@ export default function GovernedGenUIWorkbench({
 function MirrorRatchetStrip({ status }: { status: MirrorKernelPublicStatus | null }) {
   const ratchet = status?.ratchet;
   if (!ratchet) return null;
-  const visibleChecks = ratchet.checks.slice(0, 6);
+  const visibleCheckIds = new Set([
+    ...ratchet.checks.slice(0, 6).map((item) => item.id),
+    "revocation-cascade",
+    "identity-continuity",
+    "confession-stream",
+  ]);
+  const visibleChecks = ratchet.checks.filter((item) => visibleCheckIds.has(item.id));
 
   return (
     <section

@@ -1,9 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { readPublicBodyReceiptSummary, type PublicBodyReceiptSummary } from "./bodyReceipt";
+import { getDecisionCritiqueStream, type DecisionCritiqueStream } from "./decisionCritique";
+import { getIdentityContinuityStatus, type IdentityContinuityStatus } from "./identityContinuity";
 import { getMirrorRatchetStatus, type MirrorRatchetStatus } from "./mirrorRatchet";
+import { getRevocationCascadeStatus, type RevocationCascadeStatus } from "./revocationCascade";
 
-export const ACTIVE_MIRROR_KERNEL_PROOF_VERSION = "2026.06.08-mirrorkernel-body-receipt-v3";
+export const ACTIVE_MIRROR_KERNEL_PROOF_VERSION = "2026.06.08-mirrorkernel-sovereign-contracts-v4";
 
 type CapabilityKernelStatus = {
   status: "compiled" | "missing" | "body_unavailable";
@@ -48,6 +51,9 @@ export type MirrorKernelPublicStatus = {
   capabilityKernel: CapabilityKernelStatus;
   bodyReceipt: PublicBodyReceiptSummary;
   ratchet: MirrorRatchetStatus;
+  critique: DecisionCritiqueStream;
+  revocation: RevocationCascadeStatus;
+  identityContinuity: IdentityContinuityStatus;
   kerneld: KerneldStatus;
   privacyBoundary: string;
 };
@@ -136,6 +142,9 @@ export async function getMirrorKernelPublicStatus(): Promise<MirrorKernelPublicS
       ? bodyReceipt.capabilityKernel
       : capabilityKernelReceipt;
   const ratchet = getMirrorRatchetStatus();
+  const critique = getDecisionCritiqueStream();
+  const revocation = getRevocationCascadeStatus();
+  const identityContinuity = getIdentityContinuityStatus();
 
   const state =
     kerneld.status === "online"
@@ -216,6 +225,24 @@ export async function getMirrorKernelPublicStatus(): Promise<MirrorKernelPublicS
         keepsFromFrontiers: "creative and probabilistic generation",
         control: "nothing becomes truth, memory, or action until doctrine, source state, consent, and receipts allow it",
       },
+      {
+        label: "Self critique",
+        state: "public_safe",
+        keepsFromFrontiers: "opaque system behavior",
+        control: "blocked, gated, missing, and queued system states are exposed through a public-safe critique stream",
+      },
+      {
+        label: "Revocation cascade",
+        state: "public_safe",
+        keepsFromFrontiers: "opaque memory retention",
+        control: "revoked memory, source, export, and body receipt scopes have visible downstream effects before private enforcement runs",
+      },
+      {
+        label: "Identity continuity",
+        state: "gated",
+        keepsFromFrontiers: "model swap and personalization",
+        control: "public doctrine vector is stable; private user continuity score requires a signed model-swap receipt",
+      },
     ],
     doctrine: [
       "Probabilistic engines propose; canonical runtime verifies, gates, records, and promotes.",
@@ -231,6 +258,9 @@ export async function getMirrorKernelPublicStatus(): Promise<MirrorKernelPublicS
     capabilityKernel,
     bodyReceipt,
     ratchet,
+    critique,
+    revocation,
+    identityContinuity,
     kerneld,
     privacyBoundary:
       "Public site receives only a redacted kernel proof packet. Fresh private body truth is marked body_unavailable unless the body is reachable.",

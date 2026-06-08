@@ -19,13 +19,20 @@ test.describe('Active Mirror public GenUI', () => {
     await expect(ratchet).toContainText('frontier-model failure modes');
     await expect(ratchet).toContainText('Covers: fabricated certainty');
     await expect(ratchet).toContainText('Portable proof ledger');
+    await expect(ratchet).toContainText('Confessional self-transparency');
+    const sovereignContracts = page.getByTestId('mirror-sovereign-contracts');
+    await expect(sovereignContracts).toBeVisible();
+    await expect(sovereignContracts).toContainText('Self critique');
+    await expect(sovereignContracts).toContainText('Revocation cascade');
+    await expect(sovereignContracts).toContainText('Identity continuity');
+    await expect(sovereignContracts).toContainText('Export proof ledger');
     await expect(page.getByText('/Users/mirror-pro')).toHaveCount(0);
 
     const response = await page.request.get('/api/mirror/kernel');
     expect(response.ok()).toBeTruthy();
     const status = await response.json();
     expect(status.name).toBe('MirrorKernel');
-    expect(status.version).toBe('2026.06.08-mirrorkernel-body-receipt-v3');
+    expect(status.version).toBe('2026.06.08-mirrorkernel-sovereign-contracts-v4');
     expect(status.epistemicMode.runtimeLayer).toBe('canonical_verifier');
     expect(status.truthfulUtilityPolicy.principle).toBe('accuracy_without_fabrication');
     expect(status.actualization.productWedge).toContain('without giving it all of me');
@@ -34,6 +41,12 @@ test.describe('Active Mirror public GenUI', () => {
     expect(status.doctrine).toContain('A public body receipt is proof of sanitized sync only; it does not grant private action authority.');
     expect(status.controlPlane.some((item: { label: string }) => item.label === 'Accuracy mode')).toBeTruthy();
     expect(status.controlPlane.some((item: { label: string }) => item.label === 'Canonical promotion')).toBeTruthy();
+    expect(status.controlPlane.some((item: { label: string }) => item.label === 'Self critique')).toBeTruthy();
+    expect(status.controlPlane.some((item: { label: string }) => item.label === 'Revocation cascade')).toBeTruthy();
+    expect(status.controlPlane.some((item: { label: string }) => item.label === 'Identity continuity')).toBeTruthy();
+    expect(status.critique.events.length).toBeGreaterThanOrEqual(4);
+    expect(status.revocation.events.length).toBeGreaterThanOrEqual(4);
+    expect(status.identityContinuity.privateUserContinuityScore).toBeNull();
     expect(status.privacyBoundary).toContain('redacted');
 
     const systemResponse = await page.request.get('/api/mirror/system');
@@ -44,10 +57,13 @@ test.describe('Active Mirror public GenUI', () => {
     const ratchetResponse = await page.request.get('/api/mirror/ratchet');
     expect(ratchetResponse.ok()).toBeTruthy();
     const ratchetStatus = await ratchetResponse.json();
-    expect(ratchetStatus.version).toBe('2026.06.08-mirror-ratchet-v2');
+    expect(ratchetStatus.version).toBe('2026.06.08-mirror-ratchet-v3');
     expect(ratchetStatus.targetPasses).toBe(1000);
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('fabricated certainty');
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('vendor-owned proof ledger');
+    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('revocation cascade opacity');
+    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('hidden system failure stream');
+    expect(ratchetStatus.frontierFailureCoverage.queued).toContain('model-swap identity drift');
     expect(ratchetStatus.claimBoundary).toContain('not a claim of superior raw model IQ');
 
     const ledgerResponse = await page.request.get('/api/mirror/proof-ledger');
@@ -56,14 +72,43 @@ test.describe('Active Mirror public GenUI', () => {
     expect(ledger.version).toBe('2026.06.08-proof-ledger-v1');
     expect(ledger.owner).toBe('user');
     expect(ledger.chainHead).toMatch(/^sha256:/);
-    expect(ledger.entries.length).toBeGreaterThanOrEqual(5);
+    expect(ledger.entries.length).toBeGreaterThanOrEqual(9);
     expect(ledger.entries.at(-1).hash).toBe(ledger.chainHead);
+    expect(ledger.entries.some((entry: { id: string }) => entry.id === 'critique.system_self_transparency')).toBeTruthy();
+    expect(ledger.entries.some((entry: { id: string }) => entry.id === 'revocation.public_cascade_contract')).toBeTruthy();
+    expect(ledger.entries.some((entry: { id: string }) => entry.id === 'identity.public_doctrine_vector')).toBeTruthy();
 
     const markdownLedgerResponse = await page.request.get('/api/mirror/proof-ledger?format=markdown');
     expect(markdownLedgerResponse.ok()).toBeTruthy();
     const markdownLedger = await markdownLedgerResponse.text();
     expect(markdownLedger).toContain('Active Mirror Public-Safe Proof Ledger');
     expect(markdownLedger).toContain('Chain head: sha256:');
+
+    const critiqueResponse = await page.request.get('/api/mirror/critique');
+    expect(critiqueResponse.ok()).toBeTruthy();
+    const critique = await critiqueResponse.json();
+    expect(critique.version).toBe('2026.06.08-decision-critique-v1');
+    expect(critique.coveredFailureClass).toBe('hidden system failure stream');
+    expect(critique.events.some((event: { systemAdmission: string }) => event.systemAdmission.includes('body_unavailable'))).toBeTruthy();
+
+    const critiqueNdjsonResponse = await page.request.get('/api/mirror/critique?format=ndjson');
+    expect(critiqueNdjsonResponse.ok()).toBeTruthy();
+    const critiqueNdjson = await critiqueNdjsonResponse.text();
+    expect(critiqueNdjson).toContain('critique.body_unavailable');
+
+    const revocationResponse = await page.request.get('/api/mirror/revocation-cascade');
+    expect(revocationResponse.ok()).toBeTruthy();
+    const revocation = await revocationResponse.json();
+    expect(revocation.version).toBe('2026.06.08-revocation-cascade-v1');
+    expect(revocation.coveredFailureClass).toBe('revocation cascade opacity');
+    expect(revocation.privateEnforcement).toBe('body_required');
+
+    const identityResponse = await page.request.get('/api/mirror/identity-continuity');
+    expect(identityResponse.ok()).toBeTruthy();
+    const identity = await identityResponse.json();
+    expect(identity.version).toBe('2026.06.08-identity-continuity-v1');
+    expect(identity.privateUserContinuityScore).toBeNull();
+    expect(identity.crossModelDiff.requiredReceipt).toBe('signed_model_swap_identity_receipt');
   });
 
   test('body receipt bridge is public-readable and write-gated by default', async ({ page }) => {

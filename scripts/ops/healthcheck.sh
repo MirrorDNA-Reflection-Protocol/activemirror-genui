@@ -48,6 +48,21 @@ proof_ledger_code="$(curl_code GET "$BASE_URL/api/mirror/proof-ledger")"
 grep -q "proof-ledger" "$TMP_DIR/body" || fail "proof ledger endpoint did not expose ledger version"
 grep -q "chainHead" "$TMP_DIR/body" || fail "proof ledger endpoint did not expose chain head"
 
+critique_code="$(curl_code GET "$BASE_URL/api/mirror/critique")"
+[[ "$critique_code" == "200" ]] || fail "critique endpoint returned HTTP $critique_code"
+grep -q "decision-critique" "$TMP_DIR/body" || fail "critique endpoint did not expose stream version"
+grep -q "systemAdmission" "$TMP_DIR/body" || fail "critique endpoint did not expose system admissions"
+
+revocation_code="$(curl_code GET "$BASE_URL/api/mirror/revocation-cascade")"
+[[ "$revocation_code" == "200" ]] || fail "revocation cascade endpoint returned HTTP $revocation_code"
+grep -q "revocation-cascade" "$TMP_DIR/body" || fail "revocation endpoint did not expose cascade version"
+grep -q "downstreamEffect" "$TMP_DIR/body" || fail "revocation endpoint did not expose downstream effects"
+
+identity_code="$(curl_code GET "$BASE_URL/api/mirror/identity-continuity")"
+[[ "$identity_code" == "200" ]] || fail "identity continuity endpoint returned HTTP $identity_code"
+grep -q "identity-continuity" "$TMP_DIR/body" || fail "identity endpoint did not expose continuity version"
+grep -q "privateUserContinuityScore" "$TMP_DIR/body" || fail "identity endpoint did not expose private measurement boundary"
+
 query_code="$(curl_code POST "$BASE_URL/api/mirror/query" \
   -H "content-type: application/json" \
   --data "{\"messages\":[{\"role\":\"user\",\"content\":\"$PROMPT\"}]}")"

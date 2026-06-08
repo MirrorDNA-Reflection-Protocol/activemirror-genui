@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
 import { readPublicBodyReceiptSummary } from "./bodyReceipt";
+import { getDecisionCritiqueStream } from "./decisionCritique";
+import { getIdentityContinuityStatus } from "./identityContinuity";
 import { getMirrorRatchetStatus } from "./mirrorRatchet";
+import { getRevocationCascadeStatus } from "./revocationCascade";
 
 export const ACTIVE_MIRROR_PROOF_LEDGER_VERSION = "2026.06.08-proof-ledger-v1";
 
@@ -12,6 +15,9 @@ export type ProofLedgerEntry = {
     | "kernel"
     | "body_receipt"
     | "ratchet"
+    | "critique"
+    | "revocation"
+    | "identity_continuity"
     | "approval_gate"
     | "export";
   statement: string;
@@ -58,6 +64,9 @@ export async function getProofLedger(): Promise<ProofLedger> {
     readPublicBodyReceiptSummary(),
     Promise.resolve(getMirrorRatchetStatus()),
   ]);
+  const critique = getDecisionCritiqueStream();
+  const revocation = getRevocationCascadeStatus();
+  const identityContinuity = getIdentityContinuityStatus();
   const entries: ProofLedgerEntry[] = [];
 
   buildEntry(entries, {
@@ -92,6 +101,30 @@ export async function getProofLedger(): Promise<ProofLedger> {
     source: "/api/mirror/ratchet",
   });
   buildEntry(entries, {
+    id: "critique.system_self_transparency",
+    kind: "critique",
+    statement: `Decision critique stream exposes ${critique.events.length} public-safe system admissions.`,
+    state: "available",
+    source: "/api/mirror/critique",
+  });
+  buildEntry(entries, {
+    id: "revocation.public_cascade_contract",
+    kind: "revocation",
+    statement: `Revocation cascade contract exposes ${revocation.events.length} downstream effect classes.`,
+    state: "available",
+    source: "/api/mirror/revocation-cascade",
+  });
+  buildEntry(entries, {
+    id: "identity.public_doctrine_vector",
+    kind: "identity_continuity",
+    statement:
+      identityContinuity.privateUserContinuityScore === null
+        ? "Public doctrine vector is available; private cross-model user continuity measurement is queued."
+        : "Private cross-model user continuity measurement is available.",
+    state: identityContinuity.privateUserContinuityScore === null ? "queued" : "available",
+    source: "/api/mirror/identity-continuity",
+  });
+  buildEntry(entries, {
     id: "approval.private_actions",
     kind: "approval_gate",
     statement: "Private files, vault, accounts, devices, sends, spend, and durable writes remain scoped-approval gated.",
@@ -118,9 +151,9 @@ export async function getProofLedger(): Promise<ProofLedger> {
     queuedPrivateEvents: [
       "private body receipt publisher",
       "public-key signature verification",
-      "revocation cascade events",
-      "identity continuity score",
-      "decision critique stream",
+      "private revocation enforcement receipts",
+      "measured cross-model user identity continuity score",
+      "signed private decision critique stream",
     ],
   };
 }

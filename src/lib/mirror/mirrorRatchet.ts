@@ -6,7 +6,7 @@ import {
   ACTIVE_MIRROR_STORAGE_CONTRACT,
 } from "./contracts/activeMirrorBootloader";
 
-export const ACTIVE_MIRROR_RATCHET_VERSION = "2026.06.08-mirror-ratchet-v2";
+export const ACTIVE_MIRROR_RATCHET_VERSION = "2026.06.08-mirror-ratchet-v3";
 
 type RatchetState = "passing" | "queued" | "blocked";
 
@@ -115,23 +115,23 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
     check(
       "revocation-cascade",
       "Revocation cascade",
-      "queued",
+      "passing",
       "Memory or data removal usually does not show downstream consequences.",
-      "Next queue: revoke a memory/source and stream what changed downstream.",
+      "Public cascade route shows downstream effects; private enforcement receipts remain gated.",
     ),
     check(
       "identity-continuity",
       "Identity continuity across models",
       "queued",
       "Identity is bound to one model session or one vendor account.",
-      "Next queue: identity-vector and cross-model drift score with receipts.",
+      "Public doctrine vector exists; private cross-model user drift score still needs a signed body receipt.",
     ),
     check(
       "confession-stream",
       "Confessional self-transparency",
-      "queued",
+      "passing",
       "Most assistants hide policy misses, stale assumptions, and tool failures behind polished prose.",
-      "Next queue: live decision/critique stream that shows gate fires and system failures.",
+      "Public critique stream admits blocked, gated, missing, and queued system states.",
     ),
   ];
 
@@ -157,12 +157,10 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
         "generic chat instead of generated work",
         "private-context leakage",
         "vendor-owned proof ledger",
-      ],
-      queued: [
         "revocation cascade opacity",
-        "model-swap identity drift",
         "hidden system failure stream",
       ],
+      queued: ["model-swap identity drift"],
     },
     checks,
     frontierComparison: [
@@ -195,9 +193,8 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
     nextQueue: [
       "Install production body receipt publisher and token.",
       "Verify public-key signatures instead of present_unverified signature state.",
-      "Add revocation cascade events when memory or source permissions change.",
       "Add identity-continuity score across model swaps.",
-      "Expose live decision/critique stream for gate failures.",
+      "Connect revocation cascade and critique stream to signed private body events.",
     ],
   };
 }
