@@ -1,6 +1,6 @@
 import { requestIntent, workspaceProfile } from "./lingos";
 
-export const ACTIVE_MIRROR_LOCAL_SUPERVISOR_VERSION = "2026.06.08-local-supervisor-v1";
+export const ACTIVE_MIRROR_LOCAL_SUPERVISOR_VERSION = "2026.06.08-local-supervisor-canonical-accuracy-v2";
 
 export type LocalSupervisorMode =
   | "deterministic_surface"
@@ -62,6 +62,7 @@ export function createLocalSupervisorDecision(prompt: string): LocalSupervisorDe
       "private_paths_redacted",
       "source_routes_not_promoted_to_facts",
       "vault_context_withheld_until_approved",
+      "frontier_receives_scoped_task_packet_only",
     ],
     toolPolicy: [
       "no_tool_action_without_scoped_approval",
@@ -74,12 +75,14 @@ export function createLocalSupervisorDecision(prompt: string): LocalSupervisorDe
       "browser_cache_local_only",
       "kv_public_safe_receipts_only",
       "vault_memory_opt_in_revocable",
+      "model_output_never_becomes_memory_without_canonical_promotion",
     ],
     outputPolicy: [
       "facts_assumptions_unknowns_separated",
       "frontier_output_must_pass_public_scrub",
+      "probabilistic_output_never_promotes_itself",
       "no_fake_execution_or_receipts",
-      "blocked_route_returns_safe_artifact",
+      "blocked_route_returns_truthful_next_step",
     ],
     approvalsRequired,
     receiptRequired: true,

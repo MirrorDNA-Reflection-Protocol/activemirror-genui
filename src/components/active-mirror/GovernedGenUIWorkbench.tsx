@@ -402,6 +402,7 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
         minute: "2-digit",
       })
     : null;
+  const controlPlane = status?.controlPlane || [];
 
   return (
     <section
@@ -422,7 +423,7 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
               </span>
             </div>
             <p className="mt-1 max-w-2xl text-xs leading-5 text-white/68">
-              Contextual memory actualization under consent: ask any model as you without giving it all of you.
+              Contextual memory actualization under consent. Probabilistic engines propose; canonical runtime verifies.
             </p>
           </div>
         </div>
@@ -454,6 +455,12 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
           Memory actualization: consent-gated
         </span>
         <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
+          Canonical runtime &gt; probabilistic output
+        </span>
+        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
+          Doctrine: accuracy without fabrication
+        </span>
+        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
           Fresh private actions: {kerneldLabel === "online" ? "available after approval" : "body_unavailable"}
         </span>
         {compiledAt ? (
@@ -462,6 +469,22 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
           </span>
         ) : null}
       </div>
+
+      {controlPlane.length ? (
+        <div data-testid="kernel-control-matrix" className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {controlPlane.map((item) => (
+            <div key={item.label} className="min-w-0 rounded-lg border border-white/10 bg-white/[0.035] p-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <div className="truncate text-xs font-semibold text-white">{item.label}</div>
+                <span className="shrink-0 rounded bg-cyan-200/10 px-1.5 py-0.5 text-[10px] font-semibold text-cyan-100">
+                  {item.state.replace("_", " ")}
+                </span>
+              </div>
+              <p className="mt-1 text-[11px] leading-4 text-white/55">{item.control}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

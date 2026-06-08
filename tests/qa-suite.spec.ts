@@ -11,14 +11,27 @@ test.describe('Active Mirror public GenUI', () => {
     await expect(kernel).toContainText('Contextual memory actualization');
     await expect(kernel).toContainText('proposer only');
     await expect(kernel).toContainText('consent-gated');
+    await expect(kernel).toContainText('Doctrine: accuracy without fabrication');
+    await expect(kernel).toContainText('Canonical runtime');
     await expect(page.getByText('/Users/mirror-pro')).toHaveCount(0);
 
     const response = await page.request.get('/api/mirror/kernel');
     expect(response.ok()).toBeTruthy();
     const status = await response.json();
     expect(status.name).toBe('MirrorKernel');
+    expect(status.version).toBe('2026.06.08-mirrorkernel-canonical-accuracy-v2');
+    expect(status.epistemicMode.runtimeLayer).toBe('canonical_verifier');
+    expect(status.truthfulUtilityPolicy.principle).toBe('accuracy_without_fabrication');
     expect(status.actualization.productWedge).toContain('without giving it all of me');
+    expect(status.doctrine).toContain('Accuracy without fabrication: blocked or unverified routes return facts, assumptions, unknowns, source gaps, and the next safe step.');
+    expect(status.controlPlane.some((item: { label: string }) => item.label === 'Accuracy mode')).toBeTruthy();
+    expect(status.controlPlane.some((item: { label: string }) => item.label === 'Canonical promotion')).toBeTruthy();
     expect(status.privacyBoundary).toContain('redacted');
+
+    const systemResponse = await page.request.get('/api/mirror/system');
+    expect(systemResponse.ok()).toBeTruthy();
+    const systemStatus = await systemResponse.json();
+    expect(systemStatus.localSupervisor).toBe('2026.06.08-local-supervisor-canonical-accuracy-v2');
   });
 
   test('front door route requires a real target before generation', async ({ page }) => {
@@ -58,6 +71,8 @@ test.describe('Active Mirror public GenUI', () => {
     await expect(page.getByText('Local Gate Contract', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('frontier_proposer').first()).toBeVisible();
     await expect(page.getByText('proposer_only').first()).toBeVisible();
+    await expect(page.getByText('Probabilistic output cannot promote facts').first()).toBeVisible();
+    await expect(page.getByText('Blocked routes must not dead-end').first()).toBeVisible();
   });
 
   test('ux feedback opens repair workspace instead of generic filler', async ({ page }) => {
