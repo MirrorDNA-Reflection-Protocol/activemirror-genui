@@ -13,6 +13,7 @@
     "audit:prod": "npm audit --omit=dev",
     "ops:health": "bash scripts/ops/healthcheck.sh",
     "ops:deploy:hetzner": "bash scripts/ops/deploy-hetzner.sh",
+    "body-receipt:sign": "node scripts/ops/sign-body-receipt.mjs",
     "ratchet:100": "node scripts/ops/mirror-ratchet.mjs --passes=100",
     "ratchet:1000": "node scripts/ops/mirror-ratchet.mjs --passes=1000",
     "ci": "npm run lint && npm run typecheck && npm run build"

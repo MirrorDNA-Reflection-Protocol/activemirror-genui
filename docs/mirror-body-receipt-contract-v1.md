@@ -65,8 +65,18 @@ The public site may receive a sanitized body receipt from the private Active Mir
 
 ## Publish Command
 
+Create a signed public-safe receipt:
+
 ```bash
-MIRROR_BODY_RECEIPT_TOKEN=... scripts/ops/publish-body-receipt.sh /path/to/public-safe-receipt.json
+MIRROR_BODY_RECEIPT_PRIVATE_KEY=... \
+MIRROR_BODY_RECEIPT_PUBLIC_KEY_ID=active-mirror-public-body-key \
+npm run body-receipt:sign -- unsigned-public-receipt.json signed-public-receipt.json
+```
+
+Publish it after signing:
+
+```bash
+MIRROR_BODY_RECEIPT_TOKEN=... scripts/ops/publish-body-receipt.sh signed-public-receipt.json
 ```
 
 The receipt file must already be sanitized before publishing. Raw body files remain on the private body.

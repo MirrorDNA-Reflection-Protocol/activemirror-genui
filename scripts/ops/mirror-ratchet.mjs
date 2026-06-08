@@ -23,6 +23,7 @@ const files = {
   ui: "src/components/active-mirror/GovernedGenUIWorkbench.tsx",
   tests: "tests/qa-suite.spec.ts",
   healthcheck: "scripts/ops/healthcheck.sh",
+  signer: "scripts/ops/sign-body-receipt.mjs",
 };
 
 const contents = Object.fromEntries(
@@ -61,6 +62,11 @@ const invariants = [
     id: "body_receipt_ed25519_verification",
     file: "bodyReceipt",
     pattern: /MIRROR_BODY_RECEIPT_PUBLIC_KEY[\s\S]*publicBodyReceiptSigningPayload[\s\S]*ed25519_verified/,
+  },
+  {
+    id: "body_receipt_signed_publisher",
+    file: "signer",
+    pattern: /MIRROR_BODY_RECEIPT_PRIVATE_KEY[\s\S]*receipt contains private material[\s\S]*algorithm: "ed25519"/,
   },
   {
     id: "ratchet_frontier_failure_coverage",
