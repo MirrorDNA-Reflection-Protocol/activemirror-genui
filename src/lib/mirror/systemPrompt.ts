@@ -15,14 +15,14 @@ import {
 } from "./contracts/activeMirrorBootloader";
 
 export const ACTIVE_MIRROR_SOURCE_ROOTS = [
-  "/Users/mirror-pro/MirrorDNA-Vault",
-  "/Users/mirror-pro/.mirrordna",
-  "/Users/mirror-pro/.activemirror",
-  "/Users/mirror-pro/Documents/Active Mirror",
+  "private Obsidian vault",
+  "private body lattice",
+  "private Active Mirror body state",
+  "private Active Mirror control-plane workspace",
 ];
 
 export const ACTIVE_MIRROR_PRIVATE_SOURCE_POINTERS = [
-  "/Users/mirror-pro/Downloads/WhatsApp Image 2026-06-02 at 16.42.55.jpeg",
+  "private founder reference image",
 ];
 
 export const ACTIVE_MIRROR_PUBLIC_SOURCE_ROOTS = [

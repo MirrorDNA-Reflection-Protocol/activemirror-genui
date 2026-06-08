@@ -2,6 +2,23 @@ import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
 test.describe('Active Mirror public GenUI', () => {
+  test('front door exposes MirrorKernel as a redacted trust runtime surface', async ({ page }) => {
+    await page.goto('/?qa=1');
+
+    const kernel = page.getByTestId('mirrorkernel-proof');
+    await expect(kernel).toBeVisible();
+    await expect(kernel).toContainText('MirrorKernel');
+    await expect(kernel).toContainText('Trust by Design control layer');
+    await expect(kernel).toContainText('proposer only');
+    await expect(page.getByText('/Users/mirror-pro')).toHaveCount(0);
+
+    const response = await page.request.get('/api/mirror/kernel');
+    expect(response.ok()).toBeTruthy();
+    const status = await response.json();
+    expect(status.name).toBe('MirrorKernel');
+    expect(status.privacyBoundary).toContain('redacted');
+  });
+
   test('front door route requires a real target before generation', async ({ page }) => {
     await page.goto('/?qa=1');
 

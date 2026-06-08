@@ -20,6 +20,7 @@ export default function Page() {
       "Browser research surfaces",
       "Charts and data views",
       "Governance and proof trails",
+      "MirrorKernel public proof surface",
       "Local MirrorSeed personalization",
       "Vault-ready paid continuity",
       "PWA installation",

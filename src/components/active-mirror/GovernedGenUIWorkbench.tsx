@@ -1,11 +1,12 @@
 "use client";
 
 import type { ReactNode, RefObject } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   ArrowUp,
   CheckCircle2,
+  Cpu,
   FileText,
   Globe,
   LockKeyhole,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL } from "@/lib/mirror/contracts/activeMirrorBootloader";
+import type { MirrorKernelPublicStatus } from "@/lib/mirror/mirrorKernel";
 
 type GovernedGenUIWorkbenchProps = {
   value: string;
@@ -106,6 +108,24 @@ export default function GovernedGenUIWorkbench({
 }: GovernedGenUIWorkbenchProps) {
   const [selectedRoute, setSelectedRoute] = useState<(typeof ROUTES)[number] | null>(null);
   const [needsInput, setNeedsInput] = useState(false);
+  const [kernelStatus, setKernelStatus] = useState<MirrorKernelPublicStatus | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/mirror/kernel", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((status: MirrorKernelPublicStatus | null) => {
+        if (!cancelled) setKernelStatus(status);
+      })
+      .catch(() => {
+        if (!cancelled) setKernelStatus(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const submitValue = () => onSubmit(value || DEFAULT_GOVERNED_PROMPT);
 
@@ -352,7 +372,92 @@ export default function GovernedGenUIWorkbench({
           </div>
         </section>
 
+        <MirrorKernelProofStrip status={kernelStatus} />
+
         {qaSlot ? <div className="pb-4">{qaSlot}</div> : null}
+      </div>
+    </section>
+  );
+}
+
+function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus | null }) {
+  const stateLabel =
+    status?.state === "active"
+      ? "Kernel online"
+      : status?.state === "compiled_body_gated"
+        ? "Compiled, body gated"
+        : status
+          ? "Body unavailable"
+          : "Public proof";
+  const capabilityLabel =
+    status?.capabilityKernel.status === "compiled"
+      ? "compiled"
+      : status?.capabilityKernel.status || "public-safe";
+  const kerneldLabel = status?.kerneld.status || "body_unavailable";
+  const compiledAt = status?.capabilityKernel.compiledAt
+    ? new Date(status.capabilityKernel.compiledAt).toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+
+  return (
+    <section
+      data-testid="mirrorkernel-proof"
+      className="mb-4 rounded-xl border border-[#d9ddd2] bg-[#111715] p-3 text-white shadow-sm shadow-black/[0.08] lg:mb-5 lg:p-4"
+      aria-label="MirrorKernel proof surface"
+    >
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <div className="flex min-w-0 gap-3">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-300/15 text-cyan-200">
+            <Cpu className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-sm font-semibold tracking-normal text-white">MirrorKernel</h2>
+              <span className="rounded-md border border-cyan-200/15 bg-cyan-200/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-100">
+                {stateLabel}
+              </span>
+            </div>
+            <p className="mt-1 max-w-2xl text-xs leading-5 text-white/68">
+              Trust by Design control layer: models propose, the kernel governs route, consent, memory, execution, and proof.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 text-[11px] font-semibold text-white/78 lg:min-w-[420px]">
+          <div className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
+            <div className="text-white/42">Capability</div>
+            <div className="mt-1 text-cyan-100">{capabilityLabel}</div>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
+            <div className="text-white/42">Kerneld</div>
+            <div className="mt-1 text-cyan-100">{kerneldLabel}</div>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
+            <div className="text-white/42">Models</div>
+            <div className="mt-1 text-cyan-100">proposer only</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-white/50">
+        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
+          Public-safe proof packet
+        </span>
+        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
+          Private topology redacted
+        </span>
+        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
+          Fresh private actions: {kerneldLabel === "online" ? "available after approval" : "body_unavailable"}
+        </span>
+        {compiledAt ? (
+          <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
+            Last compiled: {compiledAt}
+          </span>
+        ) : null}
       </div>
     </section>
   );
