@@ -8,14 +8,16 @@ test.describe('Active Mirror public GenUI', () => {
     const kernel = page.getByTestId('mirrorkernel-proof');
     await expect(kernel).toBeVisible();
     await expect(kernel).toContainText('MirrorKernel');
-    await expect(kernel).toContainText('Trust by Design control layer');
+    await expect(kernel).toContainText('Contextual memory actualization');
     await expect(kernel).toContainText('proposer only');
+    await expect(kernel).toContainText('consent-gated');
     await expect(page.getByText('/Users/mirror-pro')).toHaveCount(0);
 
     const response = await page.request.get('/api/mirror/kernel');
     expect(response.ok()).toBeTruthy();
     const status = await response.json();
     expect(status.name).toBe('MirrorKernel');
+    expect(status.actualization.productWedge).toContain('without giving it all of me');
     expect(status.privacyBoundary).toContain('redacted');
   });
 

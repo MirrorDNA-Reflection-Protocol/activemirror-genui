@@ -422,7 +422,7 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
               </span>
             </div>
             <p className="mt-1 max-w-2xl text-xs leading-5 text-white/68">
-              Trust by Design control layer: models propose, the kernel governs route, consent, memory, execution, and proof.
+              Contextual memory actualization under consent: ask any model as you without giving it all of you.
             </p>
           </div>
         </div>
@@ -449,6 +449,9 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
         </span>
         <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
           Private topology redacted
+        </span>
+        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
+          Memory actualization: consent-gated
         </span>
         <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
           Fresh private actions: {kerneldLabel === "online" ? "available after approval" : "body_unavailable"}

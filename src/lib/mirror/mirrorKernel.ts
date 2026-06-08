@@ -20,6 +20,11 @@ export type MirrorKernelPublicStatus = {
   version: typeof ACTIVE_MIRROR_KERNEL_PROOF_VERSION;
   state: "active" | "compiled_body_gated" | "body_unavailable";
   publicClaim: string;
+  actualization: {
+    status: "doctrine_loaded";
+    loop: string;
+    productWedge: string;
+  };
   doctrine: string[];
   capabilityKernel: CapabilityKernelStatus;
   kerneld: KerneldStatus;
@@ -117,9 +122,16 @@ export async function getMirrorKernelPublicStatus(): Promise<MirrorKernelPublicS
     version: ACTIVE_MIRROR_KERNEL_PROOF_VERSION,
     state,
     publicClaim:
-      "MirrorKernel is the Trust by Design runtime around models: deterministic policy decides what may be routed, remembered, executed, or proved.",
+      "MirrorKernel is the Trust by Design identity runtime around models: contextual memory is actualized only when truth, scope, and consent allow it.",
+    actualization: {
+      status: "doctrine_loaded",
+      loop: "context -> activation -> governance -> working identity -> action -> writeback",
+      productWedge: "Ask any model as me, without giving it all of me.",
+    },
     doctrine: [
       "The model proposes; the governed runtime validates and executes.",
+      "The frontier knows the world; the mirror knows its user.",
+      "Contextual memory actualization is consent-gated.",
       "Frontier models are proposer-only.",
       "Private files, vaults, devices, sends, and account actions stay approval-gated.",
       "No proof surface may expose private runtime paths or raw body topology.",
