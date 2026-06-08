@@ -6,7 +6,7 @@ import {
   ACTIVE_MIRROR_STORAGE_CONTRACT,
 } from "./contracts/activeMirrorBootloader";
 
-export const ACTIVE_MIRROR_RATCHET_VERSION = "2026.06.08-mirror-ratchet-v1";
+export const ACTIVE_MIRROR_RATCHET_VERSION = "2026.06.08-mirror-ratchet-v2";
 
 type RatchetState = "passing" | "queued" | "blocked";
 
@@ -92,6 +92,13 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
       "Files, accounts, devices, sends, spend, and durable writes require scoped approval.",
     ),
     check(
+      "portable-proof",
+      "Portable proof ledger",
+      "passing",
+      "Audit data usually belongs to the vendor or product account.",
+      "Public-safe hash-chain ledger is user-owned and exportable from /api/mirror/proof-ledger.",
+    ),
+    check(
       "generated-surface",
       "Generated surface first",
       hasRule(ACTIVE_MIRROR_PRODUCT_CONSTITUTION, /generated workspace/) ? "passing" : "blocked",
@@ -106,11 +113,11 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
       "Ships against visible release gates for proof, mobile, voice, artifacts, and private-path absence.",
     ),
     check(
-      "portable-proof",
-      "Portable proof ledger",
+      "revocation-cascade",
+      "Revocation cascade",
       "queued",
-      "Audit data usually belongs to the vendor or product account.",
-      "Next queue: exportable hash-chain ledger with revocation cascade events.",
+      "Memory or data removal usually does not show downstream consequences.",
+      "Next queue: revoke a memory/source and stream what changed downstream.",
     ),
     check(
       "identity-continuity",
@@ -149,9 +156,10 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
         "tool/action overclaiming",
         "generic chat instead of generated work",
         "private-context leakage",
+        "vendor-owned proof ledger",
       ],
       queued: [
-        "vendor-owned proof ledger",
+        "revocation cascade opacity",
         "model-swap identity drift",
         "hidden system failure stream",
       ],

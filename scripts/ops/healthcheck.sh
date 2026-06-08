@@ -43,6 +43,11 @@ ratchet_code="$(curl_code GET "$BASE_URL/api/mirror/ratchet")"
 grep -q "mirror-ratchet" "$TMP_DIR/body" || fail "ratchet endpoint did not expose ratchet version"
 grep -q "frontierFailureCoverage" "$TMP_DIR/body" || fail "ratchet endpoint did not expose frontier failure coverage"
 
+proof_ledger_code="$(curl_code GET "$BASE_URL/api/mirror/proof-ledger")"
+[[ "$proof_ledger_code" == "200" ]] || fail "proof ledger endpoint returned HTTP $proof_ledger_code"
+grep -q "proof-ledger" "$TMP_DIR/body" || fail "proof ledger endpoint did not expose ledger version"
+grep -q "chainHead" "$TMP_DIR/body" || fail "proof ledger endpoint did not expose chain head"
+
 query_code="$(curl_code POST "$BASE_URL/api/mirror/query" \
   -H "content-type: application/json" \
   --data "{\"messages\":[{\"role\":\"user\",\"content\":\"$PROMPT\"}]}")"

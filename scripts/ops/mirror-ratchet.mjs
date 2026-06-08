@@ -16,6 +16,7 @@ const files = {
   kernel: "src/lib/mirror/mirrorKernel.ts",
   bodyReceipt: "src/lib/mirror/bodyReceipt.ts",
   ratchet: "src/lib/mirror/mirrorRatchet.ts",
+  proofLedger: "src/lib/mirror/proofLedger.ts",
   ui: "src/components/active-mirror/GovernedGenUIWorkbench.tsx",
   tests: "tests/qa-suite.spec.ts",
   healthcheck: "scripts/ops/healthcheck.sh",
@@ -56,12 +57,22 @@ const invariants = [
   {
     id: "ratchet_frontier_failure_coverage",
     file: "ratchet",
-    pattern: /frontierFailureCoverage[\s\S]*fabricated certainty[\s\S]*permission blur/,
+    pattern: /frontierFailureCoverage[\s\S]*fabricated certainty[\s\S]*vendor-owned proof ledger/,
   },
   {
     id: "ratchet_claim_boundary",
     file: "ratchet",
     pattern: /not a claim of superior raw model IQ/,
+  },
+  {
+    id: "proof_ledger_hash_chain",
+    file: "proofLedger",
+    pattern: /ACTIVE_MIRROR_PROOF_LEDGER_VERSION[\s\S]*chainHead[\s\S]*previousHash[\s\S]*hash/,
+  },
+  {
+    id: "proof_ledger_markdown_export",
+    file: "proofLedger",
+    pattern: /proofLedgerToMarkdown[\s\S]*Active Mirror Public-Safe Proof Ledger/,
   },
   {
     id: "ui_shows_kernel_receipt_and_ratchet",
@@ -76,7 +87,7 @@ const invariants = [
   {
     id: "healthcheck_covers_ratchet",
     file: "healthcheck",
-    pattern: /api\/mirror\/ratchet/,
+    pattern: /api\/mirror\/ratchet[\s\S]*api\/mirror\/proof-ledger/,
   },
 ];
 

@@ -18,6 +18,7 @@ test.describe('Active Mirror public GenUI', () => {
     await expect(ratchet).toContainText('MirrorRatchet');
     await expect(ratchet).toContainText('frontier-model failure modes');
     await expect(ratchet).toContainText('Covers: fabricated certainty');
+    await expect(ratchet).toContainText('Portable proof ledger');
     await expect(page.getByText('/Users/mirror-pro')).toHaveCount(0);
 
     const response = await page.request.get('/api/mirror/kernel');
@@ -43,10 +44,26 @@ test.describe('Active Mirror public GenUI', () => {
     const ratchetResponse = await page.request.get('/api/mirror/ratchet');
     expect(ratchetResponse.ok()).toBeTruthy();
     const ratchetStatus = await ratchetResponse.json();
-    expect(ratchetStatus.version).toBe('2026.06.08-mirror-ratchet-v1');
+    expect(ratchetStatus.version).toBe('2026.06.08-mirror-ratchet-v2');
     expect(ratchetStatus.targetPasses).toBe(1000);
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('fabricated certainty');
+    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('vendor-owned proof ledger');
     expect(ratchetStatus.claimBoundary).toContain('not a claim of superior raw model IQ');
+
+    const ledgerResponse = await page.request.get('/api/mirror/proof-ledger');
+    expect(ledgerResponse.ok()).toBeTruthy();
+    const ledger = await ledgerResponse.json();
+    expect(ledger.version).toBe('2026.06.08-proof-ledger-v1');
+    expect(ledger.owner).toBe('user');
+    expect(ledger.chainHead).toMatch(/^sha256:/);
+    expect(ledger.entries.length).toBeGreaterThanOrEqual(5);
+    expect(ledger.entries.at(-1).hash).toBe(ledger.chainHead);
+
+    const markdownLedgerResponse = await page.request.get('/api/mirror/proof-ledger?format=markdown');
+    expect(markdownLedgerResponse.ok()).toBeTruthy();
+    const markdownLedger = await markdownLedgerResponse.text();
+    expect(markdownLedger).toContain('Active Mirror Public-Safe Proof Ledger');
+    expect(markdownLedger).toContain('Chain head: sha256:');
   });
 
   test('body receipt bridge is public-readable and write-gated by default', async ({ page }) => {
