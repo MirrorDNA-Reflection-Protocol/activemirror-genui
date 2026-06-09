@@ -79,7 +79,7 @@ try {
 
   await page.waitForSelector("[data-testid=front-door-panel]", { timeout: 15_000 });
   const landing = await page.evaluate(() => ({
-    frontDoor: document.body.innerText.includes("Active Mirror builds the AI workspace") &&
+    frontDoor: document.body.innerText.includes("Turn one important AI workflow into a reviewable workspace") &&
       document.body.innerText.includes("72-hour proof sprint") &&
       Boolean(document.querySelector("[data-testid=front-door-panel]")),
     hasInput: Boolean(document.querySelector("textarea, input")),

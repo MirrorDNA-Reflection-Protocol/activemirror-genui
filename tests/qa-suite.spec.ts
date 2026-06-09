@@ -130,13 +130,16 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: /Active Mirror builds the AI workspace/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Turn one important AI workflow into a reviewable workspace/i })).toBeVisible();
     await expect(page.locator('header').getByText('72-hour proof sprint')).toBeVisible();
     await expect(page.getByTestId('front-door-panel')).toContainText('I need to make a decision');
     await expect(page.getByTestId('front-door-panel')).toContainText('I need to use sensitive context');
     await expect(page.getByRole('link', { name: /Start a decision brief/i })).toHaveAttribute('href', /\/mirror\?prompt=/);
     await expect(page.getByRole('link', { name: /Apply for a 72-hour sprint/i }).first()).toHaveAttribute('href', '/intake?focus=pilot');
     await expect(page.getByText('Give us one workflow your current AI cannot safely finish.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /No pitch theatre/i })).toBeVisible();
+    await expect(page.getByText('A working proof on your workflow')).toBeVisible();
+    await expect(page.getByText("A clear deploy-or-don't plan")).toBeVisible();
     await expect(page.locator('.usecase__label').filter({ hasText: /^People$/ })).toBeVisible();
     await expect(page.locator('.usecase__label').filter({ hasText: /^Companies$/ })).toBeVisible();
     await expect(page.locator('.usecase__label').filter({ hasText: /^Governments$/ })).toBeVisible();
@@ -225,7 +228,7 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.goto('/about');
 
-    await expect(page.getByRole('heading', { name: /Active Mirror builds the AI workspace/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Turn one important AI workflow into a reviewable workspace/i })).toBeVisible();
     await expect(page.getByTestId('front-door-panel')).toContainText('What do you need to get done?');
     await expect(page.getByRole('link', { name: /Try the workspace/i }).first()).toHaveAttribute('href', '/mirror');
     await expect(page.locator('textarea, input')).toHaveCount(0);

@@ -32,7 +32,6 @@ export const metadata: Metadata = {
     "AI files",
     "AI work records",
     "AI review workflow",
-    "AI review workflow",
     "sensitive data approval",
     "N1 Intelligence",
   ],

@@ -162,6 +162,16 @@
   font-weight: 700; white-space: nowrap; }
 .challenge__cta:hover { background: var(--accent-hover); }
 
+/* ============================================================ SPRINT DELIVERABLES */
+.sprint { background: var(--ink-1000); }
+.sprint__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; margin-top: 44px;
+  border: 1px solid var(--hairline); border-radius: 14px; overflow: hidden; background: var(--hairline); }
+.sprint__item { min-width: 0; background: var(--ink-950); padding: 24px 22px; }
+.sprint__item span { display: block; font-family: var(--font-data); font-size: 10.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--text-accent); margin-bottom: 14px; }
+.sprint__item h3 { font-size: 18px; line-height: 1.28; font-weight: 600; margin: 0 0 10px; color: var(--text-primary); }
+.sprint__item p { font-size: 13.5px; line-height: 1.56; margin: 0; color: var(--text-secondary); }
+
 /* ============================================================ BUYER USE CASES */
 .usecases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 46px; }
 .usecase { min-width: 0; background: var(--surface-card); border: 1px solid var(--border-default); border-radius: 14px;
@@ -529,7 +539,7 @@
   .hero__front, .proof-split { grid-template-columns: 1fr; }
   .challenge .wrap { grid-template-columns: 1fr; }
   .challenge__cta { justify-self: start; min-height: 42px; }
-  .thesis .wrap, .engage, .sysmap, .converge, .usecases, .novelty { grid-template-columns: 1fr 1fr; }
+  .thesis .wrap, .engage, .sysmap, .converge, .usecases, .novelty, .sprint__grid { grid-template-columns: 1fr 1fr; }
   .converge__gov { grid-column: 1 / -1; }
   .seed-bridge { grid-template-columns: auto 1fr; }
   .seed-bridge__go { grid-column: 2; justify-self: start; }
@@ -553,7 +563,7 @@
   .challenge { padding: 28px 0; }
   .challenge__cta { justify-self: stretch; white-space: normal; text-align: center; }
   .trust-strip { grid-template-columns: 1fr; }
-  .thesis .wrap, .engage, .sysmap, .wedge__stats, .foot .wrap, .usecases, .novelty { grid-template-columns: 1fr; }
+  .thesis .wrap, .engage, .sysmap, .wedge__stats, .foot .wrap, .usecases, .novelty, .sprint__grid { grid-template-columns: 1fr; }
   .converge { grid-template-columns: 1fr; }
   .seed-bridge { grid-template-columns: 1fr; }
   .seed-bridge__go { grid-column: auto; justify-self: start; }

@@ -54,6 +54,29 @@ const challengeSteps = [
   ["3", "You see what works, what is missing, and what it would take to deploy."],
 ];
 
+const sprintDeliverables = [
+  {
+    label: "Scope",
+    title: "A no-nonsense fit decision",
+    body: "We name the business result, the data needed, the approval points, and the reason to proceed or stop.",
+  },
+  {
+    label: "Workspace",
+    title: "A working proof on your workflow",
+    body: "You get a usable surface for the task: brief, source desk, checklist, form, review lane, or workflow board.",
+  },
+  {
+    label: "Evidence",
+    title: "A visible trail of assumptions and gaps",
+    body: "The proof separates what ran, what was assumed, what still needs a source, and what needs human approval.",
+  },
+  {
+    label: "Next",
+    title: "A clear deploy-or-don't plan",
+    body: "You leave with the smallest real deployment path, the blockers, and the cost/risk boundary before more work starts.",
+  },
+];
+
 const useCases = [
   {
     label: "People",
@@ -234,7 +257,7 @@ export default function ActiveMirrorSite() {
           <div className="hero__front">
             <div className="hero__copy">
               <Eyebrow>72-hour proof sprint</Eyebrow>
-              <h1>Active Mirror builds the AI workspace for the work you need done.</h1>
+              <h1>Turn one important AI workflow into a reviewable workspace.</h1>
               <p className="hero__lede">
                 It shows what it used, what it still needs, and what is safe to do next. Send one real workflow and
                 apply for a qualified proof sprint. More capable AI, with a human in the loop before it matters.
@@ -282,6 +305,27 @@ export default function ActiveMirrorSite() {
           <Link className="challenge__cta" data-analytics="challenge_72h_sprint" href="/intake?focus=challenge">
             Apply for the 72-hour sprint →
           </Link>
+        </div>
+      </section>
+
+      <section className="band sprint" data-analytics-section="sprint-deliverables">
+        <div className="wrap">
+          <div className="band__head">
+            <Eyebrow>What the sprint produces</Eyebrow>
+            <h2>No pitch theatre. A useful proof or a clear no.</h2>
+            <p className="band__sub">
+              For accepted workflows, the 72-hour sprint ends with a working artifact your team can inspect. No silent data access. No slide-only demo.
+            </p>
+          </div>
+          <div className="sprint__grid">
+            {sprintDeliverables.map((item) => (
+              <div className="sprint__item" key={item.title}>
+                <span>{item.label}</span>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
