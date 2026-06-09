@@ -122,9 +122,9 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByTestId('site-teaser-console')).toContainText('read-only');
     await expect(page.getByTestId('site-teaser-console')).toContainText('Vendor evidence workspace');
     await expect(page.getByTestId('site-teaser-console')).toContainText('receiptRequired');
-    await expect(page.getByRole('link', { name: /Open Active Mirror/i }).first()).toHaveAttribute('href', '/mirror');
+    await expect(page.getByRole('link', { name: /See it run/i })).toHaveAttribute('href', '/mirror');
     await expect(page.getByText('Portable identity before memory.')).toBeVisible();
-    await expect(page.getByRole('link', { name: /Create your seed/i })).toHaveAttribute(
+    await expect(page.getByRole('link', { name: /Create your MirrorSeed/i }).first()).toHaveAttribute(
       'href',
       'https://id.activemirror.ai/docs/identity.html#generator',
     );
@@ -147,7 +147,7 @@ test.describe('Active Mirror work OS front door', () => {
 
     await expect(page.getByRole('heading', { name: /Not another model/i })).toBeVisible();
     await expect(page.getByTestId('site-teaser-console')).toContainText('no model call');
-    await expect(page.getByRole('link', { name: /Open Active Mirror/i }).first()).toHaveAttribute('href', '/mirror');
+    await expect(page.getByRole('link', { name: /See it run/i })).toHaveAttribute('href', '/mirror');
     await expect(page.locator('textarea, input')).toHaveCount(0);
     expect(modelCalls).toEqual([]);
   });

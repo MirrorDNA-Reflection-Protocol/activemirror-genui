@@ -9,7 +9,7 @@
 /* ---- stage ---- */
 .gen { position: relative; isolation: isolate; padding: 40px 0 64px; }
 .gen__halo { position: absolute; left: 50%; top: -80px; translate: -50% 0; z-index: -2;
-  width: 720px; height: 420px; background: radial-gradient(50% 50% at 50% 50%, var(--reflect-glow), transparent 70%);
+  width: min(720px, calc(100vw - 24px)); height: 420px; background: radial-gradient(50% 50% at 50% 50%, var(--reflect-glow), transparent 70%);
   filter: blur(46px); opacity: .35; pointer-events: none; }
 .gen__lead { text-align: center; max-width: 60ch; margin: 0 auto 30px; }
 .gen__lead .eyebrow { justify-content: center; margin-bottom: 20px; }
@@ -22,13 +22,13 @@
 .gen__lead p { font-size: 16.5px; line-height: 1.6; color: var(--text-secondary); margin: 18px auto 0; max-width: 52ch; }
 
 /* ---- the console window ---- */
-.console { max-width: 880px; margin: 0 auto; border: 1px solid var(--border-default);
+.console { max-width: 880px; width: 100%; margin: 0 auto; border: 1px solid var(--border-default);
   border-radius: 16px; overflow: hidden; background: var(--ink-1000); box-shadow: var(--shadow-xl); }
 .console__bar { display: flex; align-items: center; gap: 9px; padding: 12px 16px;
   border-bottom: 1px solid var(--hairline); background: var(--ink-900); }
 .console__bar .dots { display: flex; gap: 6px; }
 .console__bar .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-600); }
-.console__bar .ttl { margin-left: 8px; display: flex; align-items: center; gap: 8px;
+.console__bar .ttl { margin-left: 8px; display: flex; align-items: center; gap: 8px; min-width: 0;
   font-family: var(--font-data); font-size: 12px; color: var(--text-tertiary); }
 .console__bar .ttl .gl { color: var(--signal); }
 .console__bar .ttl b { color: var(--text-secondary); font-weight: 500; }
@@ -51,7 +51,7 @@
 .lang select option { background: var(--ink-900); color: var(--text-primary); font-family: var(--font-body); }
 
 /* ---- body bar: the runtime's limbs, honestly stated ---- */
-.body-bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+.body-bar { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap;
   padding: 8px 16px; border-bottom: 1px solid var(--hairline); background: var(--ink-950); }
 .body-bar__lbl { font-family: var(--font-data); font-size: 10px; letter-spacing: .14em; color: var(--text-faint); }
 .limb { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-data); font-size: 11px;
@@ -225,7 +225,7 @@
 .surf__t { font-size: 15px; font-weight: 600; color: var(--text-primary); }
 /* generated pack — proof the prompt became a workspace, not a reply */
 .surf__pack { display: flex; flex-wrap: wrap; gap: 7px; }
-.surf__pack .pk { font-family: var(--font-data); font-size: 11px; color: var(--text-secondary);
+.surf__pack .pk { max-width: 100%; font-family: var(--font-data); font-size: 11px; color: var(--text-secondary);
   padding: 4px 9px; border-radius: 6px; border: 1px solid var(--hairline); background: var(--surface-card);
   white-space: nowrap; }
 .surf__pack .pk--out { color: var(--text-accent); border-color: color-mix(in srgb, var(--accent) 32%, transparent);
@@ -302,7 +302,11 @@
   .bubble { max-width: 100%; }
   .memrow { grid-template-columns: 1fr; gap: 6px; }
   .surf__proof { grid-template-columns: 1fr; }
+  .surf__pack .pk { white-space: normal; overflow-wrap: anywhere; }
   .console__bar .st .pill:not(:first-child) { display: none; }
+  .console__bar .ttl { margin-left: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .body-bar { padding: 8px 12px; }
+  .limb { white-space: normal; }
 }
 .cursor::after { content: "▋"; color: var(--text-accent); margin-left: 1px; animation: tw-blink 1s steps(1) infinite; }
 @keyframes tw-blink { 50% { opacity: 0; } }

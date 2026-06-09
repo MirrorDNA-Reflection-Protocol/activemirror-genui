@@ -53,7 +53,7 @@ const engagements = [
       "Weekly shipping, local-first, you own the deployment",
     ],
     price: "Engagement",
-    action: "Start",
+    action: "Talk to us",
     featured: true,
   },
   {
@@ -66,7 +66,7 @@ const engagements = [
       "Audit, gates, and human-in-the-loop design",
     ],
     price: "Retainer",
-    action: "Book",
+    action: "Talk to us",
   },
   {
     tag: "Protocol",
@@ -78,7 +78,7 @@ const engagements = [
       "Implementation support from us",
     ],
     price: "License",
-    action: "Enquire",
+    action: "Talk to us",
   },
 ];
 
@@ -215,10 +215,10 @@ function StaticMirrorTeaser() {
       <div className="composer">
         <div className="composer__hint">
           <span className="gl">⟡</span>
-          This is a static preview. The live work OS opens at /mirror.
+          A real request, governed end-to-end. This is a static preview.
         </div>
         <Link href="/mirror" className="btn btn--primary btn--lg site-open-link">
-          Open Active Mirror <span className="arr">→</span>
+          See it run <span className="arr">→</span>
         </Link>
       </div>
     </div>
@@ -240,7 +240,7 @@ export default function ActiveMirrorSite() {
           </div>
           <div className="nav__r">
             <span className="nav__status"><span className="dot"></span>TRUST BY DESIGN™</span>
-            <Link className="btn btn--primary" href="/mirror">Open Active Mirror <span className="arr">→</span></Link>
+            <Link className="btn btn--primary" href="/mirror">Open workspace <span className="arr">→</span></Link>
           </div>
         </div>
       </nav>
@@ -315,7 +315,7 @@ export default function ActiveMirrorSite() {
                   Active Mirror can use it as the starting contract before any model remembers or acts.
                 </p>
               </div>
-              <a className="seed-bridge__go" href={MIRRORSEED_URL}>Create your seed →</a>
+              <a className="seed-bridge__go" href={MIRRORSEED_URL}>Create your MirrorSeed →</a>
             </div>
             <div className="converge__gov">
               <span className="converge__gl">⟡</span>
@@ -361,7 +361,7 @@ export default function ActiveMirrorSite() {
         <div className="wrap">
           <div className="band__head">
             <Eyebrow>PROOF, NOT PROMISES</Eyebrow>
-            <h2>The Glass Box: every decision, in real time.</h2>
+            <h2>The Glass Box: every decision, on the record.</h2>
             <p className="band__sub">
               We instrument the AI itself — gates that pass, warn, or block; behavioral drift; model monitor; memory map.
               Transparency isn&apos;t a setting. It&apos;s the architecture.
@@ -371,11 +371,11 @@ export default function ActiveMirrorSite() {
             <div className="proof__bar">
               <div className="dots"><i></i><i></i><i></i></div>
               <span className="u">mirrordash.activemirror.ai<b> /dash/glass</b></span>
-              <span className="live"><span className="dot"></span>LIVE</span>
+              <span className="live"><span className="dot"></span>SNAPSHOT</span>
             </div>
             <div className="gbmini">
               <div className="p">
-                <div className="pt">GATE ACTIVITY · LIVE</div>
+                <div className="pt">GATE ACTIVITY · SAMPLE</div>
                 <div className="row"><span className="l">anti_rationalization</span><span className="v-pass">pass</span></div>
                 <div className="row"><span className="l">logic_anchor</span><span className="v-pass">allow</span></div>
                 <div className="row"><span className="l">fact_check</span><span className="v-deny">deny</span></div>
@@ -383,7 +383,7 @@ export default function ActiveMirrorSite() {
               </div>
               <div className="p">
                 <div className="pt">BEHAVIORAL METRICS</div>
-                <div className="row"><span className="l">Integrity</span><span className="v-num">54</span></div>
+                <div className="row"><span className="l">Integrity</span><span className="v-num">54/100</span></div>
                 <div className="row"><span className="l">Drift</span><span className="v-drift">0.259</span></div>
                 <div className="row"><span className="l">Verification</span><span className="v-pass">0.57</span></div>
               </div>
@@ -396,8 +396,8 @@ export default function ActiveMirrorSite() {
             </div>
           </div>
           <div className="proof__caption">
-            <a className="btn btn--ghost" href="#system">Open the live Glass Box <span className="arr">→</span></a>
-            <span className="txt">A real surface from our stack — MIRRORDASH, the AI-transparency cockpit.</span>
+            <a className="btn btn--ghost" href="#system">See how it works <span className="arr">→</span></a>
+            <span className="txt">A sample surface from our stack — MIRRORDASH, the AI-transparency cockpit.</span>
           </div>
         </div>
       </section>
@@ -464,8 +464,8 @@ export default function ActiveMirrorSite() {
           <p>If you&apos;re deploying AI that needs to remember correctly, stay within boundaries, and prove every action — let&apos;s build the trust layer together.</p>
           <div className="cta__cta">
             <a className="btn btn--primary btn--lg" href="mailto:hello@activemirror.ai">Talk to us <span className="arr">→</span></a>
-            <a className="btn btn--ghost btn--lg" href={MIRRORSEED_URL}>Create MirrorSeed</a>
-            <Link className="btn btn--ghost btn--lg" href="/mirror">Open Active Mirror</Link>
+            <a className="btn btn--ghost btn--lg" href={MIRRORSEED_URL}>Create your MirrorSeed</a>
+            <Link className="btn btn--ghost btn--lg" href="/mirror">Open the workspace</Link>
           </div>
         </div>
       </section>
