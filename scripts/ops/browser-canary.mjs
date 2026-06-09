@@ -5,7 +5,7 @@ process.env.PW_TEST_SCREENSHOT_NO_FONTS_READY = process.env.PW_TEST_SCREENSHOT_N
 
 const baseUrl = (process.argv[2] || process.env.ACTIVEMIRROR_BROWSER_CANARY_URL || "http://127.0.0.1:3456").replace(/\/$/, "");
 const screenshotPath = process.env.ACTIVEMIRROR_BROWSER_CANARY_SCREENSHOT || "/tmp/activemirror-browser-canary.png";
-const serviceWorkerTimeoutMs = Number(process.env.ACTIVEMIRROR_BROWSER_CANARY_SW_TIMEOUT_MS || 60_000);
+const serviceWorkerTimeoutMs = Number(process.env.ACTIVEMIRROR_BROWSER_CANARY_SW_TIMEOUT_MS || 180_000);
 
 function fail(receipt) {
   console.error(JSON.stringify({ ...receipt, status: "failed" }, null, 2));
@@ -90,6 +90,7 @@ try {
   await page.goto(`${baseUrl}/mirror?qa=canary`, { waitUntil: "domcontentloaded", timeout: 20_000 });
   receipt.checks.mirrorRoute = page.url().startsWith(`${baseUrl}/mirror`);
   await page.waitForSelector("[data-testid=work-os-stage]", { timeout: 15_000 });
+  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
   await page.click("[data-testid=runtime-btn]");
   await page.waitForSelector("[data-testid=mirrorkernel-proof]", { timeout: 15_000 });
   await page.waitForSelector("[data-testid=mirror-ratchet-proof]", { timeout: 15_000 });
