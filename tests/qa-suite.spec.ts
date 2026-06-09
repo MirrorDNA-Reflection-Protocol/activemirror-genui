@@ -32,7 +32,7 @@ test.describe('Active Mirror public GenUI', () => {
     expect(response.ok()).toBeTruthy();
     const status = await response.json();
     expect(status.name).toBe('MirrorKernel');
-    expect(status.version).toBe('2026.06.08-mirrorkernel-signature-v5');
+    expect(status.version).toBe('2026.06.09-mirrorkernel-identity-score-v6');
     expect(status.epistemicMode.runtimeLayer).toBe('canonical_verifier');
     expect(status.truthfulUtilityPolicy.principle).toBe('accuracy_without_fabrication');
     expect(status.actualization.productWedge).toContain('without giving it all of me');
@@ -58,14 +58,15 @@ test.describe('Active Mirror public GenUI', () => {
     const ratchetResponse = await page.request.get('/api/mirror/ratchet');
     expect(ratchetResponse.ok()).toBeTruthy();
     const ratchetStatus = await ratchetResponse.json();
-    expect(ratchetStatus.version).toBe('2026.06.08-mirror-ratchet-v4');
+    expect(ratchetStatus.version).toBe('2026.06.09-mirror-ratchet-v5');
     expect(ratchetStatus.targetPasses).toBe(1000);
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('fabricated certainty');
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('vendor-owned proof ledger');
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('unverified audit signatures');
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('revocation cascade opacity');
     expect(ratchetStatus.frontierFailureCoverage.covered).toContain('hidden system failure stream');
-    expect(ratchetStatus.frontierFailureCoverage.queued).toContain('model-swap identity drift');
+    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('model-swap identity drift');
+    expect(ratchetStatus.frontierFailureCoverage.queued).toEqual([]);
     expect(ratchetStatus.claimBoundary).toContain('not a claim of superior raw model IQ');
 
     const ledgerResponse = await page.request.get('/api/mirror/proof-ledger');
@@ -108,9 +109,74 @@ test.describe('Active Mirror public GenUI', () => {
     const identityResponse = await page.request.get('/api/mirror/identity-continuity');
     expect(identityResponse.ok()).toBeTruthy();
     const identity = await identityResponse.json();
-    expect(identity.version).toBe('2026.06.08-identity-continuity-v1');
+    expect(identity.version).toBe('2026.06.09-identity-continuity-v2');
     expect(identity.privateUserContinuityScore).toBeNull();
+    expect(identity.scoringRoute).toBe('/api/mirror/identity-continuity/measure');
     expect(identity.crossModelDiff.requiredReceipt).toBe('signed_model_swap_identity_receipt');
+
+    const identityMeasureContractResponse = await page.request.get('/api/mirror/identity-continuity/measure');
+    expect(identityMeasureContractResponse.ok()).toBeTruthy();
+    const identityMeasureContract = await identityMeasureContractResponse.json();
+    expect(identityMeasureContract.version).toBe('2026.06.09-identity-continuity-measure-v1');
+    expect(identityMeasureContract.requiredReceipt).toBe('signed_model_swap_identity_receipt');
+
+    const identityMeasureResponse = await page.request.post('/api/mirror/identity-continuity/measure', {
+      data: {
+        beforeModel: 'frontier-a',
+        afterModel: 'local-b',
+        before: [
+          { id: 'purpose', label: 'Purpose lock', value: 1 },
+          { id: 'memory', label: 'Memory scope', value: 1 },
+          { id: 'proof', label: 'Proof discipline', value: 1 },
+          { id: 'permission', label: 'Permission boundary', value: 0.8 },
+        ],
+        after: [
+          { id: 'purpose', label: 'Purpose lock', value: 0.9 },
+          { id: 'memory', label: 'Memory scope', value: 0.8 },
+          { id: 'proof', label: 'Proof discipline', value: 1 },
+          { id: 'permission', label: 'Permission boundary', value: 0.8 },
+        ],
+      },
+    });
+    expect(identityMeasureResponse.ok()).toBeTruthy();
+    const identityMeasure = await identityMeasureResponse.json();
+    expect(identityMeasure.continuityScore).toBe(0.925);
+    expect(identityMeasure.drift).toBe(0.075);
+    expect(identityMeasure.vectorDelta.length).toBe(4);
+    expect(identityMeasure.requiredReceipt).toBe('signed_model_swap_identity_receipt');
+
+    const rejectedIdentityMeasureResponse = await page.request.post('/api/mirror/identity-continuity/measure', {
+      data: {
+        before: [
+          { id: 'purpose', label: 'Purpose lock', value: 1, source: '/Users/mirror-pro/private' },
+          { id: 'memory', label: 'Memory scope', value: 1 },
+        ],
+        after: [
+          { id: 'purpose', label: 'Purpose lock', value: 1 },
+          { id: 'memory', label: 'Memory scope', value: 1 },
+        ],
+      },
+    });
+    expect(rejectedIdentityMeasureResponse.status()).toBe(400);
+    const rejectedIdentityMeasure = await rejectedIdentityMeasureResponse.json();
+    expect(rejectedIdentityMeasure.reason).toBe('measurement_contains_private_material');
+
+    const shapeDriftResponse = await page.request.post('/api/mirror/identity-continuity/measure', {
+      data: {
+        before: [
+          { id: 'purpose', label: 'Purpose lock', value: 1 },
+          { id: 'memory', label: 'Memory scope', value: 1 },
+        ],
+        after: [
+          { id: 'purpose', label: 'Purpose lock', value: 1 },
+          { id: 'memory', label: 'Memory scope', value: 1 },
+          { id: 'padding', label: 'Padding claim', value: 1 },
+        ],
+      },
+    });
+    expect(shapeDriftResponse.status()).toBe(400);
+    const shapeDrift = await shapeDriftResponse.json();
+    expect(shapeDrift.reason).toBe('unexpected_after_dimension:padding');
   });
 
   test('body receipt bridge is public-readable and write-gated by default', async ({ page }) => {

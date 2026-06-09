@@ -6,7 +6,7 @@ import {
   ACTIVE_MIRROR_STORAGE_CONTRACT,
 } from "./contracts/activeMirrorBootloader";
 
-export const ACTIVE_MIRROR_RATCHET_VERSION = "2026.06.08-mirror-ratchet-v4";
+export const ACTIVE_MIRROR_RATCHET_VERSION = "2026.06.09-mirror-ratchet-v5";
 
 type RatchetState = "passing" | "queued" | "blocked";
 
@@ -129,9 +129,9 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
     check(
       "identity-continuity",
       "Identity continuity across models",
-      "queued",
+      "passing",
       "Identity is bound to one model session or one vendor account.",
-      "Public doctrine vector exists; private cross-model user drift score still needs a signed body receipt.",
+      "Deterministic continuity scorer is live; private cross-model user drift still requires a signed body receipt.",
     ),
     check(
       "confession-stream",
@@ -167,8 +167,9 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
         "unverified audit signatures",
         "revocation cascade opacity",
         "hidden system failure stream",
+        "model-swap identity drift",
       ],
-      queued: ["model-swap identity drift"],
+      queued: [],
     },
     checks,
     frontierComparison: [
@@ -201,7 +202,7 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
     nextQueue: [
       "Install production body receipt publisher and token.",
       "Install production body receipt public key and signed publisher.",
-      "Add identity-continuity score across model swaps.",
+      "Run signed private identity-continuity measurements across approved model swaps.",
       "Connect revocation cascade and critique stream to signed private body events.",
     ],
   };

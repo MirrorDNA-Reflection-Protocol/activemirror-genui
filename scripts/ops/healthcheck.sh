@@ -64,6 +64,11 @@ identity_code="$(curl_code GET "$BASE_URL/api/mirror/identity-continuity")"
 grep -q "identity-continuity" "$TMP_DIR/body" || fail "identity endpoint did not expose continuity version"
 grep -q "privateUserContinuityScore" "$TMP_DIR/body" || fail "identity endpoint did not expose private measurement boundary"
 
+identity_measure_code="$(curl_code GET "$BASE_URL/api/mirror/identity-continuity/measure")"
+[[ "$identity_measure_code" == "200" ]] || fail "identity continuity measure endpoint returned HTTP $identity_measure_code"
+grep -q "identity-continuity-measure" "$TMP_DIR/body" || fail "identity measure endpoint did not expose scorer version"
+grep -q "signed_model_swap_identity_receipt" "$TMP_DIR/body" || fail "identity measure endpoint did not expose receipt boundary"
+
 query_code="$(curl_code POST "$BASE_URL/api/mirror/query" \
   -H "content-type: application/json" \
   --data "{\"messages\":[{\"role\":\"user\",\"content\":\"$PROMPT\"}]}")"

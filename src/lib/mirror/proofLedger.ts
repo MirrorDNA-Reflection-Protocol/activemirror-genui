@@ -119,7 +119,7 @@ export async function getProofLedger(): Promise<ProofLedger> {
     kind: "identity_continuity",
     statement:
       identityContinuity.privateUserContinuityScore === null
-        ? "Public doctrine vector is available; private cross-model user continuity measurement is queued."
+        ? "Public doctrine vector and deterministic scorer are available; private cross-model user continuity measurement is queued."
         : "Private cross-model user continuity measurement is available.",
     state: identityContinuity.privateUserContinuityScore === null ? "queued" : "available",
     source: "/api/mirror/identity-continuity",

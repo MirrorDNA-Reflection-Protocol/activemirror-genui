@@ -1,4 +1,6 @@
-export const ACTIVE_MIRROR_IDENTITY_CONTINUITY_VERSION = "2026.06.08-identity-continuity-v1";
+import { identityContinuityMeasureContract } from "./identityContinuityMeasure";
+
+export const ACTIVE_MIRROR_IDENTITY_CONTINUITY_VERSION = "2026.06.09-identity-continuity-v2";
 
 export type IdentityContinuityDimension = {
   id: string;
@@ -9,27 +11,30 @@ export type IdentityContinuityDimension = {
 
 export type IdentityContinuityStatus = {
   version: typeof ACTIVE_MIRROR_IDENTITY_CONTINUITY_VERSION;
-  status: "public_contract_ready_private_measurement_queued";
+  status: "public_scorer_ready_private_measurement_queued";
   claimBoundary: string;
   publicDoctrineContinuityScore: number;
   privateUserContinuityScore: null;
   identityVector: IdentityContinuityDimension[];
   crossModelDiff: {
-    measurementState: "not_run_public_preview";
+    measurementState: "public_scorer_ready_private_run_missing";
     continuityScore: null;
     drift: null;
     vectorDelta: null;
     requiredReceipt: "signed_model_swap_identity_receipt";
   };
+  scoringRoute: string;
   nextPrivateRun: string[];
 };
 
 export function getIdentityContinuityStatus(): IdentityContinuityStatus {
+  const scoringContract = identityContinuityMeasureContract();
+
   return {
     version: ACTIVE_MIRROR_IDENTITY_CONTINUITY_VERSION,
-    status: "public_contract_ready_private_measurement_queued",
+    status: "public_scorer_ready_private_measurement_queued",
     claimBoundary:
-      "This is a public Active Mirror doctrine vector, not a hidden personality profile. Private user continuity across model swaps remains unmeasured until the approved body runner signs a receipt.",
+      "This is a public Active Mirror doctrine vector and scorer contract, not a hidden personality profile. Private user continuity across model swaps remains unmeasured until the approved body runner signs a receipt.",
     publicDoctrineContinuityScore: 1,
     privateUserContinuityScore: null,
     identityVector: [
@@ -65,12 +70,13 @@ export function getIdentityContinuityStatus(): IdentityContinuityStatus {
       },
     ],
     crossModelDiff: {
-      measurementState: "not_run_public_preview",
+      measurementState: "public_scorer_ready_private_run_missing",
       continuityScore: null,
       drift: null,
       vectorDelta: null,
       requiredReceipt: "signed_model_swap_identity_receipt",
     },
+    scoringRoute: scoringContract.route,
     nextPrivateRun: [
       "capture before vector from approved continuity state",
       "route the same task packet through two approved model proposers",

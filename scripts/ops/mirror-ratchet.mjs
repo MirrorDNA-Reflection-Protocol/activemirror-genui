@@ -20,6 +20,7 @@ const files = {
   critique: "src/lib/mirror/decisionCritique.ts",
   revocation: "src/lib/mirror/revocationCascade.ts",
   identity: "src/lib/mirror/identityContinuity.ts",
+  identityMeasure: "src/lib/mirror/identityContinuityMeasure.ts",
   ui: "src/components/active-mirror/GovernedGenUIWorkbench.tsx",
   tests: "tests/qa-suite.spec.ts",
   healthcheck: "scripts/ops/healthcheck.sh",
@@ -104,6 +105,11 @@ const invariants = [
     pattern: /ACTIVE_MIRROR_IDENTITY_CONTINUITY_VERSION[\s\S]*privateUserContinuityScore: null[\s\S]*signed_model_swap_identity_receipt/,
   },
   {
+    id: "identity_continuity_scorer",
+    file: "identityMeasure",
+    pattern: /ACTIVE_MIRROR_IDENTITY_CONTINUITY_MEASURE_VERSION[\s\S]*continuityScore[\s\S]*signed_model_swap_identity_receipt/,
+  },
+  {
     id: "ui_shows_kernel_receipt_and_ratchet",
     file: "ui",
     pattern: /Body receipt[\s\S]*mirror-ratchet-proof|mirror-ratchet-proof[\s\S]*Body receipt/,
@@ -116,7 +122,7 @@ const invariants = [
   {
     id: "healthcheck_covers_public_contracts",
     file: "healthcheck",
-    pattern: /api\/mirror\/ratchet[\s\S]*api\/mirror\/proof-ledger[\s\S]*api\/mirror\/critique[\s\S]*api\/mirror\/revocation-cascade[\s\S]*api\/mirror\/identity-continuity/,
+    pattern: /api\/mirror\/ratchet[\s\S]*api\/mirror\/proof-ledger[\s\S]*api\/mirror\/critique[\s\S]*api\/mirror\/revocation-cascade[\s\S]*api\/mirror\/identity-continuity[\s\S]*api\/mirror\/identity-continuity\/measure/,
   },
 ];
 
