@@ -123,6 +123,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Searc
         <MetricCard label="Workspace starts" value={summary.workspaceStarts} sub={`${summary.artifacts} delivered artifacts`} />
         <MetricCard label="Intake submits" value={summary.intakeSubmits} sub={`${pct(summary.intakeRate)} of public visitors`} />
         <MetricCard label="Captured leads" value={summary.leads} sub={`${pct(summary.leadRate)} of public visitors`} />
+        <MetricCard label="Workspace leads" value={summary.workspaceHandoffLeads} sub={`${summary.workspaceHandoffClicks} handoff clicks`} />
         <MetricCard label="Qualified leads" value={summary.qualifiedLeads} sub={`${summary.priorityLeads} priority · avg score ${summary.avgLeadScore}`} />
       </section>
 
@@ -150,6 +151,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Searc
 
       <section className="ops-grid">
         <RankedList title="Top CTAs" rows={snapshot.topCtas} />
+        <RankedList title="Intake focus" rows={snapshot.topFocus} />
         <RankedList title="Top sources" rows={snapshot.topSources} />
         <RankedList title="Top paths" rows={snapshot.topPaths} />
         <RankedList title="Devices" rows={snapshot.devices} />
@@ -175,6 +177,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Searc
                 <span>{lead.infrastructure || "infra unknown"}</span>
                 <span>{lead.timeline || "timeline unknown"}</span>
                 <span>{lead.decisionRole || "owner unknown"}</span>
+                <span>{lead.focus || "focus unknown"}</span>
                 <span>{lead.deliveryStatus || "capture_only"}</span>
                 {lead.qualification.reasons.map((reason) => <span key={reason}>{reason}</span>)}
                 <time>{formatDate(lead.createdAt)}</time>

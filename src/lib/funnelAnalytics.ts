@@ -25,6 +25,7 @@ type LeadRecord = {
   infrastructure: string;
   timeline: string;
   decisionRole?: string;
+  focus?: string;
   proofTarget?: string;
   useCase: string;
   qualification?: LeadQualification;
@@ -71,6 +72,8 @@ function nextAdjustment(input: {
   intakeReady: number;
   leads: number;
   priorityLeads?: number;
+  workspaceHandoffClicks?: number;
+  workspaceHandoffLeads?: number;
 }) {
   if (input.visitors < 20) {
     return {
@@ -100,6 +103,12 @@ function nextAdjustment(input: {
     return {
       title: "Lead quality needs sharper proof signals.",
       body: "Captured leads exist, but none look priority yet. Tighten outreach around urgent owned workflows and ask what proof would justify a paid sprint.",
+    };
+  }
+  if ((input.workspaceHandoffClicks || 0) > 0 && !input.workspaceHandoffLeads) {
+    return {
+      title: "Workspace handoff is attracting clicks, not leads yet.",
+      body: "The product demo is creating buying intent. Check the focused intake copy, reduce friction, and follow up on any workspace-origin sessions quickly.",
     };
   }
   if (input.workspaceStarts > input.sprintClicks * 2 && input.sprintClicks < 3) {
@@ -157,12 +166,14 @@ export async function getFunnelSnapshot(days = 14) {
     const intakeSubmits = events.filter((event) => event.event === "intake_submit");
     const intakeReady = events.filter((event) => event.event === "intake_ready");
     const intakeErrors = events.filter((event) => event.event === "intake_error");
+    const workspaceHandoffClicks = ctaClicks.filter((event) => event.target === "workspace_72h_sprint");
     const leadsWithQualification = leads.map((lead) => ({
       ...lead,
       qualification: lead.qualification || qualifyLead(lead),
     }));
     const priorityLeads = leadsWithQualification.filter((lead) => lead.qualification.grade === "priority");
     const qualifiedLeads = leadsWithQualification.filter((lead) => lead.qualification.grade === "priority" || lead.qualification.grade === "qualified");
+    const workspaceHandoffLeads = leadsWithQualification.filter((lead) => lead.focus === "workspace-proof");
     const avgLeadScore = leadsWithQualification.length
       ? Math.round(leadsWithQualification.reduce((sum, lead) => sum + lead.qualification.score, 0) / leadsWithQualification.length)
       : 0;
@@ -171,12 +182,17 @@ export async function getFunnelSnapshot(days = 14) {
     const bySource = new Map<string, number>();
     const byCta = new Map<string, number>();
     const byDevice = new Map<string, number>();
+    const byFocus = new Map<string, number>();
 
     for (const event of events) {
       if (event.path) byPath.set(event.path, (byPath.get(event.path) || 0) + 1);
       if (event.event === "page_view") bySource.set(sourceKey(event), (bySource.get(sourceKey(event)) || 0) + 1);
       if (event.event === "cta_click") byCta.set(event.target || event.label || event.href || "unknown", (byCta.get(event.target || event.label || event.href || "unknown") || 0) + 1);
+      if (event.event === "intake_focus_loaded" && event.target) byFocus.set(event.target, (byFocus.get(event.target) || 0) + 1);
       if (event.device) byDevice.set(event.device, (byDevice.get(event.device) || 0) + 1);
+    }
+    for (const lead of leadsWithQualification) {
+      if (lead.focus) byFocus.set(`lead:${lead.focus}`, (byFocus.get(`lead:${lead.focus}`) || 0) + 1);
     }
 
     const visitorBase = publicSessions.size || publicViews.length;
@@ -196,6 +212,8 @@ export async function getFunnelSnapshot(days = 14) {
       leads: leads.length,
       priorityLeads: priorityLeads.length,
       qualifiedLeads: qualifiedLeads.length,
+      workspaceHandoffClicks: workspaceHandoffClicks.length,
+      workspaceHandoffLeads: workspaceHandoffLeads.length,
       avgLeadScore,
       clickRate: pct(sprintClicks.length, visitorBase),
       intakeRate: pct(intakeSubmits.length, visitorBase),
@@ -213,10 +231,12 @@ export async function getFunnelSnapshot(days = 14) {
         { label: "Workspace starts", value: summary.workspaceStarts, rate: pct(summary.workspaceStarts, summary.visitors) },
         { label: "Intake submits", value: summary.intakeSubmits, rate: summary.intakeRate },
         { label: "Captured leads", value: summary.leads, rate: summary.leadRate },
+        { label: "Workspace handoff leads", value: summary.workspaceHandoffLeads, rate: pct(summary.workspaceHandoffLeads, summary.workspaceHandoffClicks || summary.sprintClicks || summary.visitors) },
       ],
       topPaths: topMap(byPath),
       topSources: topMap(bySource),
       topCtas: topMap(byCta),
+      topFocus: topMap(byFocus),
       devices: topMap(byDevice),
       recentLeads: leadsWithQualification.slice(0, 12).map((lead) => ({
         ...lead,
@@ -249,6 +269,8 @@ export async function getFunnelSnapshot(days = 14) {
         priorityLeads: 0,
         qualifiedLeads: 0,
         avgLeadScore: 0,
+        workspaceHandoffClicks: 0,
+        workspaceHandoffLeads: 0,
         clickRate: 0,
         intakeRate: 0,
         leadRate: 0,
@@ -261,6 +283,7 @@ export async function getFunnelSnapshot(days = 14) {
       topPaths: [],
       topSources: [],
       topCtas: [],
+      topFocus: [],
       devices: [],
       recentLeads: [],
       recentEvents: [],

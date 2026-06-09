@@ -224,8 +224,10 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByText('Revenue front door')).toBeVisible();
     await expect(page.getByText('72h sprint clicks')).toBeVisible();
     await expect(page.getByText('Captured leads', { exact: true })).toBeVisible();
+    await expect(page.getByText('Workspace leads')).toBeVisible();
     await expect(page.getByText('Qualified leads')).toBeVisible();
     await expect(page.getByText('Next adjustment')).toBeVisible();
+    await expect(page.getByText('Intake focus')).toBeVisible();
     await expect(page.getByText('Recent leads')).toBeVisible();
   });
 
