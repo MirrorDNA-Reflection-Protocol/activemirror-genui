@@ -217,6 +217,44 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByLabel('What business workflow should Active Mirror help with?')).toHaveAttribute('placeholder', /I generated a vendor evidence workspace/);
   });
 
+  test('intake success returns a buyer-safe follow-up packet', async ({ page }) => {
+    await page.route('**/api/lead', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          ok: true,
+          captured: true,
+          deliveryStatus: 'capture_only',
+          mailto: 'mailto:paul@activemirror.ai?subject=Active%20Mirror%20test',
+          followUp: {
+            responseWindow: 'same_day',
+            buyerStatus: 'Captured. We review the workflow and reply with the first scope question.',
+            proofSurface: 'reviewable evidence workspace',
+            riskBoundary: 'No private files, account access, device access, or external sends before explicit approval.',
+            scopeQuestions: [
+              'Who owns approval for the first proof?',
+              'What source, file, or system boundary is allowed in the first 72 hours?',
+              'What result would make this worth deploying or rejecting?',
+            ],
+          },
+        }),
+      });
+    });
+
+    await page.goto('/intake?focus=workspace-proof');
+    await page.getByLabel('Name').fill('Asha Rao');
+    await page.getByLabel('Work email').fill('asha@examplecorp.com');
+    await page.getByLabel('What business workflow should Active Mirror help with?').fill('We generated a vendor evidence workspace and need it adapted for a real procurement review.');
+    await page.getByLabel('What would make the 72-hour proof worth paying attention to?').fill('A decision-ready export with source gaps and approvals visible.');
+    await page.getByRole('button', { name: 'Submit workflow' }).click();
+
+    await expect(page.getByTestId('intake-followup')).toContainText('reviewable evidence workspace');
+    await expect(page.getByTestId('intake-followup')).toContainText('Who owns approval for the first proof?');
+    await expect(page.getByTestId('intake-followup')).toContainText('No private files');
+    await expect(page.getByRole('link', { name: 'Open prepared email' })).toHaveAttribute('href', /mailto:paul@activemirror\.ai/);
+  });
+
   test('local ops funnel shows the conversion dashboard', async ({ page }) => {
     await page.goto('/ops/funnel?days=7');
 

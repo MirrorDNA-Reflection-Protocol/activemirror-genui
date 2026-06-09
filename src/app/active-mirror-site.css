@@ -450,6 +450,13 @@
   border: 1px dashed var(--border-strong); border-radius: 10px; color: var(--text-tertiary); }
 .intake__proof span { color: var(--signal); }
 .intake__proof b { font-size: 12.5px; font-weight: 500; line-height: 1.5; }
+.intake__followup { margin-top: 16px; padding: 16px; border: 1px solid color-mix(in srgb, var(--signal) 28%, var(--hairline));
+  border-radius: 12px; background: color-mix(in srgb, var(--signal) 8%, var(--ink-1000)); }
+.intake__followup span { font-family: var(--font-data); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--signal); }
+.intake__followup h3 { margin: 6px 0 0; font-family: var(--font-display); font-size: 21px; color: var(--text-primary); }
+.intake__followup p { margin: 8px 0 0; color: var(--text-secondary); font-size: 13.5px; line-height: 1.5; }
+.intake__followup ul { margin: 12px 0 0; padding-left: 18px; color: var(--text-secondary); font-size: 13px; line-height: 1.55; }
+.intake__boundary { color: var(--text-tertiary) !important; }
 .intake__error { margin-top: 12px; color: var(--danger); font-size: 13px; }
 .intake__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
 
@@ -511,6 +518,7 @@
 .ops-lead span { color: var(--text-tertiary); font-size: 12.5px; }
 .ops-lead p { margin: 10px 0; color: var(--text-secondary); font-size: 13.5px; line-height: 1.5; }
 .ops-lead__proof { color: var(--text-tertiary) !important; margin-top: -2px !important; }
+.ops-lead__reply { border: 1px solid var(--hairline); border-radius: 10px; padding: 10px; color: var(--text-tertiary) !important; background: var(--surface-card); }
 .ops-lead__next { border-left: 2px solid var(--text-accent); padding-left: 10px; color: var(--text-primary) !important; }
 .ops-lead footer { display: flex; flex-wrap: wrap; gap: 8px; }
 .ops-lead footer span, .ops-lead time { border: 1px solid var(--hairline); border-radius: 999px; padding: 5px 8px;

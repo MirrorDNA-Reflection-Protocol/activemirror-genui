@@ -171,6 +171,8 @@ export default async function FunnelPage({ searchParams }: { searchParams: Searc
               </div>
               <p>{lead.useCasePreview || "No use case preview."}</p>
               {lead.proofTargetPreview ? <p className="ops-lead__proof">Proof target: {lead.proofTargetPreview}</p> : null}
+              {lead.followUpProofSurface ? <p className="ops-lead__proof">Proof surface: {lead.followUpProofSurface}</p> : null}
+              {lead.firstReplyPreview ? <p className="ops-lead__reply">First reply: {lead.firstReplyPreview}</p> : null}
               <p className="ops-lead__next">{lead.qualification.nextAction}</p>
               <footer>
                 <span>{lead.sensitivity || "sensitivity unknown"}</span>

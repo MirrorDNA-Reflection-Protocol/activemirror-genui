@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { qualifyLead } from "@/lib/leadQualification";
+import { buildLeadFollowUp, type LeadFollowUp } from "@/lib/leadFollowUp";
 
 const LEAD_TO = "paul@activemirror.ai";
 const LEAD_WEBHOOK_URL = process.env.MIRROR_LEAD_WEBHOOK_URL || "";
@@ -46,7 +47,7 @@ function mailtoFromLead(lead: Lead) {
   return `mailto:${LEAD_TO}?subject=${subject}&body=${body}`;
 }
 
-async function deliverLeadNotification(lead: Lead, qualification: ReturnType<typeof qualifyLead>) {
+async function deliverLeadNotification(lead: Lead, qualification: ReturnType<typeof qualifyLead>, followUp: LeadFollowUp) {
   if (!LEAD_WEBHOOK_URL) {
     return {
       delivered: false,
@@ -73,6 +74,7 @@ async function deliverLeadNotification(lead: Lead, qualification: ReturnType<typ
         destination: LEAD_TO,
         lead,
         qualification,
+        followUp,
       }),
       signal: controller.signal,
     }).finally(() => clearTimeout(timeout));
@@ -138,13 +140,16 @@ export async function POST(request: NextRequest) {
     }
 
     const qualification = qualifyLead(lead);
-    const delivery = await deliverLeadNotification(lead, qualification);
+    const followUp = buildLeadFollowUp(lead, qualification);
+    const captureId = `amlead_${Date.now().toString(36)}_${crypto.randomUUID().slice(0, 8)}`;
+    const delivery = await deliverLeadNotification(lead, qualification, followUp);
 
     await prisma.auditLog.create({
       data: {
         action: "LEAD_CAPTURE",
-        resource: "activemirror.ai:waitlist",
+        resource: `activemirror.ai:lead:${captureId}`,
         details: JSON.stringify({
+          captureId,
           ...lead,
           destination: LEAD_TO,
           delivered: delivery.delivered,
@@ -152,6 +157,7 @@ export async function POST(request: NextRequest) {
           deliveryChannel: delivery.deliveryChannel,
           source: "public_structured_intake",
           qualification,
+          followUp,
         }),
         severity: "INFO",
       },
@@ -165,6 +171,14 @@ export async function POST(request: NextRequest) {
       deliveryChannel: delivery.deliveryChannel,
       destination: LEAD_TO,
       qualification,
+      captureId,
+      followUp: {
+        responseWindow: followUp.responseWindow,
+        buyerStatus: followUp.buyerStatus,
+        proofSurface: followUp.proofSurface,
+        riskBoundary: followUp.riskBoundary,
+        scopeQuestions: followUp.scopeQuestions,
+      },
       mailto: mailtoFromLead(lead),
     });
   } catch (error) {

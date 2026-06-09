@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { qualifyLead, type LeadQualification } from "@/lib/leadQualification";
+import type { LeadFollowUp } from "@/lib/leadFollowUp";
 
 type AnalyticsRecord = {
   event: string;
@@ -32,6 +33,7 @@ type LeadRecord = {
   delivered?: boolean;
   deliveryStatus?: string;
   deliveryChannel?: string;
+  followUp?: LeadFollowUp;
   createdAt: string;
 };
 
@@ -244,6 +246,8 @@ export async function getFunnelSnapshot(days = 14) {
         emailDomain: emailDomain(lead.email),
         useCasePreview: lead.useCase.replace(/\s+/g, " ").slice(0, 260),
         proofTargetPreview: (lead.proofTarget || "").replace(/\s+/g, " ").slice(0, 220),
+        followUpProofSurface: lead.followUp?.proofSurface || "",
+        firstReplyPreview: (lead.followUp?.firstReplyBody || "").replace(/\s+/g, " ").slice(0, 260),
       })),
       recentEvents: events.slice(0, 20),
     };

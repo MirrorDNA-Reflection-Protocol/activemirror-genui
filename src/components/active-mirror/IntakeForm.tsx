@@ -5,6 +5,13 @@ import { trackSiteEvent } from "@/lib/siteAnalytics";
 
 type IntakeState = "idle" | "sending" | "ready" | "error";
 type IntakeFocus = "general" | "pilot" | "challenge" | "deployment" | "private-context" | "review" | "platform" | "workspace-proof";
+type PublicFollowUp = {
+  responseWindow: "same_day" | "next_business_day" | "fit_review";
+  buyerStatus: string;
+  proofSurface: string;
+  riskBoundary: string;
+  scopeQuestions: string[];
+};
 
 const FOCUS_COPY: Record<IntakeFocus, {
   eyebrow: string;
@@ -99,6 +106,7 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
   const [state, setState] = useState<IntakeState>("idle");
   const [error, setError] = useState("");
   const [mailto, setMailto] = useState("");
+  const [followUp, setFollowUp] = useState<PublicFollowUp | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -128,6 +136,7 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
     event.preventDefault();
     setState("sending");
     setError("");
+    setFollowUp(null);
     trackSiteEvent({
       event: "intake_submit",
       target: "lead_form",
@@ -162,6 +171,7 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
       const payload = await response.json();
       if (!response.ok) throw new Error(payload?.error || "Lead capture failed");
       setMailto(payload.mailto || fallbackMailto(form));
+      setFollowUp(payload.followUp || null);
       setState("ready");
       trackSiteEvent({
         event: "intake_ready",
@@ -178,6 +188,7 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
     } catch (err) {
       setError(err instanceof Error ? err.message : "Lead capture failed");
       setMailto(fallbackMailto(form));
+      setFollowUp(null);
       setState("error");
       trackSiteEvent({
         event: "intake_error",
@@ -278,6 +289,19 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
         <b>{proofLine}</b>
       </div>
       {error ? <div className="intake__error">{error}</div> : null}
+      {state === "ready" && followUp ? (
+        <div className="intake__followup" data-testid="intake-followup">
+          <div>
+            <span>follow-up packet</span>
+            <h3>{followUp.proofSurface}</h3>
+            <p>{followUp.buyerStatus}</p>
+          </div>
+          <ul>
+            {followUp.scopeQuestions.map((question) => <li key={question}>{question}</li>)}
+          </ul>
+          <p className="intake__boundary">{followUp.riskBoundary}</p>
+        </div>
+      ) : null}
       <div className="intake__actions">
         <button className="btn btn--primary btn--lg" data-analytics="intake_prepare_request" type="submit" disabled={state === "sending"}>
           {state === "sending" ? "Submitting..." : "Submit workflow"}

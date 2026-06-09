@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { qualifyLead } from '../src/lib/leadQualification';
+import { buildLeadFollowUp } from '../src/lib/leadFollowUp';
 
 test.describe('lead qualification', () => {
   test('prioritizes urgent owned workflows with a clear proof target', () => {
@@ -46,5 +47,26 @@ test.describe('lead qualification', () => {
 
     expect(lead.grade).toBe('priority');
     expect(lead.reasons).toContain('workspace handoff');
+  });
+
+  test('builds a deterministic first-reply packet for captured leads', () => {
+    const input = {
+      name: 'Asha Rao',
+      email: 'asha@examplecorp.com',
+      company: 'Example Corp',
+      focus: 'workspace-proof',
+      timeline: 'this month',
+      decisionRole: 'I can sponsor or approve it',
+      proofTarget: 'A decision-ready export with source gaps and approvals visible.',
+      useCase: 'We generated a vendor evidence workspace and need it adapted for a real procurement review.',
+    };
+    const qualification = qualifyLead(input);
+    const followUp = buildLeadFollowUp(input, qualification);
+
+    expect(followUp.schemaVersion).toBe('active_mirror.lead_followup.v1');
+    expect(followUp.proofSurface).toBe('reviewable evidence workspace');
+    expect(followUp.firstReplySubject).toContain('Example Corp');
+    expect(followUp.firstReplyBody).toContain('Before I call it a fit');
+    expect(followUp.riskBoundary).toContain('No private files');
   });
 });
