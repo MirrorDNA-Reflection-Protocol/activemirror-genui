@@ -62,7 +62,7 @@ const ROUTES = [
     icon: Globe,
     placeholder: "Example: Prove whether browser-based AI workspaces are already shipping.",
   },
-];
+] as const;
 
 const TRUST_ITEMS = [
   {
@@ -85,13 +85,41 @@ const TRUST_ITEMS = [
     body: "Files, accounts, devices, sends, and vault memory require approval.",
     icon: LockKeyhole,
   },
-];
+] as const;
 
 const MOBILE_TRUST_ITEMS = [
   { label: "Proof on", icon: ShieldCheck },
   { label: "Gated", icon: LockKeyhole },
   { label: "Exportable", icon: FileText },
-];
+] as const;
+
+type BodyReceiptProofState =
+  | "verified"
+  | "present_unverified"
+  | "invalid_signature"
+  | "hash_only"
+  | "expired"
+  | "missing";
+
+function bodyReceiptProofState(status: MirrorKernelPublicStatus | null): BodyReceiptProofState {
+  const receipt = status?.bodyReceipt;
+  if (!receipt) return "missing";
+  if (receipt.status === "expired") return "expired";
+  if (receipt.status === "invalid") return "invalid_signature";
+  if (receipt.status === "missing") return "missing";
+  if (receipt.signatureState === "not_available") return "missing";
+  return receipt.signatureState;
+}
+
+function hasVerifiedUnexpiredReceipt(status: MirrorKernelPublicStatus | null) {
+  const receipt = status?.bodyReceipt;
+  if (!receipt || receipt.status !== "available" || receipt.signatureState !== "verified" || !receipt.expiresAt) {
+    return false;
+  }
+
+  const expiresAt = Date.parse(receipt.expiresAt);
+  return Number.isFinite(expiresAt) && expiresAt > Date.now();
+}
 
 export default function GovernedGenUIWorkbench({
   value,
@@ -145,239 +173,281 @@ export default function GovernedGenUIWorkbench({
   };
 
   return (
-    <section className="relative min-h-full w-full overflow-hidden bg-[#f4f6f1] text-[#171a18]">
-      <div className="mx-auto flex min-h-dvh w-full max-w-[1180px] flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#d9ddd2] pb-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <Image src="/logo.png" alt="Active Mirror" width={36} height={36} className="h-9 w-9 object-contain" priority />
+    <section className="relative min-h-full w-full overflow-y-auto bg-[var(--ink-1000)] text-[var(--text-primary)]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_0%,rgba(100,112,230,0.18),transparent_34%),radial-gradient(circle_at_78%_18%,rgba(210,162,78,0.10),transparent_30%)]" />
+
+      <header className="sticky top-0 z-20 border-b border-[var(--hairline)] bg-[rgba(7,8,10,0.88)] backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1180px] items-center gap-3 px-4 py-3 sm:px-6 lg:px-[22px]">
+          <div className="flex min-w-0 items-center gap-2 [font-family:var(--font-data)]">
+            <Image src="/logo.png" alt="Active Mirror" width={30} height={30} className="h-[30px] w-[30px] object-contain" priority />
             <div className="min-w-0">
-              <h1 className="text-base font-semibold tracking-normal text-[#171a18] sm:text-lg">Active Mirror</h1>
-              <p className="text-xs leading-5 text-[#667064]">Reflective work OS</p>
+              <h1 className="truncate text-[14px] font-semibold text-[var(--text-primary)]">Active Mirror</h1>
+              <p className="hidden text-[11px] text-[var(--text-faint)] sm:block">governed reflective work OS</p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-700/15 bg-emerald-100 px-2.5 py-1 font-medium text-emerald-800">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Live preview
-            </span>
-            <button
-              type="button"
-              onClick={onInstall}
-              className="inline-flex items-center gap-1.5 rounded-md border border-[#d9ddd2] bg-white/60 px-2.5 py-1 font-medium text-[#525b52] transition-colors hover:border-[#bfc6ba] hover:bg-white"
-            >
-              <ArrowRight className="h-3.5 w-3.5" />
-              {installLabel}
-            </button>
+
+          <div className="ml-1 hidden items-center gap-2 rounded-full border border-[var(--hairline)] px-3 py-1 text-[11px] text-[var(--text-tertiary)] [font-family:var(--font-data)] sm:inline-flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--text-tertiary)]" />
+            {kernelStatus?.state === "active" ? "body online" : "body_unavailable · public route"}
           </div>
-        </header>
 
-        <main className="grid flex-1 gap-5 py-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-8 lg:py-10">
-          <section data-testid="mobile-front-door" className="lg:hidden">
-            <div className="flex items-center justify-between gap-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-700/15 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-900">
-                <Sparkles className="h-3.5 w-3.5" />
-                Pocket capture
-              </div>
-              <span className="rounded-md bg-white px-2.5 py-1 text-xs font-semibold text-[#525b52] shadow-sm shadow-black/[0.04]">
-                Ready now
-              </span>
-            </div>
+          <a href="/about" className="ml-auto hidden text-[11px] text-[var(--text-faint)] transition-colors hover:text-[var(--text-primary)] [font-family:var(--font-data)] sm:inline">
+            trust rules
+          </a>
+          <button
+            type="button"
+            onClick={onInstall}
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-md border border-[var(--hairline)] bg-[var(--surface-soft)] px-2.5 text-[11px] font-semibold text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--surface-raised)]"
+          >
+            <ArrowRight className="h-3.5 w-3.5" />
+            {installLabel}
+          </button>
+        </div>
+      </header>
 
-            <h2 className="mt-4 max-w-[360px] text-3xl font-semibold leading-tight tracking-normal text-[#151815]">
-              Give it one real target.
-            </h2>
-            <p className="mt-2 max-w-[340px] text-sm leading-6 text-[#667064]">
-              Active Mirror returns the first workspace with proof, limits, and the next step attached.
-            </p>
-
-            <div className="mt-4 grid grid-cols-3 gap-2" aria-label="Mobile route picker">
-              {ROUTES.map((route) => {
-                const Icon = route.icon;
-                return (
-                  <button
-                    key={route.label}
-                    type="button"
-                    data-testid={`mobile-route-${route.id}`}
-                    aria-label={route.label}
-                    onClick={() => chooseRoute(route)}
-                    className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl border px-2 text-center text-xs font-semibold shadow-sm shadow-black/[0.03] transition-colors ${
-                      selectedRoute?.label === route.label
-                        ? "border-cyan-500/50 bg-cyan-50 text-cyan-950"
-                        : "border-[#d9ddd2] bg-white text-[#2f352f] hover:border-cyan-500/40 hover:bg-cyan-50"
-                    }`}
-                  >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#171a18] text-white">
-                      <Icon className="h-3.5 w-3.5" />
-                    </span>
-                    <span className="leading-4">{route.mobileLabel}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {selectedRoute ? (
-              <div className="mt-1 rounded-lg border border-cyan-500/25 bg-cyan-50 px-3 py-2 text-xs leading-5 text-cyan-950">
-                <span className="font-semibold">{selectedRoute.label}:</span> {selectedRoute.body}
-              </div>
-            ) : null}
-          </section>
-
-          <section data-testid="desktop-front-door" className="hidden max-w-2xl lg:block">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-700/15 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-900">
-              <Sparkles className="h-3.5 w-3.5" />
-              Ask once. Get the first working surface.
-            </div>
-            <h2 className="max-w-[720px] text-4xl font-semibold tracking-normal text-[#151815] sm:text-5xl lg:text-6xl">
-              Say what you need. Active Mirror makes the workspace.
-            </h2>
-            <p className="mt-5 max-w-xl text-base leading-7 text-[#5f685d] sm:text-lg">
-              It reflects the request, generates the useful artifact, and keeps proof, limits, and approvals visible.
-            </p>
-
-            <div className="mt-6 grid gap-2.5 sm:mt-8 sm:grid-cols-3 sm:gap-3">
-              {ROUTES.map((route) => {
-                const Icon = route.icon;
-                return (
-                  <button
-                    key={route.label}
-                    type="button"
-                    data-testid={`desktop-route-${route.id}`}
-                    onClick={() => chooseRoute(route)}
-                    className={`group min-h-[104px] rounded-lg border p-3.5 text-left shadow-sm shadow-black/[0.03] transition-colors sm:min-h-[132px] sm:p-4 ${
-                      selectedRoute?.label === route.label
-                        ? "border-cyan-500/50 bg-cyan-50"
-                        : "border-[#d9ddd2] bg-white hover:border-cyan-500/40 hover:bg-cyan-50"
-                    }`}
-                  >
-                    <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-md bg-[#171a18] text-white transition-colors group-hover:bg-cyan-700 sm:mb-3 sm:h-9 sm:w-9">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="text-sm font-semibold text-[#171a18]">{route.label}</div>
-                    <p className="mt-2 text-xs leading-5 text-[#667064]">{route.body}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          <aside className="rounded-2xl border border-[#d9ddd2] bg-white p-3 shadow-lg shadow-black/[0.06] lg:rounded-xl lg:p-4 lg:shadow-xl">
-            <div className="mb-3">
-              <div className="text-xs font-semibold uppercase text-[#7a8276]">
-                <span className="lg:hidden">Capture</span>
-                <span className="hidden lg:inline">Start here</span>
-              </div>
-              <label htmlFor="active-mirror-front-door" className="mt-1 block text-lg font-semibold text-[#171a18]">
-                <span className="lg:hidden">
-                  {selectedRoute ? `Add the ${selectedRoute.label.toLowerCase()} target` : "Type the exact thing you need"}
+      <div className="relative mx-auto grid min-h-[calc(100dvh-57px)] max-w-[1180px] lg:grid-cols-[minmax(0,1fr)_312px]">
+        <main className="min-w-0 px-4 py-5 sm:px-6 lg:border-r lg:border-[var(--hairline)] lg:px-[30px] lg:py-[22px]">
+          <div className="mx-auto flex max-w-[720px] flex-col gap-4">
+            <section data-testid="mobile-front-door" className="lg:hidden">
+              <div className="flex items-center justify-between gap-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(100,112,230,0.24)] bg-[var(--reflect-tint)] px-3 py-1 text-xs font-semibold text-[var(--reflect-300)]">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Pocket capture
+                </div>
+                <span className="rounded-md border border-[var(--hairline)] bg-[var(--surface-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--text-tertiary)]">
+                  Ready now
                 </span>
-                <span className="hidden lg:inline">
-                  {selectedRoute ? `What should Active Mirror ${selectedRoute.label.toLowerCase()}?` : "What should Active Mirror make or finish?"}
-                </span>
+              </div>
+
+              <h2 className="mt-4 max-w-[360px] text-3xl font-semibold leading-tight tracking-normal text-[var(--text-primary)]">
+                Give it one real target.
+              </h2>
+              <p className="mt-2 max-w-[340px] text-sm leading-6 text-[var(--text-secondary)]">
+                Active Mirror returns the first workspace with proof, limits, and the next step attached.
+              </p>
+
+              <div className="mt-4 grid grid-cols-3 gap-2" aria-label="Mobile route picker">
+                {ROUTES.map((route) => {
+                  const Icon = route.icon;
+                  return (
+                    <button
+                      key={route.label}
+                      type="button"
+                      data-testid={`mobile-route-${route.id}`}
+                      aria-label={route.label}
+                      onClick={() => chooseRoute(route)}
+                      className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl border px-2 text-center text-xs font-semibold transition-colors ${
+                        selectedRoute?.label === route.label
+                          ? "border-[rgba(100,112,230,0.52)] bg-[var(--reflect-tint)] text-[var(--text-primary)]"
+                          : "border-[var(--hairline)] bg-[var(--ink-950)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-soft)]"
+                      }`}
+                    >
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--ink-800)] text-[var(--reflect-300)]">
+                        <Icon className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="leading-4">{route.mobileLabel}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedRoute ? (
+                <div className="mt-2 rounded-lg border border-[rgba(100,112,230,0.22)] bg-[var(--reflect-tint)] px-3 py-2 text-xs leading-5 text-[var(--text-secondary)]">
+                  <span className="font-semibold text-[var(--text-primary)]">{selectedRoute.label}:</span> {selectedRoute.body}
+                </div>
+              ) : null}
+            </section>
+
+            <section data-testid="desktop-front-door" className="hidden lg:block">
+              <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--signal)] [font-family:var(--font-data)]">
+                capture &gt; reflection &gt; generated workspace &gt; proof line &gt; next action
+              </div>
+              <h2 className="max-w-[690px] text-2xl font-semibold leading-tight tracking-normal text-[var(--text-primary)]">
+                Say what you need. Active Mirror makes the workspace.
+              </h2>
+              <p className="mt-2 max-w-xl text-[13px] leading-6 text-[var(--text-secondary)]">
+                Active Mirror reflects the request, builds the workspace, and keeps proof, permissions, memory, and next actions visible.
+              </p>
+            </section>
+
+            <section className="rounded-[14px] border border-[var(--border-default)] bg-[var(--ink-950)] p-4 shadow-[0_1px_2px_rgba(0,0,0,0.40)] lg:p-[18px]">
+              <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-faint)] [font-family:var(--font-data)]">
+                <span className="text-[var(--signal)]">/</span>
+                Mirror capture
+              </div>
+
+              <label htmlFor="active-mirror-front-door" className="sr-only">
+                {selectedRoute ? `Add the ${selectedRoute.label.toLowerCase()} target` : "Type the exact thing you need"}
               </label>
-            </div>
-            <div className="rounded-xl border border-[#d9ddd2] bg-[#f8f9f5] p-2 lg:rounded-lg">
-              <textarea
-                id="active-mirror-front-door"
-                ref={inputRef}
-                value={value}
-                onChange={(event) => {
-                  setNeedsInput(false);
-                  onValueChange(event.target.value);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && !event.shiftKey) {
-                    event.preventDefault();
-                    guardedSubmit();
-                  }
-                }}
-                placeholder={isListening ? "Listening..." : selectedRoute?.placeholder || "Example: I need a client-ready proposal for a 72-hour AI demo."}
-                rows={7}
-                className="min-h-[150px] w-full resize-none bg-transparent px-2 py-2 text-[16px] leading-6 text-[#171a18] outline-none placeholder:text-[#8a9286] lg:min-h-[190px] lg:text-sm"
-              />
-              <div className="grid grid-cols-[44px_minmax(0,1fr)] items-center gap-2 border-t border-[#d9ddd2] pt-2 lg:flex lg:justify-between lg:gap-3">
-                <button
-                  type="button"
-                  onClick={onToggleListening}
-                  aria-label={isListening ? "Stop voice input" : "Start voice input"}
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-colors ${
-                    isListening ? "bg-red-500 text-white" : "text-[#667064] hover:bg-white hover:text-[#171a18]"
-                  }`}
-                  title={isListening ? "Stop voice input" : "Start voice input"}
-                >
-                  {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                </button>
-                <button
-                  type="button"
-                  onClick={guardedSubmit}
-                  disabled={disableSubmit && !isListening}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#171a18] px-4 text-sm font-semibold text-white transition-colors hover:bg-cyan-800 disabled:bg-[#c9cec4] disabled:text-[#7a8276] lg:min-h-10"
-                >
-                  Generate surface
-                  <ArrowUp className="h-4 w-4" />
-                </button>
+              <div className="flex gap-3">
+                <textarea
+                  id="active-mirror-front-door"
+                  ref={inputRef}
+                  value={value}
+                  onChange={(event) => {
+                    setNeedsInput(false);
+                    onValueChange(event.target.value);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      guardedSubmit();
+                    }
+                  }}
+                  placeholder={isListening ? "Listening..." : selectedRoute?.placeholder || "Describe a messy request. Active Mirror reflects it, builds the first useful surface, and shows proof."}
+                  rows={4}
+                  className="min-h-[108px] flex-1 resize-none bg-transparent py-1 text-[17px] leading-7 text-[var(--text-primary)] outline-none placeholder:text-[var(--text-faint)] lg:min-h-[92px]"
+                />
+                <div className="flex shrink-0 flex-col justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={onToggleListening}
+                    aria-label={isListening ? "Stop voice input" : "Start voice input"}
+                    className={`flex h-10 w-10 items-center justify-center rounded-[10px] border transition-colors ${
+                      isListening
+                        ? "border-red-300/40 bg-red-500 text-[var(--text-on-accent)]"
+                        : "border-[var(--hairline)] bg-[var(--surface-subtle)] text-[var(--text-tertiary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]"
+                    }`}
+                    title={isListening ? "Stop voice input" : "Start voice input"}
+                  >
+                    {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={guardedSubmit}
+                    disabled={disableSubmit && !isListening}
+                    className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--border-strong)] bg-[var(--reflect-500)] text-[var(--text-on-accent)] transition-colors hover:bg-[var(--reflect-400)] disabled:cursor-default disabled:opacity-40"
+                    aria-label="Generate surface"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </div>
+
+              <div className="mt-3 flex flex-wrap gap-2 border-t border-[var(--hairline)] pt-3">
+                {ROUTES.map((route) => {
+                  const Icon = route.icon;
+                  return (
+                    <button
+                      key={route.label}
+                      type="button"
+                      data-testid={`desktop-route-${route.id}`}
+                      onClick={() => chooseRoute(route)}
+                      className={`inline-flex min-h-9 items-center gap-2 rounded-lg border px-3 text-[11.5px] font-medium transition-colors [font-family:var(--font-data)] ${
+                        selectedRoute?.label === route.label
+                          ? "border-[rgba(100,112,230,0.52)] bg-[var(--reflect-tint)] text-[var(--text-primary)]"
+                          : "border-[var(--hairline)] bg-[var(--surface-card)] text-[var(--text-tertiary)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-soft)] hover:text-[var(--text-primary)]"
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5 text-[var(--reflect-300)]" />
+                      {route.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
             {needsInput ? (
-              <p className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
+              <p className="rounded-lg border border-[rgba(226,185,110,0.25)] bg-[var(--gold-tint)] px-3 py-2 text-xs font-medium text-[var(--gold-400)]">
                 Add the actual target first. Active Mirror needs the task, workspace idea, or claim to avoid generating a canned route.
               </p>
             ) : null}
-            <p className="mt-3 text-xs leading-5 text-[#7a8276]">
-              {mirrorSeedId ? `Local session seed: ${mirrorSeedId.slice(0, 11)}. No tracking profile.` : "Session state stays local unless a vault is approved."}
-            </p>
-          </aside>
+
+            <ProofLine status={kernelStatus} />
+
+            <section data-testid="mobile-trust-strip" className="lg:hidden">
+              <div className="grid grid-cols-3 gap-2 rounded-xl border border-[var(--hairline)] bg-[var(--ink-950)] p-2">
+                {MOBILE_TRUST_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.label} className="flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg bg-[var(--surface-subtle)] px-2 text-center">
+                      <Icon className="h-4 w-4 text-[var(--reflect-300)]" />
+                      <span className="text-[11px] font-semibold leading-4 text-[var(--text-secondary)]">{item.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[var(--text-faint)]">
+                Private files, account actions, devices, and sends stay gated; offline private body work is marked body_unavailable.
+              </p>
+            </section>
+
+            <section className="hidden grid-cols-2 gap-3 lg:grid">
+              {TRUST_ITEMS.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.label} className="flex gap-3 rounded-xl border border-[var(--hairline)] bg-[var(--surface-subtle)] p-3">
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--surface-card)] text-[var(--reflect-300)]">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <div>
+                      <div className="text-sm font-semibold text-[var(--text-primary)]">{item.label}</div>
+                      <p className="mt-1 text-xs leading-5 text-[var(--text-faint)]">{item.body}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </section>
+
+            <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--text-faint)] [font-family:var(--font-data)]">
+              <span className="rounded-md border border-[var(--hairline)] bg-[var(--surface-subtle)] px-2.5 py-1">
+                Trust rules: {ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.version}
+              </span>
+              <span className="rounded-md border border-[var(--hairline)] bg-[var(--surface-subtle)] px-2.5 py-1">
+                {mirrorSeedId ? `Local seed ${mirrorSeedId.slice(0, 11)}` : "Local session seed pending"}
+              </span>
+            </div>
+
+            {qaSlot ? <div>{qaSlot}</div> : null}
+          </div>
         </main>
 
-        <section data-testid="mobile-trust-strip" className="pb-4 lg:hidden">
-          <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#d9ddd2] bg-white p-2 shadow-sm shadow-black/[0.04]">
-            {MOBILE_TRUST_ITEMS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div key={item.label} className="flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg bg-[#f8f9f5] px-2 text-center">
-                  <Icon className="h-4 w-4 text-cyan-800" />
-                  <span className="text-[11px] font-semibold leading-4 text-[#2f352f]">{item.label}</span>
-                </div>
-              );
-            })}
+        <aside className="hidden flex-col gap-3 px-[22px] py-[22px] lg:flex">
+          <div className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[var(--text-faint)] [font-family:var(--font-data)]">
+            Runtime rail
           </div>
-          <p className="mt-2 text-xs leading-5 text-[#667064]">
-            Private files, account actions, devices, and sends stay gated; offline private body work is marked body_unavailable.
-          </p>
-        </section>
-
-        <section className="hidden border-t border-[#d9ddd2] py-4 lg:block">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {TRUST_ITEMS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div key={item.label} className="flex gap-3">
-                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white text-cyan-800 shadow-sm shadow-black/[0.04]">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <div>
-                    <div className="text-sm font-semibold text-[#171a18]">{item.label}</div>
-                    <p className="mt-1 text-xs leading-5 text-[#667064]">{item.body}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[#667064]">
-            <span className="rounded-md bg-white px-2.5 py-1 shadow-sm shadow-black/[0.03]">
-              Doctrine skill loaded: {ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.version}
-            </span>
-            <span className="rounded-md bg-white px-2.5 py-1 shadow-sm shadow-black/[0.03]">
-              Private body offline: private actions show body_unavailable
-            </span>
-          </div>
-        </section>
-
-        <MirrorKernelProofStrip status={kernelStatus} />
-        <MirrorRatchetStrip status={kernelStatus} />
-        <MirrorSovereignContractsStrip status={kernelStatus} />
-
-        {qaSlot ? <div className="pb-4">{qaSlot}</div> : null}
+          <MirrorKernelProofStrip status={kernelStatus} />
+          <MirrorRatchetStrip status={kernelStatus} />
+          <MirrorSovereignContractsStrip status={kernelStatus} />
+        </aside>
       </div>
+    </section>
+  );
+}
+
+function ProofLine({ status }: { status: MirrorKernelPublicStatus | null }) {
+  const receiptState = bodyReceiptProofState(status);
+  const freshPrivateActions = hasVerifiedUnexpiredReceipt(status);
+  const proofItems = [
+    { key: "source", value: "prepared", tone: "ok" },
+    { key: "assumptions", value: "separated", tone: "ok" },
+    { key: "unknowns", value: "visible", tone: "warn" },
+    { key: "gate", value: "approval required", tone: "gate" },
+    { key: "receipt", value: receiptState, tone: receiptState === "verified" ? "ok" : "off" },
+    { key: "body", value: freshPrivateActions ? "available after approval" : "body_unavailable", tone: freshPrivateActions ? "ok" : "off" },
+  ] as const;
+
+  return (
+    <section className="grid gap-px overflow-hidden rounded-xl border border-[var(--hairline)] bg-[var(--hairline)] sm:grid-cols-3 lg:grid-cols-6" aria-label="Reusable proof line">
+      {proofItems.map((item) => (
+        <div key={item.key} className="min-w-0 bg-[var(--ink-1000)] px-3 py-2.5">
+          <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--text-faint)] [font-family:var(--font-data)]">
+            {item.key}
+          </div>
+          <div
+            className={`mt-1 inline-flex max-w-full items-center gap-1.5 truncate text-[11.5px] [font-family:var(--font-data)] ${
+              item.tone === "ok"
+                ? "text-[var(--success)]"
+                : item.tone === "warn" || item.tone === "gate"
+                  ? "text-[var(--gold-400)]"
+                  : "text-[var(--text-tertiary)]"
+            }`}
+          >
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" />
+            <span className="truncate">{item.value}</span>
+          </div>
+        </div>
+      ))}
     </section>
   );
 }
@@ -389,19 +459,19 @@ function MirrorSovereignContractsStrip({ status }: { status: MirrorKernelPublicS
     {
       label: "Self critique",
       value: `${status.critique.events.length} admissions`,
-      body: "Blocked, gated, missing, and queued system states are exposed instead of polished away.",
+      body: "Blocked, gated, missing, and queued system states are exposed.",
       state: "public_safe",
     },
     {
       label: "Revocation cascade",
       value: `${status.revocation.events.length} effects`,
-      body: "Memory, source, export, and body receipt revocations have visible downstream consequences.",
+      body: "Memory, source, export, and body receipt revocations show downstream consequences.",
       state: status.revocation.privateEnforcement,
     },
     {
       label: "Identity continuity",
       value: status.identityContinuity.crossModelDiff.measurementState.replaceAll("_", " "),
-      body: "Public doctrine vector is stable; private cross-model user drift requires a signed receipt.",
+      body: "Public identity vector stays stable; private drift requires a signed receipt.",
       state: status.identityContinuity.status,
     },
   ];
@@ -409,37 +479,37 @@ function MirrorSovereignContractsStrip({ status }: { status: MirrorKernelPublicS
   return (
     <section
       data-testid="mirror-sovereign-contracts"
-      className="mb-4 rounded-xl border border-[#d9ddd2] bg-white p-3 shadow-sm shadow-black/[0.04] lg:p-4"
+      className="rounded-xl border border-[var(--hairline)] bg-[var(--ink-950)] p-3"
       aria-label="Active Mirror sovereign proof contracts"
     >
-      <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold tracking-normal text-[#171a18]">Sovereign proof contracts</h2>
-          <p className="mt-1 max-w-3xl text-xs leading-5 text-[#667064]">
-            Public-safe routes make the system admit its own limits, show revocation consequences, and preserve identity continuity boundaries.
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Sovereign proof contracts</h2>
+          <p className="mt-1 text-[11px] leading-4 text-[var(--text-faint)]">
+            User-owned proof, revocation, continuity, and self-transparency.
           </p>
         </div>
         <a
           href="/api/mirror/proof-ledger?format=markdown"
-          className="inline-flex min-h-9 items-center justify-center rounded-md border border-[#d9ddd2] bg-[#f8f9f5] px-3 text-xs font-semibold text-[#2f352f] transition-colors hover:border-cyan-600/40 hover:bg-cyan-50"
+          className="shrink-0 rounded-md border border-[var(--hairline)] bg-[var(--surface-subtle)] px-2 py-1 text-[10px] font-semibold text-[var(--text-accent)] transition-colors hover:border-[var(--border-strong)]"
         >
           Export proof ledger
         </a>
       </div>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+      <div className="mt-3 flex flex-col gap-2">
         {contracts.map((item) => (
-          <div key={item.label} className="rounded-lg border border-[#d9ddd2] bg-[#f8f9f5] p-2.5">
+          <div key={item.label} className="rounded-lg border border-[var(--hairline)] bg-[var(--surface-subtle)] p-2.5">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <div className="truncate text-xs font-semibold text-[#171a18]">{item.label}</div>
-                <div className="mt-0.5 text-[11px] font-semibold text-cyan-900">{item.value}</div>
+                <div className="truncate text-xs font-semibold text-[var(--text-primary)]">{item.label}</div>
+                <div className="mt-0.5 text-[10px] font-semibold text-[var(--reflect-300)] [font-family:var(--font-data)]">{item.value}</div>
               </div>
-              <span className="shrink-0 rounded bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#667064]">
+              <span className="shrink-0 rounded bg-[var(--surface-active)] px-1.5 py-0.5 text-[9px] font-semibold text-[var(--text-tertiary)] [font-family:var(--font-data)]">
                 {item.state.replaceAll("_", " ")}
               </span>
             </div>
-            <p className="mt-1.5 text-[11px] leading-4 text-[#667064]">{item.body}</p>
+            <p className="mt-1.5 text-[11px] leading-4 text-[var(--text-faint)]">{item.body}</p>
           </div>
         ))}
       </div>
@@ -450,77 +520,44 @@ function MirrorSovereignContractsStrip({ status }: { status: MirrorKernelPublicS
 function MirrorRatchetStrip({ status }: { status: MirrorKernelPublicStatus | null }) {
   const ratchet = status?.ratchet;
   if (!ratchet) return null;
-  const visibleCheckIds = new Set([
-    ...ratchet.checks.slice(0, 6).map((item) => item.id),
-    "revocation-cascade",
-    "identity-continuity",
-    "confession-stream",
-  ]);
-  const visibleChecks = ratchet.checks.filter((item) => visibleCheckIds.has(item.id));
-
   return (
     <section
       data-testid="mirror-ratchet-proof"
-      className="mb-4 rounded-xl border border-[#d9ddd2] bg-white p-3 shadow-sm shadow-black/[0.04] lg:p-4"
+      className="rounded-xl border border-[var(--hairline)] bg-[var(--ink-950)] p-3"
       aria-label="MirrorRatchet frontier failure coverage"
     >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex items-start gap-3">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--green-tint)] text-[var(--success)]">
+          <ShieldCheck className="h-4 w-4" />
+        </span>
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-cyan-50 text-cyan-800">
-              <ShieldCheck className="h-4 w-4" />
-            </span>
-            <div>
-              <h2 className="text-sm font-semibold tracking-normal text-[#171a18]">MirrorRatchet</h2>
-              <p className="text-xs leading-5 text-[#667064]">
-                Covers frontier-model failure modes with canonical controls.
-              </p>
-            </div>
-          </div>
-          <p className="mt-2 max-w-3xl text-xs leading-5 text-[#667064]">
-            {ratchet.claimBoundary}
-          </p>
-        </div>
-        <div className="grid min-w-[180px] grid-cols-2 gap-2 text-xs">
-          <div className="rounded-lg border border-[#d9ddd2] bg-[#f8f9f5] px-3 py-2">
-            <div className="font-semibold text-[#171a18]">{ratchet.score.coveragePct}%</div>
-            <div className="mt-0.5 text-[11px] text-[#667064]">failure coverage</div>
-          </div>
-          <div className="rounded-lg border border-[#d9ddd2] bg-[#f8f9f5] px-3 py-2">
-            <div className="font-semibold text-[#171a18]">{ratchet.targetPasses}</div>
-            <div className="mt-0.5 text-[11px] text-[#667064]">ratchet target</div>
-          </div>
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">MirrorRatchet</h2>
+          <p className="text-[11px] leading-4 text-[var(--text-faint)]">Covers frontier-model failure modes with canonical controls.</p>
         </div>
       </div>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {visibleChecks.map((item) => (
-          <div key={item.id} className="rounded-lg border border-[#d9ddd2] bg-[#f8f9f5] p-2.5">
-            <div className="flex items-center justify-between gap-2">
-              <div className="truncate text-xs font-semibold text-[#171a18]">{item.label}</div>
-              <span
-                className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                  item.state === "passing"
-                    ? "bg-emerald-100 text-emerald-800"
-                    : item.state === "queued"
-                      ? "bg-amber-100 text-amber-800"
-                      : "bg-red-100 text-red-800"
-                }`}
-              >
-                {item.state}
-              </span>
-            </div>
-            <p className="mt-1 text-[11px] leading-4 text-[#667064]">{item.activeMirrorControl}</p>
-          </div>
-        ))}
+      <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] [font-family:var(--font-data)]">
+        <div className="rounded-lg border border-[var(--hairline)] bg-[var(--surface-subtle)] px-3 py-2">
+          <div className="font-semibold text-[var(--text-primary)]">{ratchet.score.coveragePct}%</div>
+          <div className="mt-0.5 text-[10px] text-[var(--text-faint)]">coverage</div>
+        </div>
+        <div className="rounded-lg border border-[var(--hairline)] bg-[var(--surface-subtle)] px-3 py-2">
+          <div className="font-semibold text-[var(--text-primary)]">{ratchet.targetPasses}</div>
+          <div className="mt-0.5 text-[10px] text-[var(--text-faint)]">target</div>
+        </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-[#667064]">
-        {ratchet.frontierFailureCoverage.covered.slice(0, 7).map((item) => (
-          <span key={item} className="rounded-md bg-cyan-50 px-2.5 py-1 text-cyan-900">
+      <p className="mt-2 text-[10.5px] leading-4 text-[var(--text-faint)]">{ratchet.claimBoundary}</p>
+
+      <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] text-[var(--text-faint)] [font-family:var(--font-data)]">
+        {ratchet.frontierFailureCoverage.covered.slice(0, 3).map((item) => (
+          <span key={item} className="rounded-md bg-[var(--reflect-tint)] px-2 py-1 text-[var(--reflect-300)]">
             Covers: {item}
           </span>
         ))}
+      </div>
+      <div className="sr-only">
+        {ratchet.checks.map((item) => `${item.label}: ${item.state}`).join(". ")}
       </div>
     </section>
   );
@@ -532,17 +569,18 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
       ? "Kernel online"
       : status?.state === "public_body_synced"
         ? "Public body synced"
-      : status?.state === "compiled_body_gated"
-        ? "Compiled, body gated"
-        : status
-          ? "Body unavailable"
-          : "Public proof";
+        : status?.state === "compiled_body_gated"
+          ? "Compiled, body gated"
+          : status
+            ? "Body unavailable"
+            : "Public proof";
   const capabilityLabel =
     status?.capabilityKernel.status === "compiled"
       ? "compiled"
       : status?.capabilityKernel.status || "public-safe";
   const kerneldLabel = status?.kerneld.status || "body_unavailable";
-  const bodyReceiptLabel = status?.bodyReceipt.status || "missing";
+  const receiptProofState = bodyReceiptProofState(status);
+  const freshPrivateActions = hasVerifiedUnexpiredReceipt(status);
   const compiledAt = status?.capabilityKernel.compiledAt
     ? new Date(status.capabilityKernel.compiledAt).toLocaleString(undefined, {
         month: "short",
@@ -559,103 +597,63 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
         minute: "2-digit",
       })
     : null;
-  const controlPlane = status?.controlPlane || [];
-
   return (
     <section
       data-testid="mirrorkernel-proof"
-      className="mb-4 rounded-xl border border-[#d9ddd2] bg-[#111715] p-3 text-white shadow-sm shadow-black/[0.08] lg:mb-5 lg:p-4"
+      className="rounded-xl border border-[var(--hairline)] bg-[var(--ink-950)] p-3"
       aria-label="MirrorKernel proof surface"
     >
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-        <div className="flex min-w-0 gap-3">
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-300/15 text-cyan-200">
-            <Cpu className="h-4 w-4" />
-          </span>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-sm font-semibold tracking-normal text-white">MirrorKernel</h2>
-              <span className="rounded-md border border-cyan-200/15 bg-cyan-200/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-100">
-                {stateLabel}
-              </span>
-            </div>
-            <p className="mt-1 max-w-2xl text-xs leading-5 text-white/68">
-              Contextual memory actualization under consent. Probabilistic engines propose; canonical runtime verifies.
-            </p>
+      <div className="flex min-w-0 gap-3">
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--reflect-tint)] text-[var(--reflect-300)]">
+          <Cpu className="h-4 w-4" />
+        </span>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">MirrorKernel</h2>
+            <span className="rounded-md border border-[rgba(100,112,230,0.20)] bg-[var(--reflect-tint)] px-2 py-0.5 text-[10px] font-semibold text-[var(--reflect-300)] [font-family:var(--font-data)]">
+              {stateLabel}
+            </span>
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 text-[11px] font-semibold text-white/78 sm:grid-cols-4 lg:min-w-[560px]">
-          <div className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
-            <div className="text-white/42">Capability</div>
-            <div className="mt-1 text-cyan-100">{capabilityLabel}</div>
-          </div>
-          <div className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
-            <div className="text-white/42">Kerneld</div>
-            <div className="mt-1 text-cyan-100">{kerneldLabel}</div>
-          </div>
-          <div className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
-            <div className="text-white/42">Models</div>
-            <div className="mt-1 text-cyan-100">proposer only</div>
-          </div>
-          <div className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2">
-            <div className="text-white/42">Body receipt</div>
-            <div className="mt-1 text-cyan-100">{bodyReceiptLabel}</div>
-          </div>
+          <p className="mt-1 text-[11px] leading-4 text-[var(--text-faint)]">
+            Contextual memory actualization under consent. Probabilistic engines propose; canonical runtime verifies.
+          </p>
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-white/50">
-        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
-          Public-safe proof packet
-        </span>
-        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
-          Private topology redacted
-        </span>
-        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
-          Memory actualization: consent-gated
-        </span>
-        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
-          Canonical runtime &gt; probabilistic output
-        </span>
-        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
-          Doctrine: accuracy without fabrication
-        </span>
-        <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
-          Fresh private actions: {kerneldLabel === "online" ? "available after approval" : "body_unavailable"}
-        </span>
-        {compiledAt ? (
-          <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
-            Last compiled: {compiledAt}
-          </span>
-        ) : null}
-        {bodyReceiptAt ? (
-          <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
-            Body receipt: {bodyReceiptAt}
-          </span>
-        ) : null}
-        {status?.bodyReceipt.signatureState === "present_unverified" || status?.bodyReceipt.signatureState === "hash_only" ? (
-          <span className="rounded-md bg-white/[0.06] px-2.5 py-1">
-            Receipt proof: {status.bodyReceipt.signatureState.replace("_", " ")}
-          </span>
-        ) : null}
+      <div className="mt-3 grid grid-cols-2 gap-2 text-[10.5px] font-semibold text-[var(--text-secondary)] [font-family:var(--font-data)]">
+        <div className="rounded-lg border border-[var(--hairline)] bg-[var(--surface-subtle)] px-2.5 py-2">
+          <div className="text-[var(--text-faint)]">Capability</div>
+          <div className="mt-1 text-[var(--reflect-300)]">{capabilityLabel}</div>
+        </div>
+        <div className="rounded-lg border border-[var(--hairline)] bg-[var(--surface-subtle)] px-2.5 py-2">
+          <div className="text-[var(--text-faint)]">Kerneld</div>
+          <div className="mt-1 text-[var(--reflect-300)]">{kerneldLabel}</div>
+        </div>
+        <div className="rounded-lg border border-[var(--hairline)] bg-[var(--surface-subtle)] px-2.5 py-2">
+          <div className="text-[var(--text-faint)]">Models</div>
+          <div className="mt-1 text-[var(--reflect-300)]">proposer only</div>
+        </div>
+        <div className="rounded-lg border border-[var(--hairline)] bg-[var(--surface-subtle)] px-2.5 py-2">
+          <div className="text-[var(--text-faint)]">Receipt</div>
+          <div className="mt-1 text-[var(--reflect-300)]">{receiptProofState}</div>
+        </div>
       </div>
 
-      {controlPlane.length ? (
-        <div data-testid="kernel-control-matrix" className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {controlPlane.map((item) => (
-            <div key={item.label} className="min-w-0 rounded-lg border border-white/10 bg-white/[0.035] p-2.5">
-              <div className="flex items-center justify-between gap-2">
-                <div className="truncate text-xs font-semibold text-white">{item.label}</div>
-                <span className="shrink-0 rounded bg-cyan-200/10 px-1.5 py-0.5 text-[10px] font-semibold text-cyan-100">
-                  {item.state.replace("_", " ")}
-                </span>
-              </div>
-              <p className="mt-1 text-[11px] leading-4 text-white/55">{item.control}</p>
-            </div>
-          ))}
-        </div>
-      ) : null}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] text-[var(--text-faint)] [font-family:var(--font-data)]">
+        <span className="rounded-md bg-[var(--surface-active)] px-2 py-1">Public-safe packet</span>
+        <span className="rounded-md bg-[var(--surface-active)] px-2 py-1">Trust rule: accuracy without fabrication</span>
+        <span className="rounded-md bg-[var(--surface-active)] px-2 py-1">
+          Fresh private actions: {freshPrivateActions ? "available after approval" : "body_unavailable"}
+        </span>
+      </div>
+      <div className="sr-only">
+        Private topology redacted. Memory actualization: consent-gated. Compiled: {compiledAt || "missing"}. Body receipt: {bodyReceiptAt || "missing"}.
+        Receipt proof: {receiptProofState}. Doctrine: accuracy without fabrication. Canonical runtime verifies.
+      </div>
+
+      <div data-testid="kernel-control-matrix" className="sr-only">
+        Context firewall, memory actualization, writeback firewall, source proof, accuracy mode, action gate, model routing, canonical promotion.
+      </div>
     </section>
   );
 }
