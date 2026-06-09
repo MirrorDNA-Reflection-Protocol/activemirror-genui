@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     default: "Active Mirror - Governed GenUI Workbench",
     template: "%s | Active Mirror",
   },
-  description: "Active Mirror is a governed GenUI workbench for generated surfaces, provenance, doctrine contracts, approvals, files, browser routes, and receipts.",
+  description: "Active Mirror reflects the request, builds the workspace, and keeps proof, permissions, memory, and next actions visible.",
   keywords: [
     "generative UI",
     "GenUI browser OS",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Active Mirror - Governed GenUI Workbench",
-    description: "Generated surfaces with provenance, doctrine contracts, approvals, source routes, files, and receipts.",
+    description: "Generated workspaces with provenance, proof contracts, approvals, source routes, files, and receipts.",
     siteName: "Active Mirror",
     type: "website",
     url: "https://activemirror.ai",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Active Mirror - Governed GenUI Workbench",
-    description: "Ask for the governed surface: provenance, doctrine, approvals, files, browser route, and receipt.",
+    description: "Ask for the governed workspace: provenance, proof contracts, approvals, files, browser route, and receipt.",
     images: ["/mirror-icon-512.png"],
   },
   manifest: "/manifest.json",
