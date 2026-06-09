@@ -224,10 +224,29 @@ test.describe('Active Mirror public GenUI', () => {
     expect(postBody.status).toBe('sync_not_configured');
   });
 
+  test('about page is supporting reference material, not the canonical start', async ({ page }) => {
+    await page.goto('/about');
+
+    await expect(page.getByRole('heading', { name: 'Active Mirror is a governed reflective work OS.' })).toBeVisible();
+    await expect(page.getByText('Reference, not the front door')).toBeVisible();
+    await expect(page.getByText('messy prompt -> reflection -> generated workspace -> proof line -> export -> next action')).toBeVisible();
+    await expect(page.getByRole('link', { name: /Open work OS/i })).toHaveAttribute('href', '/');
+    await expect(page.getByText('/api/mirror/proof-ledger')).toBeVisible();
+    await expect(page.getByText('body_unavailable is an honest state')).toBeVisible();
+  });
+
+  test('app route redirects to the public work OS until private auth exists', async ({ page }) => {
+    await page.goto('/app');
+
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByTestId('desktop-front-door')).toBeVisible();
+    await expect(page.getByText('Say what you need. Active Mirror makes the workspace.')).toBeVisible();
+  });
+
   test('front door route requires a real target before generation', async ({ page }) => {
     await page.goto('/?qa=1');
 
-    await page.getByRole('button', { name: /Research or prove/i }).click();
+    await page.getByTestId('desktop-route-research-prove').click();
     await page.getByRole('button', { name: /Generate surface/i }).click();
 
     await expect(page.getByText(/Add the actual target first/i)).toBeVisible();

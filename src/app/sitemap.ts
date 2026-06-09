@@ -8,5 +8,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 1,
     },
+    {
+      url: "https://activemirror.ai/about",
+      lastModified: new Date("2026-06-09"),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
   ];
 }
