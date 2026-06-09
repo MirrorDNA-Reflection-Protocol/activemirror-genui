@@ -123,6 +123,11 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByTestId('site-teaser-console')).toContainText('Vendor evidence workspace');
     await expect(page.getByTestId('site-teaser-console')).toContainText('receiptRequired');
     await expect(page.getByRole('link', { name: /Open Active Mirror/i }).first()).toHaveAttribute('href', '/mirror');
+    await expect(page.getByText('Portable identity before memory.')).toBeVisible();
+    await expect(page.getByRole('link', { name: /Create your seed/i })).toHaveAttribute(
+      'href',
+      'https://id.activemirror.ai/docs/identity.html#generator',
+    );
     await expect(page.getByText("Five laws we don't break.")).toBeVisible();
     await expect(page.getByText('There must be one sacred thing')).toBeVisible();
     await expect(page.locator('textarea, input')).toHaveCount(0);

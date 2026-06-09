@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+const MIRRORSEED_URL = "https://id.activemirror.ai/docs/identity.html#generator";
+
 const thesis = [
   {
     number: "01 / REFLECT",
@@ -34,9 +36,9 @@ const convergence = [
   },
   {
     key: "REMEMBER",
-    title: "Reflective memory",
-    body: "What matters, why, where it came from, and whether it's allowed into the task. Governed, not stored.",
-    tag: "MirrorGraph · provenance · consent scope",
+    title: "MirrorSeed + reflective memory",
+    body: "A portable identity seed gives the system the user's durable context. MirrorGraph decides what can enter the task.",
+    tag: "MirrorSeed · MirrorGraph · consent scope",
   },
 ];
 
@@ -231,6 +233,7 @@ export default function ActiveMirrorSite() {
           <BrandLink />
           <div className="nav__links">
             <a href="#reflect">Reflect</a>
+            <a href={MIRRORSEED_URL}>MirrorSeed</a>
             <a href="#engagements">Work with us</a>
             <a href="#system">The system</a>
             <a href="#axioms">Principles</a>
@@ -302,6 +305,18 @@ export default function ActiveMirrorSite() {
                 <div className="cv__tag">{item.tag}</div>
               </div>
             ))}
+            <div className="seed-bridge">
+              <div className="seed-bridge__mark">⟡</div>
+              <div>
+                <div className="seed-bridge__k">MirrorSeed</div>
+                <h3>Portable identity before memory.</h3>
+                <p>
+                  MirrorSeed is the user-owned identity file: preferences, context, boundaries, and working style.
+                  Active Mirror can use it as the starting contract before any model remembers or acts.
+                </p>
+              </div>
+              <a className="seed-bridge__go" href={MIRRORSEED_URL}>Create your seed →</a>
+            </div>
             <div className="converge__gov">
               <span className="converge__gl">⟡</span>
               <span className="converge__t">
@@ -449,6 +464,7 @@ export default function ActiveMirrorSite() {
           <p>If you&apos;re deploying AI that needs to remember correctly, stay within boundaries, and prove every action — let&apos;s build the trust layer together.</p>
           <div className="cta__cta">
             <a className="btn btn--primary btn--lg" href="mailto:hello@activemirror.ai">Talk to us <span className="arr">→</span></a>
+            <a className="btn btn--ghost btn--lg" href={MIRRORSEED_URL}>Create MirrorSeed</a>
             <Link className="btn btn--ghost btn--lg" href="/mirror">Open Active Mirror</Link>
           </div>
         </div>
@@ -463,6 +479,7 @@ export default function ActiveMirrorSite() {
           <div className="foot__col">
             <h5>Product</h5>
             <a href="#reflect">Reflect</a>
+            <a href={MIRRORSEED_URL}>MirrorSeed</a>
             <a href="#system">Glass Box</a>
             <a href="#system">MirrorOS Console</a>
             <a href="#system">The system</a>
