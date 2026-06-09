@@ -24,6 +24,7 @@ const files = {
   ui: "src/components/active-mirror/GovernedGenUIWorkbench.tsx",
   tests: "tests/qa-suite.spec.ts",
   healthcheck: "scripts/ops/healthcheck.sh",
+  browserCanary: "scripts/ops/browser-canary.mjs",
   signer: "scripts/ops/sign-body-receipt.mjs",
 };
 
@@ -123,6 +124,11 @@ const invariants = [
     id: "healthcheck_covers_public_contracts",
     file: "healthcheck",
     pattern: /api\/mirror\/ratchet[\s\S]*api\/mirror\/proof-ledger[\s\S]*api\/mirror\/critique[\s\S]*api\/mirror\/revocation-cascade[\s\S]*api\/mirror\/identity-continuity[\s\S]*api\/mirror\/identity-continuity\/measure/,
+  },
+  {
+    id: "browser_canary_covers_pwa_control",
+    file: "browserCanary",
+    pattern: /mirrorkernel-proof[\s\S]*mirror-ratchet-proof[\s\S]*serviceWorkerControlled/,
   },
 ];
 

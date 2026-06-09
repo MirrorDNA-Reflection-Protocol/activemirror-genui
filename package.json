@@ -12,6 +12,7 @@
     "test:signature": "MIRROR_BODY_RECEIPT_PUBLIC_KEY_ID=active-mirror-test-key MIRROR_BODY_RECEIPT_PUBLIC_KEY=MCowBQYDK2VwAyEAFYu9XZ0Hu+c15jt3oKn/dI3g/GcFpxIFhauplPGJTEQ= playwright test tests/body-receipt-signature.spec.ts --workers=1",
     "audit:prod": "npm audit --omit=dev",
     "ops:health": "bash scripts/ops/healthcheck.sh",
+    "ops:browser-canary": "node scripts/ops/browser-canary.mjs",
     "ops:deploy:hetzner": "bash scripts/ops/deploy-hetzner.sh",
     "body-receipt:sign": "node scripts/ops/sign-body-receipt.mjs",
     "ratchet:100": "node scripts/ops/mirror-ratchet.mjs --passes=100",
