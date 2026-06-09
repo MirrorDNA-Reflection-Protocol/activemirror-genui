@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { getFunnelSnapshot } from "@/lib/funnelAnalytics";
-import { OPS_COOKIE_NAME, authorizedOpsAccess, hasOpsTokenConfigured } from "@/lib/opsAuth";
+import { OPS_COOKIE_NAME, authorizedOpsAccess } from "@/lib/opsAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +36,6 @@ function LoginPanel({ failed }: { failed: boolean }) {
           <button className="btn btn--primary" type="submit">Open dashboard</button>
         </form>
         {failed ? <div className="ops-login__error">Token did not match.</div> : null}
-        {!hasOpsTokenConfigured() ? <div className="ops-login__note">No admin token is configured. Use localhost access or set MIRROR_ANALYTICS_ADMIN_TOKEN.</div> : null}
       </section>
     </main>
   );
