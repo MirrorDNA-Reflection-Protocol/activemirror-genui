@@ -1,4 +1,5 @@
 export const ACTIVE_MIRROR_REVOCATION_CASCADE_VERSION = "2026.06.08-revocation-cascade-v1";
+export const ACTIVE_MIRROR_REVOCATION_CASCADE_SCHEMA_VERSION = "active_mirror.revocation_cascade.v1";
 
 export type RevocationCascadeEvent = {
   sequence: number;
@@ -9,6 +10,7 @@ export type RevocationCascadeEvent = {
 };
 
 export type RevocationCascadeStatus = {
+  schemaVersion: typeof ACTIVE_MIRROR_REVOCATION_CASCADE_SCHEMA_VERSION;
   version: typeof ACTIVE_MIRROR_REVOCATION_CASCADE_VERSION;
   mode: "public_safe_cascade_contract";
   claimBoundary: string;
@@ -19,6 +21,7 @@ export type RevocationCascadeStatus = {
 
 export function getRevocationCascadeStatus(): RevocationCascadeStatus {
   return {
+    schemaVersion: ACTIVE_MIRROR_REVOCATION_CASCADE_SCHEMA_VERSION,
     version: ACTIVE_MIRROR_REVOCATION_CASCADE_VERSION,
     mode: "public_safe_cascade_contract",
     claimBoundary:

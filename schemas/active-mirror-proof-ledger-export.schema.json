@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://activemirror.ai/schemas/active-mirror-proof-ledger-export.schema.json",
+  "title": "Active Mirror Proof Ledger Export",
+  "description": "Public-safe, user-owned, hash-chained proof ledger export.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "version",
+    "owner",
+    "portability",
+    "claimBoundary",
+    "generatedAt",
+    "chainHead",
+    "entries",
+    "queuedPrivateEvents",
+    "exportFormats"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "active_mirror.proof_ledger_export.v1" },
+    "version": { "type": "string", "pattern": "^2026\\." },
+    "owner": { "const": "user" },
+    "portability": { "const": "exportable_public_safe" },
+    "claimBoundary": { "type": "string", "minLength": 20 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "chainHead": { "type": "string", "pattern": "^(genesis|sha256:[a-f0-9]{64})$" },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/proofLedgerEntry" }
+    },
+    "queuedPrivateEvents": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 3 }
+    },
+    "exportFormats": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "enum": ["json", "markdown"] },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "proofLedgerEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index", "id", "kind", "statement", "state", "source", "previousHash", "hash"],
+      "properties": {
+        "index": { "type": "integer", "minimum": 0 },
+        "id": { "type": "string", "pattern": "^[a-z0-9_.:-]{3,120}$" },
+        "kind": {
+          "enum": [
+            "doctrine",
+            "kernel",
+            "body_receipt",
+            "ratchet",
+            "critique",
+            "revocation",
+            "identity_continuity",
+            "approval_gate",
+            "export"
+          ]
+        },
+        "statement": { "type": "string", "minLength": 10 },
+        "state": { "enum": ["proven", "available", "missing", "queued", "gated"] },
+        "source": { "type": "string", "minLength": 1 },
+        "previousHash": { "type": "string", "pattern": "^(genesis|sha256:[a-f0-9]{64})$" },
+        "hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+      }
+    }
+  }
+}

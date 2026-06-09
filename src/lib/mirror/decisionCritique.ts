@@ -1,4 +1,5 @@
 export const ACTIVE_MIRROR_DECISION_CRITIQUE_VERSION = "2026.06.08-decision-critique-v1";
+export const ACTIVE_MIRROR_DECISION_CRITIQUE_SCHEMA_VERSION = "active_mirror.decision_critique_stream.v1";
 
 export type DecisionCritiqueEvent = {
   sequence: number;
@@ -11,6 +12,7 @@ export type DecisionCritiqueEvent = {
 };
 
 export type DecisionCritiqueStream = {
+  schemaVersion: typeof ACTIVE_MIRROR_DECISION_CRITIQUE_SCHEMA_VERSION;
   version: typeof ACTIVE_MIRROR_DECISION_CRITIQUE_VERSION;
   stream: "public_safe_decision_critique";
   claimBoundary: string;
@@ -74,6 +76,7 @@ export function getDecisionCritiqueStream(): DecisionCritiqueStream {
   ];
 
   return {
+    schemaVersion: ACTIVE_MIRROR_DECISION_CRITIQUE_SCHEMA_VERSION,
     version: ACTIVE_MIRROR_DECISION_CRITIQUE_VERSION,
     stream: "public_safe_decision_critique",
     claimBoundary:
@@ -89,5 +92,7 @@ export function getDecisionCritiqueStream(): DecisionCritiqueStream {
 }
 
 export function decisionCritiqueToNdjson(stream: DecisionCritiqueStream) {
-  return stream.events.map((event) => JSON.stringify({ version: stream.version, ...event })).join("\n") + "\n";
+  return stream.events
+    .map((event) => JSON.stringify({ schemaVersion: stream.schemaVersion, version: stream.version, ...event }))
+    .join("\n") + "\n";
 }

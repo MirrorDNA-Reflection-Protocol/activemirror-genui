@@ -72,14 +72,32 @@ test.describe('Active Mirror public GenUI', () => {
     const ledgerResponse = await page.request.get('/api/mirror/proof-ledger');
     expect(ledgerResponse.ok()).toBeTruthy();
     const ledger = await ledgerResponse.json();
+    expect(ledger.schemaVersion).toBe('active_mirror.proof_ledger_export.v1');
     expect(ledger.version).toBe('2026.06.08-proof-ledger-v1');
     expect(ledger.owner).toBe('user');
+    expect(ledger.exportFormats).toEqual(['json', 'markdown']);
     expect(ledger.chainHead).toMatch(/^sha256:/);
     expect(ledger.entries.length).toBeGreaterThanOrEqual(9);
     expect(ledger.entries.at(-1).hash).toBe(ledger.chainHead);
     expect(ledger.entries.some((entry: { id: string }) => entry.id === 'critique.system_self_transparency')).toBeTruthy();
     expect(ledger.entries.some((entry: { id: string }) => entry.id === 'revocation.public_cascade_contract')).toBeTruthy();
     expect(ledger.entries.some((entry: { id: string }) => entry.id === 'identity.public_doctrine_vector')).toBeTruthy();
+
+    const contractsResponse = await page.request.get('/api/mirror/contracts');
+    expect(contractsResponse.ok()).toBeTruthy();
+    const contracts = await contractsResponse.json();
+    expect(contracts.schemaVersion).toBe('active_mirror.contract_registry.v1');
+    expect(contracts.version).toBe('2026.06.09-novelty-contract-registry-v1');
+    expect(contracts.contracts.map((contract: { id: string }) => contract.id)).toEqual([
+      'proof_ledger_export',
+      'revocation_cascade',
+      'identity_continuity_measure',
+      'decision_critique_stream',
+    ]);
+    expect(contracts.contracts.find((contract: { id: string }) => contract.id === 'proof_ledger_export').schema.$id)
+      .toBe('https://activemirror.ai/schemas/active-mirror-proof-ledger-export.schema.json');
+    expect(contracts.contracts.find((contract: { id: string }) => contract.id === 'decision_critique_stream').transport)
+      .toBe('ndjson');
 
     const markdownLedgerResponse = await page.request.get('/api/mirror/proof-ledger?format=markdown');
     expect(markdownLedgerResponse.ok()).toBeTruthy();
@@ -90,6 +108,7 @@ test.describe('Active Mirror public GenUI', () => {
     const critiqueResponse = await page.request.get('/api/mirror/critique');
     expect(critiqueResponse.ok()).toBeTruthy();
     const critique = await critiqueResponse.json();
+    expect(critique.schemaVersion).toBe('active_mirror.decision_critique_stream.v1');
     expect(critique.version).toBe('2026.06.08-decision-critique-v1');
     expect(critique.coveredFailureClass).toBe('hidden system failure stream');
     expect(critique.events.some((event: { systemAdmission: string }) => event.systemAdmission.includes('body_unavailable'))).toBeTruthy();
@@ -97,11 +116,13 @@ test.describe('Active Mirror public GenUI', () => {
     const critiqueNdjsonResponse = await page.request.get('/api/mirror/critique?format=ndjson');
     expect(critiqueNdjsonResponse.ok()).toBeTruthy();
     const critiqueNdjson = await critiqueNdjsonResponse.text();
+    expect(critiqueNdjson).toContain('active_mirror.decision_critique_stream.v1');
     expect(critiqueNdjson).toContain('critique.body_unavailable');
 
     const revocationResponse = await page.request.get('/api/mirror/revocation-cascade');
     expect(revocationResponse.ok()).toBeTruthy();
     const revocation = await revocationResponse.json();
+    expect(revocation.schemaVersion).toBe('active_mirror.revocation_cascade.v1');
     expect(revocation.version).toBe('2026.06.08-revocation-cascade-v1');
     expect(revocation.coveredFailureClass).toBe('revocation cascade opacity');
     expect(revocation.privateEnforcement).toBe('body_required');
@@ -140,6 +161,7 @@ test.describe('Active Mirror public GenUI', () => {
     });
     expect(identityMeasureResponse.ok()).toBeTruthy();
     const identityMeasure = await identityMeasureResponse.json();
+    expect(identityMeasure.schemaVersion).toBe('active_mirror.identity_continuity_measure.v1');
     expect(identityMeasure.continuityScore).toBe(0.925);
     expect(identityMeasure.drift).toBe(0.075);
     expect(identityMeasure.vectorDelta.length).toBe(4);

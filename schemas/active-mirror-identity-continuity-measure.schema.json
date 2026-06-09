@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://activemirror.ai/schemas/active-mirror-identity-continuity-measure.schema.json",
+  "title": "Active Mirror Identity Continuity Measure",
+  "description": "Deterministic public-safe continuity score for comparing the same identity vector across model swaps.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "version",
+    "state",
+    "receiptState",
+    "beforeModel",
+    "afterModel",
+    "continuityScore",
+    "drift",
+    "vectorDelta",
+    "claimBoundary",
+    "requiredReceipt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "active_mirror.identity_continuity_measure.v1" },
+    "version": { "type": "string", "pattern": "^2026\\." },
+    "state": { "const": "computed_public_safe" },
+    "receiptState": { "const": "unsigned_public_preview" },
+    "beforeModel": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "afterModel": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "continuityScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "drift": { "type": "number", "minimum": 0, "maximum": 1 },
+    "vectorDelta": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 24,
+      "items": { "$ref": "#/$defs/identityVectorDelta" }
+    },
+    "claimBoundary": { "type": "string", "minLength": 20 },
+    "requiredReceipt": { "const": "signed_model_swap_identity_receipt" }
+  },
+  "$defs": {
+    "identityVectorDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "before", "after", "delta", "stability", "weight"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_.:-]{3,80}$" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "before": { "type": "number", "minimum": 0, "maximum": 1 },
+        "after": { "type": "number", "minimum": 0, "maximum": 1 },
+        "delta": { "type": "number", "minimum": -1, "maximum": 1 },
+        "stability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "weight": { "type": "number", "minimum": 0.1, "maximum": 10 }
+      }
+    }
+  }
+}

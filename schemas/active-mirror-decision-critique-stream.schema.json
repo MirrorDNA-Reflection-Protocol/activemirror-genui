@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://activemirror.ai/schemas/active-mirror-decision-critique-stream.schema.json",
+  "title": "Active Mirror Decision Critique Stream",
+  "description": "Public-safe self-transparency stream that admits blocked, gated, missing, and queued system states.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "version",
+    "stream",
+    "claimBoundary",
+    "events",
+    "coveredFailureClass",
+    "queuedPrivateEvents"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "active_mirror.decision_critique_stream.v1" },
+    "version": { "type": "string", "pattern": "^2026\\." },
+    "stream": { "const": "public_safe_decision_critique" },
+    "claimBoundary": { "type": "string", "minLength": 20 },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/decisionCritiqueEvent" }
+    },
+    "coveredFailureClass": { "const": "hidden system failure stream" },
+    "queuedPrivateEvents": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 3 }
+    }
+  },
+  "$defs": {
+    "decisionCritiqueEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "id",
+        "state",
+        "systemAdmission",
+        "activeControl",
+        "publicEvidence",
+        "nextSafeStep"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "id": { "type": "string", "pattern": "^[a-z0-9_.:-]{3,120}$" },
+        "state": { "enum": ["admitted", "blocked", "gated", "queued"] },
+        "systemAdmission": { "type": "string", "minLength": 10 },
+        "activeControl": { "type": "string", "minLength": 10 },
+        "publicEvidence": { "type": "string", "minLength": 1 },
+        "nextSafeStep": { "type": "string", "minLength": 10 }
+      }
+    }
+  }
+}

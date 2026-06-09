@@ -49,6 +49,12 @@ proof_ledger_code="$(curl_code GET "$BASE_URL/api/mirror/proof-ledger")"
 grep -q "proof-ledger" "$TMP_DIR/body" || fail "proof ledger endpoint did not expose ledger version"
 grep -q "chainHead" "$TMP_DIR/body" || fail "proof ledger endpoint did not expose chain head"
 
+contracts_code="$(curl_code GET "$BASE_URL/api/mirror/contracts")"
+[[ "$contracts_code" == "200" ]] || fail "contracts endpoint returned HTTP $contracts_code"
+grep -q "novelty-contract-registry" "$TMP_DIR/body" || fail "contracts endpoint did not expose registry version"
+grep -q "active-mirror-proof-ledger-export.schema.json" "$TMP_DIR/body" || fail "contracts endpoint did not expose proof ledger schema"
+grep -q "active-mirror-decision-critique-stream.schema.json" "$TMP_DIR/body" || fail "contracts endpoint did not expose critique stream schema"
+
 critique_code="$(curl_code GET "$BASE_URL/api/mirror/critique")"
 [[ "$critique_code" == "200" ]] || fail "critique endpoint returned HTTP $critique_code"
 grep -q "decision-critique" "$TMP_DIR/body" || fail "critique endpoint did not expose stream version"

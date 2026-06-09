@@ -1,5 +1,7 @@
 export const ACTIVE_MIRROR_IDENTITY_CONTINUITY_MEASURE_VERSION =
   "2026.06.09-identity-continuity-measure-v1";
+export const ACTIVE_MIRROR_IDENTITY_CONTINUITY_MEASURE_SCHEMA_VERSION =
+  "active_mirror.identity_continuity_measure.v1";
 
 type RawIdentityDimension = {
   id?: unknown;
@@ -28,6 +30,7 @@ export type IdentityVectorDelta = {
 };
 
 export type IdentityContinuityMeasurement = {
+  schemaVersion: typeof ACTIVE_MIRROR_IDENTITY_CONTINUITY_MEASURE_SCHEMA_VERSION;
   version: typeof ACTIVE_MIRROR_IDENTITY_CONTINUITY_MEASURE_VERSION;
   state: "computed_public_safe";
   receiptState: "unsigned_public_preview";
@@ -98,6 +101,8 @@ function normalizeVector(input: unknown): IdentityContinuityMeasureDimension[] |
 export function identityContinuityMeasureContract() {
   return {
     version: ACTIVE_MIRROR_IDENTITY_CONTINUITY_MEASURE_VERSION,
+    responseSchemaVersion: ACTIVE_MIRROR_IDENTITY_CONTINUITY_MEASURE_SCHEMA_VERSION,
+    responseSchemaPath: "schemas/active-mirror-identity-continuity-measure.schema.json",
     route: "/api/mirror/identity-continuity/measure",
     mode: "deterministic_public_safe_vector_diff",
     requiredReceipt: "signed_model_swap_identity_receipt",
@@ -161,6 +166,7 @@ export function measureIdentityContinuity(input: unknown): {
   return {
     ok: true,
     measurement: {
+      schemaVersion: ACTIVE_MIRROR_IDENTITY_CONTINUITY_MEASURE_SCHEMA_VERSION,
       version: ACTIVE_MIRROR_IDENTITY_CONTINUITY_MEASURE_VERSION,
       state: "computed_public_safe",
       receiptState: "unsigned_public_preview",

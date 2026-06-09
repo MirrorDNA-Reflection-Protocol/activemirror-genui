@@ -6,6 +6,7 @@ import { getMirrorRatchetStatus } from "./mirrorRatchet";
 import { getRevocationCascadeStatus } from "./revocationCascade";
 
 export const ACTIVE_MIRROR_PROOF_LEDGER_VERSION = "2026.06.08-proof-ledger-v1";
+export const ACTIVE_MIRROR_PROOF_LEDGER_SCHEMA_VERSION = "active_mirror.proof_ledger_export.v1";
 
 export type ProofLedgerEntry = {
   index: number;
@@ -28,6 +29,7 @@ export type ProofLedgerEntry = {
 };
 
 export type ProofLedger = {
+  schemaVersion: typeof ACTIVE_MIRROR_PROOF_LEDGER_SCHEMA_VERSION;
   version: typeof ACTIVE_MIRROR_PROOF_LEDGER_VERSION;
   owner: "user";
   portability: "exportable_public_safe";
@@ -36,6 +38,7 @@ export type ProofLedger = {
   chainHead: string;
   entries: ProofLedgerEntry[];
   queuedPrivateEvents: string[];
+  exportFormats: ("json" | "markdown")[];
 };
 
 function hashEntry(entry: Omit<ProofLedgerEntry, "hash">) {
@@ -140,6 +143,7 @@ export async function getProofLedger(): Promise<ProofLedger> {
   });
 
   return {
+    schemaVersion: ACTIVE_MIRROR_PROOF_LEDGER_SCHEMA_VERSION,
     version: ACTIVE_MIRROR_PROOF_LEDGER_VERSION,
     owner: "user",
     portability: "exportable_public_safe",
@@ -155,6 +159,7 @@ export async function getProofLedger(): Promise<ProofLedger> {
       "measured cross-model user identity continuity score",
       "signed private decision critique stream",
     ],
+    exportFormats: ["json", "markdown"],
   };
 }
 

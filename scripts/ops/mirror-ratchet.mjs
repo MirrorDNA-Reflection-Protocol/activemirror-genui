@@ -21,6 +21,11 @@ const files = {
   revocation: "src/lib/mirror/revocationCascade.ts",
   identity: "src/lib/mirror/identityContinuity.ts",
   identityMeasure: "src/lib/mirror/identityContinuityMeasure.ts",
+  contractRegistry: "src/lib/mirror/runtimeContractRegistry.ts",
+  proofLedgerSchema: "schemas/active-mirror-proof-ledger-export.schema.json",
+  revocationSchema: "schemas/active-mirror-revocation-cascade.schema.json",
+  identityMeasureSchema: "schemas/active-mirror-identity-continuity-measure.schema.json",
+  critiqueSchema: "schemas/active-mirror-decision-critique-stream.schema.json",
   ui: "src/components/active-mirror/GovernedGenUIWorkbench.tsx",
   tests: "tests/qa-suite.spec.ts",
   healthcheck: "scripts/ops/healthcheck.sh",
@@ -111,6 +116,31 @@ const invariants = [
     pattern: /ACTIVE_MIRROR_IDENTITY_CONTINUITY_MEASURE_VERSION[\s\S]*continuityScore[\s\S]*signed_model_swap_identity_receipt/,
   },
   {
+    id: "novelty_contract_registry",
+    file: "contractRegistry",
+    pattern: /proof_ledger_export[\s\S]*revocation_cascade[\s\S]*identity_continuity_measure[\s\S]*decision_critique_stream/,
+  },
+  {
+    id: "proof_ledger_export_schema",
+    file: "proofLedgerSchema",
+    pattern: /active_mirror\.proof_ledger_export\.v1[\s\S]*chainHead[\s\S]*previousHash/,
+  },
+  {
+    id: "revocation_cascade_schema",
+    file: "revocationSchema",
+    pattern: /active_mirror\.revocation_cascade\.v1[\s\S]*downstreamEffect[\s\S]*receiptRequired/,
+  },
+  {
+    id: "identity_continuity_measure_schema",
+    file: "identityMeasureSchema",
+    pattern: /active_mirror\.identity_continuity_measure\.v1[\s\S]*continuityScore[\s\S]*vectorDelta/,
+  },
+  {
+    id: "decision_critique_stream_schema",
+    file: "critiqueSchema",
+    pattern: /active_mirror\.decision_critique_stream\.v1[\s\S]*systemAdmission[\s\S]*nextSafeStep/,
+  },
+  {
     id: "ui_shows_kernel_receipt_and_ratchet",
     file: "ui",
     pattern: /Body receipt[\s\S]*mirror-ratchet-proof|mirror-ratchet-proof[\s\S]*Body receipt/,
@@ -123,7 +153,7 @@ const invariants = [
   {
     id: "healthcheck_covers_public_contracts",
     file: "healthcheck",
-    pattern: /api\/mirror\/ratchet[\s\S]*api\/mirror\/proof-ledger[\s\S]*api\/mirror\/critique[\s\S]*api\/mirror\/revocation-cascade[\s\S]*api\/mirror\/identity-continuity[\s\S]*api\/mirror\/identity-continuity\/measure/,
+    pattern: /api\/mirror\/ratchet[\s\S]*api\/mirror\/proof-ledger[\s\S]*api\/mirror\/contracts[\s\S]*api\/mirror\/critique[\s\S]*api\/mirror\/revocation-cascade[\s\S]*api\/mirror\/identity-continuity[\s\S]*api\/mirror\/identity-continuity\/measure/,
   },
   {
     id: "browser_canary_covers_pwa_control",
