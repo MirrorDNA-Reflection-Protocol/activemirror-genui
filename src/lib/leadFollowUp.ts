@@ -12,6 +12,13 @@ export type LeadFollowUp = {
   buyerStatus: string;
 };
 
+export function followUpReplyMailto(email = "", followUp?: LeadFollowUp) {
+  if (!email || !followUp) return "";
+  const subject = encodeURIComponent(followUp.firstReplySubject);
+  const body = encodeURIComponent(followUp.firstReplyBody);
+  return `mailto:${encodeURIComponent(email)}?subject=${subject}&body=${body}`;
+}
+
 function compact(value = "", fallback = "the workflow") {
   const cleaned = value.replace(/\s+/g, " ").trim();
   return cleaned ? cleaned.slice(0, 220) : fallback;

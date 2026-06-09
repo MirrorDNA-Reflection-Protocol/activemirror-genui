@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { qualifyLead } from '../src/lib/leadQualification';
-import { buildLeadFollowUp } from '../src/lib/leadFollowUp';
+import { buildLeadFollowUp, followUpReplyMailto } from '../src/lib/leadFollowUp';
 
 test.describe('lead qualification', () => {
   test('prioritizes urgent owned workflows with a clear proof target', () => {
@@ -68,5 +68,10 @@ test.describe('lead qualification', () => {
     expect(followUp.firstReplySubject).toContain('Example Corp');
     expect(followUp.firstReplyBody).toContain('Before I call it a fit');
     expect(followUp.riskBoundary).toContain('No private files');
+
+    const mailto = followUpReplyMailto(input.email, followUp);
+    expect(mailto).toContain('mailto:asha%40examplecorp.com');
+    expect(mailto).toContain('subject=Active%20Mirror%20scope');
+    expect(decodeURIComponent(mailto)).toContain('Who owns approval for the first proof?');
   });
 });
