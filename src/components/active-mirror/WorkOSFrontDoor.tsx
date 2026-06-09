@@ -144,9 +144,12 @@ type RuntimeState = {
   critique: CritiqueStream | null;
 };
 
+type MemoryMode = "ephemeral" | "session" | "saved";
+
 type SheetId =
   | "routing"
   | "runtime"
+  | "memory"
   | "ledger"
   | "revocation"
   | "continuity"
@@ -160,6 +163,12 @@ const STARTERS = [
   "Audit a claim before I send it",
   "Create a deployment plan with approvals",
 ];
+
+const MEMORY_MODE_LABEL: Record<MemoryMode, string> = {
+  ephemeral: "ephemeral",
+  session: "session only",
+  saved: "saved with approval",
+};
 
 function makeId() {
   return `r_${Math.random().toString(16).slice(2, 8)}`;
@@ -219,6 +228,7 @@ export default function WorkOSFrontDoor() {
   const [sheet, setSheet] = useState<SheetId | null>(null);
   const [routeLabel, setRouteLabel] = useState("selecting");
   const [seedState, setSeedState] = useState<"none" | "sample">("none");
+  const [memoryMode] = useState<MemoryMode>("ephemeral");
   const [runtime, setRuntime] = useState<RuntimeState>({
     registry: null,
     kernel: null,
@@ -241,12 +251,11 @@ export default function WorkOSFrontDoor() {
     const params = new URLSearchParams(window.location.search);
     const hasSeed = params.has("seed") || params.has("mirrorseed");
     const prompt = params.get("prompt");
-    const storedSeed = window.localStorage.getItem("active_mirror.mirrorseed.sample");
     const frame = window.requestAnimationFrame(() => {
       if (prompt) setInput(prompt);
-      if (hasSeed || storedSeed) {
+      if (hasSeed) {
         setSeedState("sample");
-        setRouteLabel("sample · local");
+        setRouteLabel("sample · ephemeral");
       }
     });
     return () => window.cancelAnimationFrame(frame);
@@ -310,6 +319,7 @@ export default function WorkOSFrontDoor() {
         promptLengthBucket: lengthBucket(prompt),
         turn: nextUserTurns,
         sampleContext: seedState === "sample",
+        memoryMode,
       },
     });
 
@@ -333,6 +343,7 @@ export default function WorkOSFrontDoor() {
           turn: nextUserTurns,
           currentArtifact: artifact,
           mirrorSeed: seedState === "sample" ? "sample_public_seed_loaded" : null,
+          memoryMode,
         }),
       });
 
@@ -383,6 +394,7 @@ export default function WorkOSFrontDoor() {
           promptLengthBucket: lengthBucket(prompt),
           turn: nextUserTurns,
           sampleContext: seedState === "sample",
+          memoryMode,
         },
       });
       appendAssistantText(assistantId, "Tell me a little more — what's the goal, and who's it for? Even a sentence lets me draft something useful.");
@@ -390,25 +402,19 @@ export default function WorkOSFrontDoor() {
       setBusy(false);
       requestAnimationFrame(() => inputRef.current?.focus());
     }
-  }, [appendAssistantText, artifact, busy, seedState, turns, userTurns]);
+  }, [appendAssistantText, artifact, busy, memoryMode, seedState, turns, userTurns]);
 
   const importSampleSeed = useCallback(() => {
-    window.localStorage.setItem("active_mirror.mirrorseed.sample", JSON.stringify({
-      schema: "active_mirror.mirrorseed.public_sample.v1",
-      state: "local_browser_only",
-      preference: "proof before promotion",
-      boundary: "no private saved memory imported",
-    }));
     setSeedState("sample");
-    setRouteLabel("sample · local");
-    trackSiteEvent({ event: "sample_context_imported", target: "mirror_app" });
-  }, []);
+    setRouteLabel("sample · ephemeral");
+    trackSiteEvent({ event: "sample_context_imported", target: "mirror_app", meta: { memoryMode } });
+  }, [memoryMode]);
 
   const submit = useCallback(() => {
     void send(input);
   }, [input, send]);
 
-  const sheetContent = useMemo(() => (sheet ? buildSheet(sheet, runtime) : null), [runtime, sheet]);
+  const sheetContent = useMemo(() => (sheet ? buildSheet(sheet, runtime, memoryMode, seedState) : null), [memoryMode, runtime, seedState, sheet]);
 
   useEffect(() => {
     if (sheet) trackSiteEvent({ event: "workspace_sheet_opened", target: sheet });
@@ -424,6 +430,9 @@ export default function WorkOSFrontDoor() {
           <button className="route" id="route-btn" data-testid="route-btn" title="Intelligence is routed; identity stays local" onClick={() => setSheet("routing")}>
             <span className="route__k">routed</span>
             <span className="route__v" id="route-v">{routeLabel}</span>
+          </button>
+          <button className="os__runtime" id="memory-btn" data-testid="memory-btn" onClick={() => setSheet("memory")}>
+            <span className="d ok" />memory · {MEMORY_MODE_LABEL[memoryMode]}
           </button>
           <a className="os__about" href="/trust">review</a>
           <a className="os__about" href="/glass">evidence</a>
@@ -451,8 +460,8 @@ export default function WorkOSFrontDoor() {
         </aside>
 
         <section className="stage" id="stage" data-testid="work-os-stage">
-          <MobileControlStrip seedState={seedState} onSeed={importSampleSeed} onOpenSheet={setSheet} />
-          {artifact ? <Workpiece artifact={artifact} seedState={seedState} onOpenSheet={setSheet} /> : <EmptyStage seedState={seedState} onStarter={send} onSeed={importSampleSeed} />}
+          <MobileControlStrip memoryMode={memoryMode} seedState={seedState} onSeed={importSampleSeed} onOpenSheet={setSheet} />
+          {artifact ? <Workpiece artifact={artifact} memoryMode={memoryMode} seedState={seedState} onOpenSheet={setSheet} /> : <EmptyStage memoryMode={memoryMode} seedState={seedState} onStarter={send} onSeed={importSampleSeed} />}
         </section>
 
         <div className="composer">
@@ -512,11 +521,14 @@ export default function WorkOSFrontDoor() {
   );
 }
 
-function MobileControlStrip({ seedState, onSeed, onOpenSheet }: { seedState: "none" | "sample"; onSeed: () => void; onOpenSheet: (sheet: SheetId) => void }) {
+function MobileControlStrip({ memoryMode, seedState, onSeed, onOpenSheet }: { memoryMode: MemoryMode; seedState: "none" | "sample"; onSeed: () => void; onOpenSheet: (sheet: SheetId) => void }) {
   return (
     <div className="mobile-controls" data-testid="mobile-control-strip">
+      <button className="mobile-chip is-on" onClick={() => onOpenSheet("memory")}>
+        <span className="d ok" />{MEMORY_MODE_LABEL[memoryMode]}
+      </button>
       <button className={seedState === "sample" ? "mobile-chip is-on" : "mobile-chip"} onClick={onSeed}>
-        <span className="d" />{seedState === "sample" ? "seed local" : "import seed"}
+        <span className="d" />{seedState === "sample" ? "sample run" : "sample"}
       </button>
       <button className="mobile-chip" onClick={() => onOpenSheet("ledger")}><span className="d ok" />evidence</button>
       <button className="mobile-chip" onClick={() => onOpenSheet("routing")}><span className="d warn" />route</button>
@@ -525,15 +537,18 @@ function MobileControlStrip({ seedState, onSeed, onOpenSheet }: { seedState: "no
   );
 }
 
-function EmptyStage({ seedState, onStarter, onSeed }: { seedState: "none" | "sample"; onStarter: (value: string) => void; onSeed: () => void }) {
+function EmptyStage({ memoryMode, seedState, onStarter, onSeed }: { memoryMode: MemoryMode; seedState: "none" | "sample"; onStarter: (value: string) => void; onSeed: () => void }) {
   return (
     <div className="empty">
       <div className="empty__mark">⟡</div>
       <div className="empty__line">What are we making?</div>
       <div className="empty__sub">Tell me the goal. I&apos;ll ask only what I need, then build the real thing here — and refine it as we talk.</div>
+      <div className="memory-note" data-testid="memory-mode">
+        <span className="d ok" />Memory mode: <b>{MEMORY_MODE_LABEL[memoryMode]}</b>
+      </div>
       <button className={seedState === "sample" ? "seed-import is-on" : "seed-import"} data-testid="seed-import" onClick={onSeed}>
-        {seedState === "sample" ? "Sample context loaded locally" : "Import sample context"}
-        <span>{seedState === "sample" ? "public sample · no private context" : "local browser sample"}</span>
+        {seedState === "sample" ? "Sample context loaded for this run" : "Import sample context"}
+        <span>{seedState === "sample" ? "this run only · no private context" : "run-local public sample"}</span>
       </button>
       <div className="starters">
         {STARTERS.map((starter) => (
@@ -546,7 +561,7 @@ function EmptyStage({ seedState, onStarter, onSeed }: { seedState: "none" | "sam
   );
 }
 
-function Workpiece({ artifact, seedState, onOpenSheet }: { artifact: WorkArtifact; seedState: "none" | "sample"; onOpenSheet: (sheet: SheetId) => void }) {
+function Workpiece({ artifact, memoryMode, seedState, onOpenSheet }: { artifact: WorkArtifact; memoryMode: MemoryMode; seedState: "none" | "sample"; onOpenSheet: (sheet: SheetId) => void }) {
   const [approved, setApproved] = useState(false);
   const assumptions = artifact.assumptions || [];
   const unknowns = artifact.unknowns || [];
@@ -560,8 +575,11 @@ function Workpiece({ artifact, seedState, onOpenSheet }: { artifact: WorkArtifac
       <p className="work__summary">{artifact.summary}</p>
       {artifact.blocks.map((block) => <ArtifactBlockView key={`${block.heading}-${block.type}`} block={block} />)}
       <div className="work__foot">
+        <button className="proofbtn" data-testid="memory-state" onClick={() => onOpenSheet("memory")}>
+          <span className="d ok" />memory · {MEMORY_MODE_LABEL[memoryMode]}
+        </button>
         <span className={seedState === "sample" ? "fnote fnote--seed on" : "fnote fnote--seed"} data-testid="seed-state">
-          <span className="fk assume">context</span> {seedState === "sample" ? "local sample loaded · no private context" : "not imported"}
+          <span className="fk assume">context</span> {seedState === "sample" ? "sample loaded for this run · no private context" : "not imported"}
         </span>
         <span className="fnote"><span className="fk gap">actions</span> files, browser, sends, and devices still require approval</span>
         <button className="proofbtn" data-sheet="ledger" onClick={() => onOpenSheet("ledger")}>
@@ -627,8 +645,9 @@ function BindLine({ route, schema }: { route: string; schema: string }) {
   );
 }
 
-function buildSheet(id: SheetId, runtime: RuntimeState) {
+function buildSheet(id: SheetId, runtime: RuntimeState, memoryMode: MemoryMode, seedState: "none" | "sample") {
   if (id === "routing") return routingSheet();
+  if (id === "memory") return memorySheet(memoryMode, seedState);
   if (id === "runtime") return runtimeSheet(runtime);
   if (id === "ledger") return ledgerSheet(runtime.ledger);
   if (id === "revocation") return revocationSheet(runtime.revocation);
@@ -636,6 +655,41 @@ function buildSheet(id: SheetId, runtime: RuntimeState) {
   if (id === "critique") return critiqueSheet(runtime.critique);
   if (id === "ratchet") return ratchetSheet(runtime.ratchet);
   return kernelSheet(runtime.kernel);
+}
+
+function memorySheet(memoryMode: MemoryMode, seedState: "none" | "sample") {
+  return {
+    title: "Memory",
+    binds: ["policy", "ephemeral by default"] as [string, string],
+    claim: "Working memory starts in RAM/request scope. Nothing becomes saved context unless the user explicitly promotes it.",
+    body: (
+      <>
+        <div className="memory-mode-card">
+          <span>current mode</span>
+          <b>{MEMORY_MODE_LABEL[memoryMode]}</b>
+          <p>Prompts, drafts, artifacts, and sample context are held only for this visible run unless a later approval promotes them.</p>
+        </div>
+        <div className="sectlabel">memory classes</div>
+        <div className="rt-row">
+          <div className="rt-row__top"><span className="rt-row__nm">Ephemeral scratch</span><span className="rt-row__st st-ok"><span className="d" />active</span></div>
+          <div className="rt-row__sub">React state and request scope. Cleared by reload, tab close, process restart, or reset.</div>
+        </div>
+        <div className="rt-row">
+          <div className="rt-row__top"><span className="rt-row__nm">Session memory</span><span className="rt-row__st st-warn"><span className="d" />reserved</span></div>
+          <div className="rt-row__sub">Would stay in browser session only. Not used unless a session-only mode is selected.</div>
+        </div>
+        <div className="rt-row">
+          <div className="rt-row__top"><span className="rt-row__nm">Saved context</span><span className="rt-row__st st-warn"><span className="d" />approval required</span></div>
+          <div className="rt-row__sub">Durable memory requires explicit promotion, source, and removal path.</div>
+        </div>
+        <div className="rt-row">
+          <div className="rt-row__top"><span className="rt-row__nm">Sample context</span><span className={`rt-row__st st-${seedState === "sample" ? "ok" : "off"}`}><span className="d" />{seedState === "sample" ? "this run" : "not loaded"}</span></div>
+          <div className="rt-row__sub">The public sample is not written to localStorage or saved memory.</div>
+        </div>
+        <Shape label="MemoryMode" code={'{ mode: "ephemeral"|"session"|"saved",\\n  writePolicy: "promote_only_after_approval",\\n  defaultStorage: "ram_and_request_scope" }'} />
+      </>
+    ),
+  };
 }
 
 function routingSheet() {

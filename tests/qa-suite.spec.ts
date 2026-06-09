@@ -13,12 +13,23 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByRole('button', { name: /Import sample context/i })).toBeVisible();
     await expect(page.getByTestId('solution-path')).toContainText('solution path · a deliverable by step 10');
     await expect(page.getByTestId('route-btn')).toContainText('selecting');
+    await expect(page.getByTestId('memory-btn')).toContainText('memory · ephemeral');
+    await expect(page.getByTestId('memory-mode')).toContainText('Memory mode: ephemeral');
     await expect(page.getByTestId('runtime-btn')).toContainText('controls');
     await expect(page.getByText('Say what you need. Active Mirror makes the workspace.')).toHaveCount(0);
     await expect(page.getByText('Generated Workspace', { exact: true })).toHaveCount(0);
     await expect(page.getByText('Ask SWFI')).toHaveCount(0);
     await expect(page.getByText('SWFI')).toHaveCount(0);
     await expect(page.getByText('/Users/mirror-pro')).toHaveCount(0);
+
+    await page.getByTestId('seed-import').click();
+    await expect(page.getByTestId('seed-import')).toContainText('Sample context loaded for this run');
+    await expect.poll(() => page.evaluate(() => window.localStorage.getItem('active_mirror.mirrorseed.sample'))).toBeNull();
+
+    await page.getByTestId('memory-btn').click();
+    await expect(page.getByTestId('memory-sheet')).toBeVisible();
+    await expect(page.getByText('Ephemeral scratch')).toBeVisible();
+    await expect(page.getByText('The public sample is not written to localStorage or saved memory.')).toBeVisible();
   });
 
   test('controls sheet binds the live review contracts behind one tap', async ({ page }) => {
@@ -228,6 +239,7 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByTestId('conversation-margin')).toBeHidden();
     await expect(page.getByTestId('work-os-stage')).toBeVisible();
     await expect(page.getByTestId('mobile-control-strip')).toBeVisible();
+    await expect(page.getByTestId('mobile-control-strip')).toContainText('ephemeral');
     await expect(page.getByText('What are we making?')).toBeVisible();
 
     const textarea = page.locator('#cap-input');
