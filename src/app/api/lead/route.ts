@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { qualifyLead } from "@/lib/leadQualification";
 
 const LEAD_TO = "paul@activemirror.ai";
 const MAX_BODY_BYTES = Number(process.env.MIRROR_LEAD_MAX_BODY_BYTES || 8_192);
@@ -10,7 +11,7 @@ function clean(value: unknown, max = 500) {
   return String(value || "").trim().slice(0, max);
 }
 
-function mailtoFromLead(lead: { name: string; email: string; company: string; useCase: string; sensitivity?: string; infrastructure?: string; timeline?: string }) {
+function mailtoFromLead(lead: { name: string; email: string; company: string; useCase: string; sensitivity?: string; infrastructure?: string; timeline?: string; decisionRole?: string; proofTarget?: string }) {
   const subject = encodeURIComponent("Active Mirror access request");
   const body = encodeURIComponent(
     [
@@ -20,6 +21,8 @@ function mailtoFromLead(lead: { name: string; email: string; company: string; us
       lead.sensitivity ? `Sensitivity: ${lead.sensitivity}` : "",
       lead.infrastructure ? `Infrastructure: ${lead.infrastructure}` : "",
       lead.timeline ? `Timeline: ${lead.timeline}` : "",
+      lead.decisionRole ? `Decision role: ${lead.decisionRole}` : "",
+      lead.proofTarget ? `Proof target: ${lead.proofTarget}` : "",
       "",
       `Use case: ${lead.useCase}`,
     ].filter(Boolean).join("\n")
@@ -60,12 +63,16 @@ export async function POST(request: NextRequest) {
       sensitivity: clean(body?.sensitivity, 120),
       infrastructure: clean(body?.infrastructure, 160),
       timeline: clean(body?.timeline, 120),
+      decisionRole: clean(body?.decisionRole, 160),
+      proofTarget: clean(body?.proofTarget, 700),
       useCase: clean(body?.useCase, 1000),
     };
 
     if (!lead.email || !lead.email.includes("@")) {
       return NextResponse.json({ error: "A valid work email is required." }, { status: 400 });
     }
+
+    const qualification = qualifyLead(lead);
 
     await prisma.auditLog.create({
       data: {
@@ -76,6 +83,7 @@ export async function POST(request: NextRequest) {
           destination: LEAD_TO,
           delivered: false,
           source: "public_structured_intake",
+          qualification,
         }),
         severity: "INFO",
       },
@@ -85,6 +93,7 @@ export async function POST(request: NextRequest) {
       ok: true,
       delivered: false,
       destination: LEAD_TO,
+      qualification,
       mailto: mailtoFromLead(lead),
     });
   } catch (error) {

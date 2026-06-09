@@ -14,6 +14,8 @@ function fallbackMailto(form: Record<string, string>) {
     `Sensitivity: ${form.sensitivity}`,
     `Infrastructure: ${form.infrastructure}`,
     `Timeline: ${form.timeline}`,
+    `Decision role: ${form.decisionRole}`,
+    `Proof target: ${form.proofTarget}`,
     "",
     form.useCase,
   ].join("\n"));
@@ -31,6 +33,8 @@ export default function IntakeForm() {
     sensitivity: "public-safe first",
     infrastructure: "not sure yet",
     timeline: "this month",
+    decisionRole: "I can sponsor or approve it",
+    proofTarget: "",
     useCase: "",
   });
 
@@ -51,7 +55,9 @@ export default function IntakeForm() {
         sensitivity: form.sensitivity,
         infrastructure: form.infrastructure,
         timeline: form.timeline,
+        decisionRole: form.decisionRole,
         hasCompany: Boolean(form.company),
+        hasProofTarget: Boolean(form.proofTarget.trim()),
         useCaseLengthBucket: form.useCase.length < 120 ? "short" : form.useCase.length < 500 ? "medium" : "long",
       },
     });
@@ -61,6 +67,8 @@ export default function IntakeForm() {
       `Sensitivity: ${form.sensitivity}`,
       `Infrastructure: ${form.infrastructure}`,
       `Timeline: ${form.timeline}`,
+      `Decision role: ${form.decisionRole}`,
+      `Proof target: ${form.proofTarget}`,
     ].join("\n");
 
     try {
@@ -80,6 +88,7 @@ export default function IntakeForm() {
           sensitivity: form.sensitivity,
           infrastructure: form.infrastructure,
           timeline: form.timeline,
+          decisionRole: form.decisionRole,
         },
       });
     } catch (err) {
@@ -93,6 +102,7 @@ export default function IntakeForm() {
           sensitivity: form.sensitivity,
           infrastructure: form.infrastructure,
           timeline: form.timeline,
+          decisionRole: form.decisionRole,
         },
       });
     }
@@ -146,6 +156,15 @@ export default function IntakeForm() {
             <option>urgent production issue</option>
           </select>
         </label>
+        <label>
+          <span>Who can move this forward?</span>
+          <select value={form.decisionRole} onChange={update("decisionRole")}>
+            <option>I can sponsor or approve it</option>
+            <option>I can recommend it internally</option>
+            <option>I am researching options</option>
+            <option>I need help defining the owner</option>
+          </select>
+        </label>
       </div>
       <label className="intake__use">
         <span>What business workflow should Active Mirror help with?</span>
@@ -154,6 +173,14 @@ export default function IntakeForm() {
           onChange={update("useCase")}
           placeholder="Example: We need to prove a vendor decision before a board meeting, using public sources first and private files only after approval."
           required
+        />
+      </label>
+      <label className="intake__use">
+        <span>What would make the 72-hour proof worth paying attention to?</span>
+        <textarea
+          value={form.proofTarget}
+          onChange={update("proofTarget")}
+          placeholder="Example: a board-ready evidence workspace with source gaps, approval steps, and a deploy-or-don't recommendation."
         />
       </label>
       <div className="intake__proof">

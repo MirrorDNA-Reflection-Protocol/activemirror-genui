@@ -123,6 +123,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Searc
         <MetricCard label="Workspace starts" value={summary.workspaceStarts} sub={`${summary.artifacts} delivered artifacts`} />
         <MetricCard label="Intake submits" value={summary.intakeSubmits} sub={`${pct(summary.intakeRate)} of public visitors`} />
         <MetricCard label="Captured leads" value={summary.leads} sub={`${pct(summary.leadRate)} of public visitors`} />
+        <MetricCard label="Qualified leads" value={summary.qualifiedLeads} sub={`${summary.priorityLeads} priority · avg score ${summary.avgLeadScore}`} />
       </section>
 
       <section className="ops-panel ops-panel--decision">
@@ -162,12 +163,19 @@ export default async function FunnelPage({ searchParams }: { searchParams: Searc
               <div>
                 <b>{lead.name || "Unnamed lead"}</b>
                 <span>{lead.company || lead.emailDomain || "No organization"}</span>
+                <span className={`ops-grade ops-grade--${lead.qualification.grade}`}>
+                  {lead.qualification.grade} · {lead.qualification.score}
+                </span>
               </div>
               <p>{lead.useCasePreview || "No use case preview."}</p>
+              {lead.proofTargetPreview ? <p className="ops-lead__proof">Proof target: {lead.proofTargetPreview}</p> : null}
+              <p className="ops-lead__next">{lead.qualification.nextAction}</p>
               <footer>
                 <span>{lead.sensitivity || "sensitivity unknown"}</span>
                 <span>{lead.infrastructure || "infra unknown"}</span>
                 <span>{lead.timeline || "timeline unknown"}</span>
+                <span>{lead.decisionRole || "owner unknown"}</span>
+                {lead.qualification.reasons.map((reason) => <span key={reason}>{reason}</span>)}
                 <time>{formatDate(lead.createdAt)}</time>
               </footer>
             </article>

@@ -203,6 +203,8 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByRole('heading', { name: /workflow that needs better AI control/i })).toBeVisible();
     await expect(page.getByLabel('How sensitive is it?')).toBeVisible();
     await expect(page.getByLabel('Where should it run?')).toBeVisible();
+    await expect(page.getByLabel('Who can move this forward?')).toBeVisible();
+    await expect(page.getByLabel('What would make the 72-hour proof worth paying attention to?')).toBeVisible();
     await expect(page.getByText('No files uploaded.')).toBeVisible();
   });
 
@@ -213,6 +215,7 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByText('Revenue front door')).toBeVisible();
     await expect(page.getByText('72h sprint clicks')).toBeVisible();
     await expect(page.getByText('Captured leads', { exact: true })).toBeVisible();
+    await expect(page.getByText('Qualified leads')).toBeVisible();
     await expect(page.getByText('Next adjustment')).toBeVisible();
     await expect(page.getByText('Recent leads')).toBeVisible();
   });

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { qualifyLead, type LeadQualification } from "@/lib/leadQualification";
 
 type AnalyticsRecord = {
   event: string;
@@ -23,7 +24,10 @@ type LeadRecord = {
   sensitivity: string;
   infrastructure: string;
   timeline: string;
+  decisionRole?: string;
+  proofTarget?: string;
   useCase: string;
+  qualification?: LeadQualification;
   createdAt: string;
 };
 
@@ -63,6 +67,7 @@ function nextAdjustment(input: {
   intakeSubmits: number;
   intakeReady: number;
   leads: number;
+  priorityLeads?: number;
 }) {
   if (input.visitors < 20) {
     return {
@@ -86,6 +91,12 @@ function nextAdjustment(input: {
     return {
       title: "The email handoff may be leaking leads.",
       body: "Intake can prepare requests without a stored lead. Make the next step obvious and consider server-side email delivery once trust and spam controls are ready.",
+    };
+  }
+  if (input.leads > 0 && !input.priorityLeads) {
+    return {
+      title: "Lead quality needs sharper proof signals.",
+      body: "Captured leads exist, but none look priority yet. Tighten outreach around urgent owned workflows and ask what proof would justify a paid sprint.",
     };
   }
   if (input.workspaceStarts > input.sprintClicks * 2 && input.sprintClicks < 3) {
@@ -143,6 +154,15 @@ export async function getFunnelSnapshot(days = 14) {
     const intakeSubmits = events.filter((event) => event.event === "intake_submit");
     const intakeReady = events.filter((event) => event.event === "intake_ready");
     const intakeErrors = events.filter((event) => event.event === "intake_error");
+    const leadsWithQualification = leads.map((lead) => ({
+      ...lead,
+      qualification: lead.qualification || qualifyLead(lead),
+    }));
+    const priorityLeads = leadsWithQualification.filter((lead) => lead.qualification.grade === "priority");
+    const qualifiedLeads = leadsWithQualification.filter((lead) => lead.qualification.grade === "priority" || lead.qualification.grade === "qualified");
+    const avgLeadScore = leadsWithQualification.length
+      ? Math.round(leadsWithQualification.reduce((sum, lead) => sum + lead.qualification.score, 0) / leadsWithQualification.length)
+      : 0;
 
     const byPath = new Map<string, number>();
     const bySource = new Map<string, number>();
@@ -171,6 +191,9 @@ export async function getFunnelSnapshot(days = 14) {
       intakeReady: intakeReady.length,
       intakeErrors: intakeErrors.length,
       leads: leads.length,
+      priorityLeads: priorityLeads.length,
+      qualifiedLeads: qualifiedLeads.length,
+      avgLeadScore,
       clickRate: pct(sprintClicks.length, visitorBase),
       intakeRate: pct(intakeSubmits.length, visitorBase),
       leadRate: pct(leads.length, visitorBase),
@@ -192,10 +215,11 @@ export async function getFunnelSnapshot(days = 14) {
       topSources: topMap(bySource),
       topCtas: topMap(byCta),
       devices: topMap(byDevice),
-      recentLeads: leads.slice(0, 12).map((lead) => ({
+      recentLeads: leadsWithQualification.slice(0, 12).map((lead) => ({
         ...lead,
         emailDomain: emailDomain(lead.email),
         useCasePreview: lead.useCase.replace(/\s+/g, " ").slice(0, 260),
+        proofTargetPreview: (lead.proofTarget || "").replace(/\s+/g, " ").slice(0, 220),
       })),
       recentEvents: events.slice(0, 20),
     };
@@ -218,6 +242,9 @@ export async function getFunnelSnapshot(days = 14) {
         intakeReady: 0,
         intakeErrors: 0,
         leads: 0,
+        priorityLeads: 0,
+        qualifiedLeads: 0,
+        avgLeadScore: 0,
         clickRate: 0,
         intakeRate: 0,
         leadRate: 0,
