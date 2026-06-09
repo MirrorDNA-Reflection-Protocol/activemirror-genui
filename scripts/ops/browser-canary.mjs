@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { chromium } from "playwright";
 
+process.env.PW_TEST_SCREENSHOT_NO_FONTS_READY = process.env.PW_TEST_SCREENSHOT_NO_FONTS_READY || "1";
+
 const baseUrl = (process.argv[2] || process.env.ACTIVEMIRROR_BROWSER_CANARY_URL || "http://127.0.0.1:3456").replace(/\/$/, "");
 const screenshotPath = process.env.ACTIVEMIRROR_BROWSER_CANARY_SCREENSHOT || "/tmp/activemirror-browser-canary.png";
 const serviceWorkerTimeoutMs = Number(process.env.ACTIVEMIRROR_BROWSER_CANARY_SW_TIMEOUT_MS || 60_000);
@@ -60,6 +62,9 @@ const receipt = {
   screenshot: screenshotPath,
   checks: {
     root: false,
+    landingTeaser: false,
+    landingStatic: false,
+    mirrorRoute: false,
     kernelPanel: false,
     ratchetPanel: false,
     noPrivatePathLeak: false,
@@ -72,9 +77,23 @@ try {
   await page.goto(`${baseUrl}/?qa=canary`, { waitUntil: "domcontentloaded", timeout: 20_000 });
   receipt.checks.root = page.url().startsWith(baseUrl);
 
+  await page.waitForSelector("[data-testid=site-teaser-console]", { timeout: 15_000 });
+  const landing = await page.evaluate(() => ({
+    teaser: Boolean(document.querySelector("[data-testid=site-teaser-console]")),
+    hasInput: Boolean(document.querySelector("textarea, input")),
+    openHref: document.querySelector('a[href="/mirror"]')?.getAttribute("href") || "",
+    privatePathLeak: document.body.innerText.includes("/Users/mirror-pro"),
+  }));
+  receipt.checks.landingTeaser = landing.teaser && landing.openHref === "/mirror";
+  receipt.checks.landingStatic = !landing.hasInput;
+
+  await page.goto(`${baseUrl}/mirror?qa=canary`, { waitUntil: "domcontentloaded", timeout: 20_000 });
+  receipt.checks.mirrorRoute = page.url().startsWith(`${baseUrl}/mirror`);
+  await page.waitForSelector("[data-testid=work-os-stage]", { timeout: 15_000 });
+  await page.click("[data-testid=runtime-btn]");
   await page.waitForSelector("[data-testid=mirrorkernel-proof]", { timeout: 15_000 });
   await page.waitForSelector("[data-testid=mirror-ratchet-proof]", { timeout: 15_000 });
-  await page.screenshot({ path: screenshotPath, fullPage: true });
+  await page.screenshot({ path: screenshotPath, fullPage: true, timeout: 60_000 });
 
   const rendered = await page.evaluate(() => ({
     kernelPanel: Boolean(document.querySelector("[data-testid=mirrorkernel-proof]")),
@@ -83,7 +102,7 @@ try {
   }));
   receipt.checks.kernelPanel = rendered.kernelPanel;
   receipt.checks.ratchetPanel = rendered.ratchetPanel;
-  receipt.checks.noPrivatePathLeak = !rendered.privatePathLeak;
+  receipt.checks.noPrivatePathLeak = !landing.privatePathLeak && !rendered.privatePathLeak;
 
   receipt.serviceWorker = await waitForServiceWorkerControl(page, serviceWorkerTimeoutMs);
   receipt.checks.serviceWorkerControlled = Boolean(receipt.serviceWorker.controller);

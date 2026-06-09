@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "./active-mirror-site.css";
+import "./active-mirror-genui.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://activemirror.ai"),
   title: {
-    default: "Active Mirror - Governed GenUI Workbench",
+    default: "Active Mirror - Reflective Work OS",
     template: "%s | Active Mirror",
   },
   description: "Active Mirror reflects the request, builds the workspace, and keeps proof, permissions, memory, and next actions visible.",
@@ -39,8 +41,8 @@ export const metadata: Metadata = {
     "N1 Intelligence",
   ],
   openGraph: {
-    title: "Active Mirror - Governed GenUI Workbench",
-    description: "Generated workspaces with provenance, proof contracts, approvals, source routes, files, and receipts.",
+    title: "Active Mirror - Reflective Work OS",
+    description: "Active Mirror reflects the request, builds the workspace, and keeps proof, permissions, memory, and next actions visible.",
     siteName: "Active Mirror",
     type: "website",
     url: "https://activemirror.ai",
@@ -48,8 +50,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Active Mirror - Governed GenUI Workbench",
-    description: "Ask for the governed workspace: provenance, proof contracts, approvals, files, browser route, and receipt.",
+    title: "Active Mirror - Reflective Work OS",
+    description: "Active Mirror reflects the request, builds the workspace, and keeps proof, permissions, memory, and next actions visible.",
     images: ["/mirror-icon-512.png"],
   },
   manifest: "/manifest.json",

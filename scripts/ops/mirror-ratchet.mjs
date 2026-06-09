@@ -26,8 +26,9 @@ const files = {
   revocationSchema: "schemas/active-mirror-revocation-cascade.schema.json",
   identityMeasureSchema: "schemas/active-mirror-identity-continuity-measure.schema.json",
   critiqueSchema: "schemas/active-mirror-decision-critique-stream.schema.json",
-  ui: "src/components/active-mirror/GovernedGenUIWorkbench.tsx",
+  ui: "src/components/active-mirror/WorkOSFrontDoor.tsx",
   tests: "tests/qa-suite.spec.ts",
+  bodyReceiptTests: "tests/body-receipt-signature.spec.ts",
   healthcheck: "scripts/ops/healthcheck.sh",
   browserCanary: "scripts/ops/browser-canary.mjs",
   signer: "scripts/ops/sign-body-receipt.mjs",
@@ -143,12 +144,17 @@ const invariants = [
   {
     id: "ui_shows_kernel_receipt_and_ratchet",
     file: "ui",
-    pattern: /Body receipt[\s\S]*mirror-ratchet-proof|mirror-ratchet-proof[\s\S]*Body receipt/,
+    pattern: /mirrorkernel-proof[\s\S]*mirror-ratchet-proof|mirror-ratchet-proof[\s\S]*mirrorkernel-proof/,
   },
   {
-    id: "qa_covers_body_receipt_and_ratchet",
+    id: "qa_covers_runtime_contracts_and_ratchet",
     file: "tests",
-    pattern: /body receipt bridge[\s\S]*MirrorRatchet|MirrorRatchet[\s\S]*body receipt bridge/,
+    pattern: /runtime sheet binds the live proof contracts[\s\S]*mirrorkernel-proof[\s\S]*mirror-ratchet-proof/,
+  },
+  {
+    id: "qa_covers_body_receipt_signature",
+    file: "bodyReceiptTests",
+    pattern: /verifies an Ed25519 public-safe body receipt[\s\S]*ed25519_verified/,
   },
   {
     id: "healthcheck_covers_public_contracts",

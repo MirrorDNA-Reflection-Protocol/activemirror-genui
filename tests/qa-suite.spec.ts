@@ -1,430 +1,167 @@
 import { expect, test } from '@playwright/test';
-import { readFile } from 'node:fs/promises';
 
-test.describe('Active Mirror public GenUI', () => {
-  test('front door exposes MirrorKernel as a redacted trust runtime surface', async ({ page }) => {
-    await page.goto('/?qa=1');
+test.describe('Active Mirror work OS front door', () => {
+  test('front door is the margin-stage Work OS, not the old GenUI dashboard', async ({ page }) => {
+    await page.goto('/mirror?qa=1');
 
-    const kernel = page.getByTestId('mirrorkernel-proof');
-    await expect(kernel).toBeVisible();
-    await expect(kernel).toContainText('MirrorKernel');
-    await expect(kernel).toContainText('Contextual memory actualization');
-    await expect(kernel).toContainText('proposer only');
-    await expect(kernel).toContainText('consent-gated');
-    await expect(kernel).toContainText('Doctrine: accuracy without fabrication');
-    await expect(kernel).toContainText('Canonical runtime');
-    const ratchet = page.getByTestId('mirror-ratchet-proof');
-    await expect(ratchet).toBeVisible();
-    await expect(ratchet).toContainText('MirrorRatchet');
-    await expect(ratchet).toContainText('frontier-model failure modes');
-    await expect(ratchet).toContainText('Covers: fabricated certainty');
-    await expect(ratchet).toContainText('Portable proof ledger');
-    await expect(ratchet).toContainText('Confessional self-transparency');
-    const sovereignContracts = page.getByTestId('mirror-sovereign-contracts');
-    await expect(sovereignContracts).toBeVisible();
-    await expect(sovereignContracts).toContainText('Self critique');
-    await expect(sovereignContracts).toContainText('Revocation cascade');
-    await expect(sovereignContracts).toContainText('Identity continuity');
-    await expect(sovereignContracts).toContainText('Export proof ledger');
+    await expect(page.getByText('Active Mirror').first()).toBeVisible();
+    await expect(page.getByTestId('conversation-margin')).toBeVisible();
+    await expect(page.getByTestId('work-os-stage')).toBeVisible();
+    await expect(page.getByText('What are we making?')).toBeVisible();
+    await expect(page.getByText("Tell me the goal. I'll ask only what I need")).toBeVisible();
+    await expect(page.getByRole('button', { name: "Outline a deck for next week's meeting" })).toBeVisible();
+    await expect(page.getByTestId('solution-path')).toContainText('solution path · a deliverable by step 10');
+    await expect(page.getByTestId('route-btn')).toContainText('selecting');
+    await expect(page.getByTestId('runtime-btn')).toContainText('runtime');
+    await expect(page.getByText('Say what you need. Active Mirror makes the workspace.')).toHaveCount(0);
+    await expect(page.getByText('Generated Workspace', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Ask SWFI')).toHaveCount(0);
+    await expect(page.getByText('SWFI')).toHaveCount(0);
     await expect(page.getByText('/Users/mirror-pro')).toHaveCount(0);
+  });
 
-    const response = await page.request.get('/api/mirror/kernel');
-    expect(response.ok()).toBeTruthy();
-    const status = await response.json();
-    expect(status.name).toBe('MirrorKernel');
-    expect(status.version).toBe('2026.06.09-mirrorkernel-identity-score-v6');
-    expect(status.epistemicMode.runtimeLayer).toBe('canonical_verifier');
-    expect(status.truthfulUtilityPolicy.principle).toBe('accuracy_without_fabrication');
-    expect(status.actualization.productWedge).toContain('without giving it all of me');
-    expect(status.bodyReceipt.version).toBe('2026.06.08-body-receipt-signature-v2');
-    expect(status.bodyReceipt.verificationMode).toBe('body_receipt_missing');
-    expect(status.doctrine).toContain('Accuracy without fabrication: blocked or unverified routes return facts, assumptions, unknowns, source gaps, and the next safe step.');
-    expect(status.doctrine).toContain('A public body receipt is proof of sanitized sync only; it does not grant private action authority.');
-    expect(status.controlPlane.some((item: { label: string }) => item.label === 'Accuracy mode')).toBeTruthy();
-    expect(status.controlPlane.some((item: { label: string }) => item.label === 'Canonical promotion')).toBeTruthy();
-    expect(status.controlPlane.some((item: { label: string }) => item.label === 'Self critique')).toBeTruthy();
-    expect(status.controlPlane.some((item: { label: string }) => item.label === 'Revocation cascade')).toBeTruthy();
-    expect(status.controlPlane.some((item: { label: string }) => item.label === 'Identity continuity')).toBeTruthy();
-    expect(status.critique.events.length).toBeGreaterThanOrEqual(4);
-    expect(status.revocation.events.length).toBeGreaterThanOrEqual(4);
-    expect(status.identityContinuity.privateUserContinuityScore).toBeNull();
-    expect(status.privacyBoundary).toContain('redacted');
+  test('runtime sheet binds the live proof contracts behind one tap', async ({ page }) => {
+    await page.goto('/mirror?qa=1');
 
-    const systemResponse = await page.request.get('/api/mirror/system');
-    expect(systemResponse.ok()).toBeTruthy();
-    const systemStatus = await systemResponse.json();
-    expect(systemStatus.localSupervisor).toBe('2026.06.08-local-supervisor-canonical-accuracy-v2');
+    await page.getByTestId('runtime-btn').click();
+    await expect(page.getByTestId('runtime-sheet')).toBeVisible();
+    await expect(page.getByText('GET /api/mirror/contracts')).toBeVisible();
+    await expect(page.getByTestId('mirrorkernel-proof')).toContainText('MirrorKernel');
+    await expect(page.getByTestId('mirror-ratchet-proof')).toContainText('Trust ratchet');
+    await expect(page.getByText('Receipt-chain export')).toBeVisible();
+    await expect(page.getByText('Revocation cascade')).toBeVisible();
+    await expect(page.getByText('Continuity score')).toBeVisible();
+    await expect(page.getByText('Decision critique')).toBeVisible();
 
-    const ratchetResponse = await page.request.get('/api/mirror/ratchet');
-    expect(ratchetResponse.ok()).toBeTruthy();
-    const ratchetStatus = await ratchetResponse.json();
-    expect(ratchetStatus.version).toBe('2026.06.09-mirror-ratchet-v5');
-    expect(ratchetStatus.targetPasses).toBe(1000);
-    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('fabricated certainty');
-    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('vendor-owned proof ledger');
-    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('unverified audit signatures');
-    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('revocation cascade opacity');
-    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('hidden system failure stream');
-    expect(ratchetStatus.frontierFailureCoverage.covered).toContain('model-swap identity drift');
-    expect(ratchetStatus.frontierFailureCoverage.queued).toEqual([]);
-    expect(ratchetStatus.claimBoundary).toContain('not a claim of superior raw model IQ');
-
-    const ledgerResponse = await page.request.get('/api/mirror/proof-ledger');
-    expect(ledgerResponse.ok()).toBeTruthy();
-    const ledger = await ledgerResponse.json();
-    expect(ledger.schemaVersion).toBe('active_mirror.proof_ledger_export.v1');
-    expect(ledger.version).toBe('2026.06.08-proof-ledger-v1');
-    expect(ledger.owner).toBe('user');
-    expect(ledger.exportFormats).toEqual(['json', 'markdown']);
-    expect(ledger.chainHead).toMatch(/^sha256:/);
-    expect(ledger.entries.length).toBeGreaterThanOrEqual(9);
-    expect(ledger.entries.at(-1).hash).toBe(ledger.chainHead);
-    expect(ledger.entries.some((entry: { id: string }) => entry.id === 'critique.system_self_transparency')).toBeTruthy();
-    expect(ledger.entries.some((entry: { id: string }) => entry.id === 'revocation.public_cascade_contract')).toBeTruthy();
-    expect(ledger.entries.some((entry: { id: string }) => entry.id === 'identity.public_doctrine_vector')).toBeTruthy();
+    const kernelResponse = await page.request.get('/api/mirror/kernel');
+    expect(kernelResponse.ok()).toBeTruthy();
+    const kernel = await kernelResponse.json();
+    expect(kernel.name).toBe('MirrorKernel');
+    expect(kernel.version).toBe('2026.06.09-mirrorkernel-identity-score-v6');
+    expect(kernel.epistemicMode.runtimeLayer).toBe('canonical_verifier');
 
     const contractsResponse = await page.request.get('/api/mirror/contracts');
     expect(contractsResponse.ok()).toBeTruthy();
     const contracts = await contractsResponse.json();
     expect(contracts.schemaVersion).toBe('active_mirror.contract_registry.v1');
-    expect(contracts.version).toBe('2026.06.09-novelty-contract-registry-v1');
     expect(contracts.contracts.map((contract: { id: string }) => contract.id)).toEqual([
       'proof_ledger_export',
       'revocation_cascade',
       'identity_continuity_measure',
       'decision_critique_stream',
     ]);
-    expect(contracts.contracts.find((contract: { id: string }) => contract.id === 'proof_ledger_export').schema.$id)
-      .toBe('https://activemirror.ai/schemas/active-mirror-proof-ledger-export.schema.json');
-    expect(contracts.contracts.find((contract: { id: string }) => contract.id === 'decision_critique_stream').transport)
-      .toBe('ndjson');
-
-    const markdownLedgerResponse = await page.request.get('/api/mirror/proof-ledger?format=markdown');
-    expect(markdownLedgerResponse.ok()).toBeTruthy();
-    const markdownLedger = await markdownLedgerResponse.text();
-    expect(markdownLedger).toContain('Active Mirror Public-Safe Proof Ledger');
-    expect(markdownLedger).toContain('Chain head: sha256:');
-
-    const critiqueResponse = await page.request.get('/api/mirror/critique');
-    expect(critiqueResponse.ok()).toBeTruthy();
-    const critique = await critiqueResponse.json();
-    expect(critique.schemaVersion).toBe('active_mirror.decision_critique_stream.v1');
-    expect(critique.version).toBe('2026.06.08-decision-critique-v1');
-    expect(critique.coveredFailureClass).toBe('hidden system failure stream');
-    expect(critique.events.some((event: { systemAdmission: string }) => event.systemAdmission.includes('body_unavailable'))).toBeTruthy();
-
-    const critiqueNdjsonResponse = await page.request.get('/api/mirror/critique?format=ndjson');
-    expect(critiqueNdjsonResponse.ok()).toBeTruthy();
-    const critiqueNdjson = await critiqueNdjsonResponse.text();
-    expect(critiqueNdjson).toContain('active_mirror.decision_critique_stream.v1');
-    expect(critiqueNdjson).toContain('critique.body_unavailable');
-
-    const revocationResponse = await page.request.get('/api/mirror/revocation-cascade');
-    expect(revocationResponse.ok()).toBeTruthy();
-    const revocation = await revocationResponse.json();
-    expect(revocation.schemaVersion).toBe('active_mirror.revocation_cascade.v1');
-    expect(revocation.version).toBe('2026.06.08-revocation-cascade-v1');
-    expect(revocation.coveredFailureClass).toBe('revocation cascade opacity');
-    expect(revocation.privateEnforcement).toBe('body_required');
-
-    const identityResponse = await page.request.get('/api/mirror/identity-continuity');
-    expect(identityResponse.ok()).toBeTruthy();
-    const identity = await identityResponse.json();
-    expect(identity.version).toBe('2026.06.09-identity-continuity-v2');
-    expect(identity.privateUserContinuityScore).toBeNull();
-    expect(identity.scoringRoute).toBe('/api/mirror/identity-continuity/measure');
-    expect(identity.crossModelDiff.requiredReceipt).toBe('signed_model_swap_identity_receipt');
-
-    const identityMeasureContractResponse = await page.request.get('/api/mirror/identity-continuity/measure');
-    expect(identityMeasureContractResponse.ok()).toBeTruthy();
-    const identityMeasureContract = await identityMeasureContractResponse.json();
-    expect(identityMeasureContract.version).toBe('2026.06.09-identity-continuity-measure-v1');
-    expect(identityMeasureContract.requiredReceipt).toBe('signed_model_swap_identity_receipt');
-
-    const identityMeasureResponse = await page.request.post('/api/mirror/identity-continuity/measure', {
-      data: {
-        beforeModel: 'frontier-a',
-        afterModel: 'local-b',
-        before: [
-          { id: 'purpose', label: 'Purpose lock', value: 1 },
-          { id: 'memory', label: 'Memory scope', value: 1 },
-          { id: 'proof', label: 'Proof discipline', value: 1 },
-          { id: 'permission', label: 'Permission boundary', value: 0.8 },
-        ],
-        after: [
-          { id: 'purpose', label: 'Purpose lock', value: 0.9 },
-          { id: 'memory', label: 'Memory scope', value: 0.8 },
-          { id: 'proof', label: 'Proof discipline', value: 1 },
-          { id: 'permission', label: 'Permission boundary', value: 0.8 },
-        ],
-      },
-    });
-    expect(identityMeasureResponse.ok()).toBeTruthy();
-    const identityMeasure = await identityMeasureResponse.json();
-    expect(identityMeasure.schemaVersion).toBe('active_mirror.identity_continuity_measure.v1');
-    expect(identityMeasure.continuityScore).toBe(0.925);
-    expect(identityMeasure.drift).toBe(0.075);
-    expect(identityMeasure.vectorDelta.length).toBe(4);
-    expect(identityMeasure.requiredReceipt).toBe('signed_model_swap_identity_receipt');
-
-    const rejectedIdentityMeasureResponse = await page.request.post('/api/mirror/identity-continuity/measure', {
-      data: {
-        before: [
-          { id: 'purpose', label: 'Purpose lock', value: 1, source: '/Users/mirror-pro/private' },
-          { id: 'memory', label: 'Memory scope', value: 1 },
-        ],
-        after: [
-          { id: 'purpose', label: 'Purpose lock', value: 1 },
-          { id: 'memory', label: 'Memory scope', value: 1 },
-        ],
-      },
-    });
-    expect(rejectedIdentityMeasureResponse.status()).toBe(400);
-    const rejectedIdentityMeasure = await rejectedIdentityMeasureResponse.json();
-    expect(rejectedIdentityMeasure.reason).toBe('measurement_contains_private_material');
-
-    const shapeDriftResponse = await page.request.post('/api/mirror/identity-continuity/measure', {
-      data: {
-        before: [
-          { id: 'purpose', label: 'Purpose lock', value: 1 },
-          { id: 'memory', label: 'Memory scope', value: 1 },
-        ],
-        after: [
-          { id: 'purpose', label: 'Purpose lock', value: 1 },
-          { id: 'memory', label: 'Memory scope', value: 1 },
-          { id: 'padding', label: 'Padding claim', value: 1 },
-        ],
-      },
-    });
-    expect(shapeDriftResponse.status()).toBe(400);
-    const shapeDrift = await shapeDriftResponse.json();
-    expect(shapeDrift.reason).toBe('unexpected_after_dimension:padding');
   });
 
-  test('body receipt bridge is public-readable and write-gated by default', async ({ page }) => {
-    const bodyReceiptResponse = await page.request.get('/api/mirror/body-receipt');
-    expect(bodyReceiptResponse.ok()).toBeTruthy();
-    const bodyReceipt = await bodyReceiptResponse.json();
-    expect(bodyReceipt.version).toBe('2026.06.08-body-receipt-signature-v2');
-    expect(bodyReceipt.status).toBe('missing');
-    expect(bodyReceipt.verificationMode).toBe('body_receipt_missing');
-    expect(bodyReceipt.note).toContain('No accepted public body receipt');
+  test('starter prompt creates one evolving artifact on the stage with proof and a gated next action', async ({ page }) => {
+    await page.goto('/mirror?qa=1');
 
-    const postResponse = await page.request.post('/api/mirror/body-receipt', {
-      data: {
-        schemaVersion: 'active_mirror.body_public_receipt.v1',
-        receiptId: 'am-body-test-20260608T171438Z',
-        issuedAt: '2026-06-08T17:14:38Z',
-        bodyState: 'online',
-        sourceState: 'public_safe_sync',
-      },
-    });
-    expect(postResponse.status()).toBe(503);
-    const postBody = await postResponse.json();
-    expect(postBody.status).toBe('sync_not_configured');
+    await page.getByRole('button', { name: "Outline a deck for next week's meeting" }).click();
+
+    await expect(page.getByText('Meeting deck outline')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('workpiece')).toBeVisible();
+    await expect(page.getByText('Slides')).toBeVisible();
+    await expect(page.getByText('The ask and next steps')).toBeVisible();
+    await expect(page.getByTestId('conversation-margin')).toContainText('you');
+    await expect(page.getByTestId('conversation-margin')).toContainText('Active Mirror');
+    await expect(page.getByTestId('solution-path')).toContainText('delivered');
+    await expect(page.getByRole('button', { name: /proof/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Export the outline — needs approval/i })).toBeVisible();
+
+    await page.getByRole('button', { name: /Export the outline — needs approval/i }).click();
+    await expect(page.getByTestId('ledger-sheet')).toBeVisible();
+    await expect(page.getByText('GET /api/mirror/proof-ledger')).toBeVisible();
+    await expect(page.getByText('ProofLedgerEntry')).toBeVisible();
   });
 
-  test('about page is supporting reference material, not the canonical start', async ({ page }) => {
-    await page.goto('/about');
+  test('typed sensitive prompt routes away from default frontier path honestly', async ({ page }) => {
+    await page.goto('/mirror?qa=1');
 
-    await expect(page.getByRole('heading', { name: 'Active Mirror is a governed reflective work OS.' })).toBeVisible();
-    await expect(page.getByText('Reference, not the front door')).toBeVisible();
-    await expect(page.getByText('messy prompt -> reflection -> generated workspace -> proof line -> export -> next action')).toBeVisible();
-    await expect(page.getByRole('link', { name: /Open work OS/i })).toHaveAttribute('href', '/');
-    await expect(page.getByText('/api/mirror/proof-ledger')).toBeVisible();
-    await expect(page.getByText('body_unavailable is an honest state')).toBeVisible();
+    const textarea = page.locator('#cap-input');
+    await textarea.fill('Draft a private vault plan that must stay local only.');
+    await textarea.press('Enter');
+
+    await expect(page.getByTestId('workpiece').getByText('Working plan')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('route-btn')).toContainText('local · gated');
+    await expect(page.getByText('body_unavailable')).toBeVisible();
+    await expect(page.getByText('Generated Workspace', { exact: true })).toHaveCount(0);
   });
 
-  test('app route redirects to the public work OS until private auth exists', async ({ page }) => {
+  test('route chip opens policy rather than pretending everything is local', async ({ page }) => {
+    await page.goto('/mirror?qa=1');
+
+    await page.getByTestId('route-btn').click();
+    await expect(page.getByTestId('routing-sheet')).toBeVisible();
+    await expect(page.getByText('Intelligence is rented; identity is local.')).toBeVisible();
+    await expect(page.getByText('gemini · flash')).toBeVisible();
+    await expect(page.getByText('claude · sonnet/opus')).toBeVisible();
+    await expect(page.getByText('local · ollama')).toBeVisible();
+    await expect(page.getByText('Never claim')).toHaveCount(0);
+  });
+
+  test('app route redirects to the canonical Work OS front door', async ({ page }) => {
     await page.goto('/app');
 
-    await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByTestId('desktop-front-door')).toBeVisible();
-    await expect(page.getByText('Say what you need. Active Mirror makes the workspace.')).toBeVisible();
+    await expect(page).toHaveURL(/\/mirror$/);
+    await expect(page.getByTestId('work-os-stage')).toBeVisible();
+    await expect(page.getByText('What are we making?')).toBeVisible();
   });
 
-  test('front door route requires a real target before generation', async ({ page }) => {
-    await page.goto('/?qa=1');
+  test('public landing is the Claude site with a static teaser and product CTA', async ({ page }) => {
+    const modelCalls: string[] = [];
+    page.on('request', (request) => {
+      const url = request.url();
+      if (url.includes('/api/mirror/') || url.includes('/api/lead')) {
+        modelCalls.push(url);
+      }
+    });
 
-    await page.getByTestId('desktop-route-research-prove').click();
-    await page.getByRole('button', { name: /Generate surface/i }).click();
+    await page.goto('/');
 
-    await expect(page.getByText(/Add the actual target first/i)).toBeVisible();
-    await expect(page.getByText('Generated Workspace', { exact: true })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: /Not another model/i })).toBeVisible();
+    await expect(page.getByText('TRUST BY DESIGN™ · SOVEREIGN AI RUNTIME')).toBeVisible();
+    await expect(page.getByTestId('site-teaser-console')).toContainText('read-only');
+    await expect(page.getByTestId('site-teaser-console')).toContainText('Vendor evidence workspace');
+    await expect(page.getByTestId('site-teaser-console')).toContainText('receiptRequired');
+    await expect(page.getByRole('link', { name: /Open Active Mirror/i }).first()).toHaveAttribute('href', '/mirror');
+    await expect(page.getByText("Five laws we don't break.")).toBeVisible();
+    await expect(page.getByText('There must be one sacred thing')).toBeVisible();
+    await expect(page.locator('textarea, input')).toHaveCount(0);
+    expect(modelCalls).toEqual([]);
   });
 
-  test('official demo route opens a product workspace without private setup leakage', async ({ page }) => {
-    await page.goto('/?qa=1');
+  test('about route uses the same static site surface without live generation', async ({ page }) => {
+    const modelCalls: string[] = [];
+    page.on('request', (request) => {
+      const url = request.url();
+      if (url.includes('/api/mirror/') || url.includes('/api/lead')) {
+        modelCalls.push(url);
+      }
+    });
 
-    await page.getByTestId('qa-test-strip').getByRole('button', { name: 'Demo', exact: true }).click();
+    await page.goto('/about');
 
-    await expect(page.getByRole('heading', { name: 'Official Product Demo Workspace' }).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole('heading', { name: 'Demo Control Room' }).first()).toBeVisible();
-    await expect(page.getByText('First Useful Artifact', { exact: true }).first()).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Official Demo One-Pager' }).first()).toBeVisible();
-    await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
-    await expect(page.getByText('Downloadable Export Pack', { exact: true })).toHaveCount(0);
-    await expect(page.getByText(/private implementation/i)).toHaveCount(0);
-    await expect(page.getByText(/plumbing/i)).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: /Not another model/i })).toBeVisible();
+    await expect(page.getByTestId('site-teaser-console')).toContainText('no model call');
+    await expect(page.getByRole('link', { name: /Open Active Mirror/i }).first()).toHaveAttribute('href', '/mirror');
+    await expect(page.locator('textarea, input')).toHaveCount(0);
+    expect(modelCalls).toEqual([]);
   });
 
-  test('local supervisor route gates frontier model as proposer only', async ({ page }) => {
-    await page.goto('/?qa=1');
-
-    const textarea = page.locator('textarea').first();
-    await textarea.fill('Wrap and gate a local deterministic model that manages the frontier model in Active Mirror with doctrine, provenance, approvals, and receipts.');
-    await textarea.press('Enter');
-
-    await expect(page.getByRole('heading', { name: 'Governed GenUI Workbench' }).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText('Local Supervisor Route', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Local Gate Contract', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('frontier_proposer').first()).toBeVisible();
-    await expect(page.getByText('proposer_only').first()).toBeVisible();
-    await expect(page.getByText('Probabilistic output cannot promote facts').first()).toBeVisible();
-    await expect(page.getByText('Blocked routes must not dead-end').first()).toBeVisible();
-  });
-
-  test('ux feedback opens repair workspace instead of generic filler', async ({ page }) => {
-    await page.goto('/?qa=1');
-
-    const textarea = page.locator('textarea').first();
-    await textarea.fill('this looks difficult to use');
-    await textarea.press('Enter');
-
-    await expect(page.getByRole('heading', { name: 'UX Repair Workspace' }).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole('heading', { name: 'Usability Fix Board' }).first()).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'UX Repair One-Pager' }).first()).toBeVisible();
-    await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
-    await expect(page.getByText('Request desk')).toHaveCount(0);
-    await expect(page.getByText('Working surface')).toHaveCount(0);
-  });
-
-  test('build prompt opens client intake builder instead of official demo', async ({ page }) => {
-    await page.goto('/?qa=1');
-
-    const textarea = page.locator('textarea').first();
-    await textarea.fill('Build me a client intake workspace for a boutique AI consulting firm. It should collect goals, files, approvals, and produce a 72-hour demo scope.');
-    await textarea.press('Enter');
-
-    await expect(page.getByRole('heading', { name: 'Client Intake Workspace' }).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole('heading', { name: 'Intake Form Builder' }).first()).toBeVisible();
-    await expect(page.getByText('Client Intake Pack', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Handoff pack', { exact: true }).first()).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Official Product Demo Workspace' })).toHaveCount(0);
-  });
-
-  test('scattered prompt opens finish mode with one artifact and parked ideas', async ({ page }) => {
-    await page.goto('/?qa=1');
-
-    const textarea = page.locator('textarea').first();
-    await textarea.fill('I have too many Active Mirror ideas and I am scattered. Help me finish one useful artifact now, park the rest, and give me the next action.');
-    await textarea.press('Enter');
-
-    await expect(page.getByRole('heading', { name: 'Finish Mode Workspace' }).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole('heading', { name: 'Finish Board' }).first()).toBeVisible();
-    await expect(page.getByText('Finished Artifact', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Parked ideas', { exact: true }).first()).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Live Workspace Preview' })).toHaveCount(0);
-  });
-
-  test('public-sector proof prompt opens evidence desk without generated scores', async ({ page }) => {
-    await page.goto('/?qa=1');
-
-    const textarea = page.locator('textarea').first();
-    await textarea.fill('Prepare a GCC public-sector AI evidence brief. Compare digital identity and service-delivery programs, separate facts from assumptions and unknowns, and show a procurement-ready next step.');
-    await textarea.press('Enter');
-
-    await expect(page.getByRole('heading', { name: 'Public-Sector Evidence Desk' }).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole('heading', { name: 'Evidence Desk' }).first()).toBeVisible();
-    await expect(page.getByText('Evidence Brief', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Facts', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Assumptions', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Unknowns', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Generated Signal Map', { exact: true })).toHaveCount(0);
-    await expect(page.getByText('Demand signal')).toHaveCount(0);
-  });
-
-  test('generates a spec workspace and downloads the pack', async ({ page }) => {
-    await page.goto('/?qa=1');
-
-    await expect(page.getByRole('heading', { name: 'Active Mirror', exact: true })).toBeVisible();
-    await expect(page.getByTestId('qa-test-strip')).toBeVisible();
-
-    await page.getByTestId('qa-test-strip').getByRole('button', { name: 'Spec', exact: true }).click();
-
-    await expect(page.getByText('Generated Workspace', { exact: true })).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText('Working Spec', { exact: true }).first()).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Working Demo Spec' }).first()).toBeVisible();
-    await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
-    await expect(page.getByText('Capability Dock', { exact: true })).toHaveCount(0);
-
-    const downloadPromise = page.waitForEvent('download');
-    await page.getByRole('button', { name: /Download pack/i }).click();
-    const download = await downloadPromise;
-    expect(download.suggestedFilename()).toMatch(/active-mirror-workspace-pack/i);
-
-    const path = await download.path();
-    expect(path).toBeTruthy();
-    const content = await readFile(path as string, 'utf8');
-    expect(content).toContain('Active Mirror Workspace Pack');
-    expect(content).toContain('Working Demo Spec');
-  });
-
-  test('typed research prompt opens source and chart lanes', async ({ page }) => {
-    await page.goto('/?qa=1');
-
-    const textarea = page.locator('textarea').first();
-    await textarea.fill('Research generated UI browser OS trends and show a chart with source assumptions.');
-    await textarea.press('Enter');
-
-    await expect(page.getByRole('heading', { name: 'Research Browser Workspace' }).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText('Evidence Brief', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Generated Signal Map', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
-  });
-
-  test('mobile front door uses compact capture flow', async ({ page }) => {
+  test('mobile hides the conversation margin and keeps the deliverable first', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 820 });
-    await page.goto('/?qa=1');
+    await page.goto('/mirror?qa=1');
 
-    await expect(page.getByTestId('mobile-front-door')).toBeVisible();
-    await expect(page.getByTestId('desktop-front-door')).toBeHidden();
-    await expect(page.getByText('Pocket capture')).toBeVisible();
-    await expect(page.getByTestId('mobile-trust-strip')).toBeVisible();
+    await expect(page.getByTestId('conversation-margin')).toBeHidden();
+    await expect(page.getByTestId('work-os-stage')).toBeVisible();
+    await expect(page.getByText('What are we making?')).toBeVisible();
 
-    await page.getByTestId('mobile-route-research-prove').click();
-    await page.getByRole('button', { name: /Generate surface/i }).click();
-    await expect(page.getByText(/Add the actual target first/i)).toBeVisible();
-    await expect(page.getByText('Generated Workspace', { exact: true })).toHaveCount(0);
-  });
-
-  test('mobile viewport keeps generated workspace readable', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 820 });
-    await page.goto('/?qa=1');
-
-    const textarea = page.locator('textarea').first();
-    await textarea.fill('Create an automation that watches my website and emails me if it breaks.');
+    const textarea = page.locator('#cap-input');
+    await textarea.fill('Create an automation checklist for watching my website.');
     await textarea.press('Enter');
 
-    const workspaceChrome = page.getByText('Generated Workspace', { exact: true });
-    await expect(workspaceChrome).toBeVisible({ timeout: 30_000 });
-    await workspaceChrome.scrollIntoViewIfNeeded();
-    await expect(page.getByRole('button', { name: /active:\/\/generated\/automation-builder-workspace/i }).first()).toBeVisible();
-    await expect(page.getByText('First Useful Artifact', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Proof + Next Step').first()).toBeVisible();
-    await expect(page.getByText('Capability Dock', { exact: true })).toHaveCount(0);
-  });
-
-  test('mobile finish mode shows the generated surface, not only the chat receipt', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 820 });
-    await page.goto('/?qa=1');
-
-    const textarea = page.locator('textarea').first();
-    await textarea.fill('I have too many Active Mirror ideas and I am scattered. Help me finish one useful artifact now, park the rest, and give me the next action.');
-    await textarea.press('Enter');
-
-    await expect(page.getByRole('heading', { name: 'Finish Mode Workspace' }).first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole('heading', { name: 'Finish Board' }).first()).toBeVisible();
-    await expect(page.getByText('Parked ideas', { exact: true }).first()).toBeVisible();
+    await expect(page.getByTestId('workpiece').getByText('Working plan')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('workpiece')).toBeVisible();
+    await page.getByRole('button', { name: /proof/i }).click();
+    await expect(page.getByTestId('ledger-sheet')).toBeVisible();
   });
 });

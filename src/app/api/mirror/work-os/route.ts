@@ -1,0 +1,407 @@
+import { NextRequest } from "next/server";
+import { generateObject, streamText } from "ai";
+import { google } from "@ai-sdk/google";
+import { openai } from "@ai-sdk/openai";
+import { z } from "zod";
+
+const artifactBlockSchema = z.object({
+  heading: z.string().min(1),
+  type: z.enum(["checklist", "steps", "list", "fields"]),
+  items: z.array(z.string().min(1)).min(1).max(10),
+});
+
+const artifactSchema = z.object({
+  title: z.string().min(1),
+  type: z.enum(["plan", "brief", "outline", "draft", "checklist", "note"]),
+  summary: z.string().min(1),
+  blocks: z.array(artifactBlockSchema).min(1).max(5),
+  assumptions: z.array(z.string()).default([]),
+  unknowns: z.array(z.string()).default([]),
+  nextAction: z.string().default(""),
+});
+
+const turnSchema = z.object({
+  reply: z.string().min(1),
+  artifact: artifactSchema.nullable(),
+});
+
+const requestSchema = z.object({
+  prompt: z.string().min(1).max(8000),
+  turn: z.number().int().min(1).max(100).default(1),
+  currentArtifact: artifactSchema.nullable().optional(),
+  messages: z.array(z.object({
+    role: z.enum(["user", "assistant"]),
+    content: z.string().max(8000),
+  })).max(30).default([]),
+});
+
+type WorkTurn = z.infer<typeof turnSchema>;
+type WorkArtifact = z.infer<typeof artifactSchema>;
+
+const encoder = new TextEncoder();
+const MODEL_TIMEOUT_MS = Number(process.env.ACTIVE_MIRROR_WORK_OS_MODEL_TIMEOUT_MS || 14_000);
+
+const SYSTEM_PROMPT = [
+  "You are Active Mirror, a sharp, calm thinking partner and assistant.",
+  "You think with the person and do work for them.",
+  "Voice: plain, precise, warm but never gushing. Sentence case. No hype, no jargon, no filler.",
+  "No solo-founder references, no origin story, no person names. Speak as Active Mirror / N1 Intelligence (OPC) Pvt. Ltd. only when company identity is needed.",
+  "You are shaping one deliverable across the conversation. Each time you produce or refine it, return the full current artifact, not a diff.",
+  "If the request is clear enough, produce or refine the artifact plus a one-line intro.",
+  "If it is underspecified, ask the one sharp question a good partner asks and set artifact to null.",
+  "This is a short solution path of at most 10 exchanges. Deliver a first useful artifact as soon as you reasonably can. By the 10th exchange, deliver a real artifact and ask no more questions.",
+  "Ask at most one or two clarifying questions total.",
+  "Never invent specifics. Genuine gaps go in unknowns. Inferences go in assumptions.",
+].join(" ");
+
+function isSensitive(prompt: string) {
+  return /\b(private|secret|credential|password|vault|local only|sovereign|sarvam|hindi|tamil|telugu|kannada|malayalam|marathi|bengali|pan|aadhaar|account|bank|device|files?|email inbox|calendar)\b/i.test(prompt);
+}
+
+function chooseRoute(prompt: string) {
+  if (isSensitive(prompt)) {
+    return {
+      label: "local · gated",
+      model: null,
+      reason: "sensitive route held off frontier path",
+    };
+  }
+
+  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    const id = process.env.ACTIVE_MIRROR_GEMINI_MODEL || "gemini-2.5-flash";
+    return { label: `gemini · ${id.replace(/^gemini-/, "")}`, model: google(id), reason: "workhorse fast route" };
+  }
+
+  if (process.env.OPENAI_API_KEY) {
+    const id = process.env.ACTIVE_MIRROR_OPENAI_MODEL || process.env.MIRROR_OPENAI_MODEL || "gpt-4.1-mini";
+    return { label: `openai · ${id}`, model: openai(id), reason: "fallback workhorse route" };
+  }
+
+  return {
+    label: "local fallback",
+    model: null,
+    reason: "no public model key configured",
+  };
+}
+
+function contextPrompt(input: z.infer<typeof requestSchema>) {
+  const prior = input.messages
+    .slice(-12)
+    .map((message) => `${message.role}: ${message.content}`)
+    .join("\n");
+  const current = input.currentArtifact
+    ? `\nCurrent artifact to refine:\n${JSON.stringify(input.currentArtifact)}`
+    : "";
+  return [
+    `Exchange ${input.turn} of 10.`,
+    input.turn >= 8 ? "Deliver or refine the artifact now. No more questions." : "Deliver an artifact as soon as you have enough. Do not over-interview.",
+    "Return the reply and artifact according to the schema.",
+    current,
+    `Conversation:\n${prior}`,
+    `Latest request:\n${input.prompt}`,
+  ].join("\n\n");
+}
+
+function withTimeout<T>(promise: Promise<T>) {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error("model_timeout")), MODEL_TIMEOUT_MS);
+    }),
+  ]);
+}
+
+function specificItems(prompt: string) {
+  const trimmed = prompt.trim().replace(/\s+/g, " ");
+  if (/deck|slide|present|ppt|powerpoint|meeting/i.test(trimmed)) {
+    return fallbackDeck();
+  }
+  if (/email|message|reply/i.test(trimmed)) {
+    return fallbackEmail(trimmed);
+  }
+  if (/decision|choose|think through|tradeoff/i.test(trimmed)) {
+    return fallbackDecision(trimmed);
+  }
+  if (/plan|messy|project|build|workspace|launch|finish/i.test(trimmed)) {
+    return fallbackPlan(trimmed);
+  }
+  return null;
+}
+
+function needsQuestion(prompt: string, turn: number, currentArtifact?: WorkArtifact | null) {
+  if (turn >= 3 || currentArtifact) return false;
+  const words = prompt.trim().split(/\s+/).filter(Boolean);
+  if (words.length >= 9) return false;
+  if (/deck|email|plan|draft|outline|decision|build|write|make|prepare|checklist/i.test(prompt)) return false;
+  return true;
+}
+
+function fallbackDeck(): WorkTurn {
+  return {
+    reply: "Here is a starting structure. Tell me the audience and the decision you need, and I will tighten it.",
+    artifact: {
+      title: "Meeting deck outline",
+      type: "outline",
+      summary: "A tight meeting deck that opens with the point, shows the evidence, and ends with the ask.",
+      blocks: [
+        {
+          heading: "Slides",
+          type: "steps",
+          items: [
+            "Title — the one line they should remember",
+            "Where things stand today",
+            "What changed and why now",
+            "The proposal",
+            "Evidence that supports the proposal",
+            "The ask and next steps",
+          ],
+        },
+        {
+          heading: "What to prepare",
+          type: "checklist",
+          items: [
+            "Name the audience and decision owner",
+            "Choose the one outcome the deck must secure",
+            "Collect 2–3 proof points that are safe to show",
+            "Decide what can be left as an appendix",
+          ],
+        },
+      ],
+      assumptions: ["The meeting needs a concise decision deck, not a broad narrative."],
+      unknowns: ["Audience", "meeting length", "the specific ask"],
+      nextAction: "Export the outline",
+    },
+  };
+}
+
+function fallbackEmail(prompt: string): WorkTurn {
+  return {
+    reply: "I drafted the useful version first. Give me the recipient and desired tone if you want it sharper.",
+    artifact: {
+      title: "Email draft",
+      type: "draft",
+      summary: "A direct email draft that states the point, reduces friction, and asks for the next move.",
+      blocks: [
+        {
+          heading: "Draft",
+          type: "list",
+          items: [
+            "Hi — I wanted to send the useful version instead of over-polishing this.",
+            `The core request is: ${prompt}.`,
+            "The next step I need is a clear yes, no, or a better time to discuss it.",
+            "If it helps, I can send the supporting detail in a shorter follow-up.",
+          ],
+        },
+        {
+          heading: "Tighten before sending",
+          type: "checklist",
+          items: ["Add the recipient name", "Remove anything that sounds defensive", "Make the ask one sentence", "Confirm the deadline or meeting window"],
+        },
+      ],
+      assumptions: ["The email should be concise and practical."],
+      unknowns: ["Recipient", "tone", "deadline"],
+      nextAction: "Export the draft",
+    },
+  };
+}
+
+function fallbackDecision(prompt: string): WorkTurn {
+  return {
+    reply: "I turned it into a decision frame. The next useful move is to name the constraint that cannot move.",
+    artifact: {
+      title: "Decision frame",
+      type: "brief",
+      summary: "A decision frame that separates the goal, options, tradeoffs, and one next move.",
+      blocks: [
+        {
+          heading: "Frame",
+          type: "fields",
+          items: [
+            `Decision — ${prompt}`,
+            "Goal — pick the option that preserves momentum without hiding risk",
+            "Constraint — identify the one thing that cannot move",
+            "Proof needed — define what would make the choice obvious",
+          ],
+        },
+        {
+          heading: "Compare",
+          type: "list",
+          items: [
+            "Option A: fastest path, highest risk of cleanup later",
+            "Option B: slower path, cleaner proof and fewer reversals",
+            "Option C: bounded experiment with a rollback point",
+          ],
+        },
+      ],
+      assumptions: ["The decision needs clarity more than a long analysis."],
+      unknowns: ["Non-negotiable constraint", "deadline", "risk tolerance"],
+      nextAction: "Export the brief",
+    },
+  };
+}
+
+function fallbackPlan(prompt: string): WorkTurn {
+  return {
+    reply: "I made the first useful plan. It is intentionally small enough to start and specific enough to revise.",
+    artifact: {
+      title: "Working plan",
+      type: "plan",
+      summary: "A practical plan that turns the request into a first deliverable, proof checks, and a gated next action.",
+      blocks: [
+        {
+          heading: "First pass",
+          type: "steps",
+          items: [
+            `Define the target: ${prompt}`,
+            "Name the first artifact that would make this useful",
+            "Separate facts, assumptions, and unknowns before execution",
+            "Build the smallest complete version",
+            "Review, export, or route the gated action for approval",
+          ],
+        },
+        {
+          heading: "Proof checks",
+          type: "checklist",
+          items: [
+            "Mark unsupported claims as assumptions",
+            "Keep private files and account actions gated",
+            "Attach source or receipt when a claim matters",
+            "Leave a visible next safe step when blocked",
+          ],
+        },
+      ],
+      assumptions: ["The first output should be useful before it is exhaustive."],
+      unknowns: ["Audience", "deadline", "required format"],
+      nextAction: "Export the plan",
+    },
+  };
+}
+
+function fallbackTurn(input: z.infer<typeof requestSchema>, routeReason: string): WorkTurn {
+  if (needsQuestion(input.prompt, input.turn, input.currentArtifact)) {
+    return {
+      reply: "What should this become: a plan, a draft, a brief, or a checklist?",
+      artifact: null,
+    };
+  }
+
+  if (routeReason === "sensitive route held off frontier path") {
+    const plan = fallbackPlan(input.prompt).artifact!;
+    return {
+      reply: "This looks sensitive, so I kept it on the gated path and drafted a safe working plan.",
+      artifact: {
+        ...plan,
+        unknowns: [
+          ...plan.unknowns,
+          "Private body state is body_unavailable until a signed approval exists.",
+        ],
+      },
+    };
+  }
+
+  const specific = specificItems(input.prompt);
+  if (specific) return specific;
+
+  if (input.currentArtifact) {
+    return {
+      reply: "I refined the existing deliverable and kept the proof gaps visible.",
+      artifact: {
+        ...input.currentArtifact,
+        blocks: input.currentArtifact.blocks.map((block, index) =>
+          index === 0
+            ? { ...block, items: [...block.items.slice(0, 8), "Refine this against the latest request before export"] }
+            : block,
+        ),
+        assumptions: Array.from(new Set([...(input.currentArtifact.assumptions || []), "Latest request is a refinement, not a new artifact."])),
+      },
+    };
+  }
+
+  return {
+    reply: "I made the first useful version. Tell me what feels off and I will refine the same artifact in place.",
+    artifact: fallbackPlan(input.prompt).artifact,
+  };
+}
+
+async function modelTurn(input: z.infer<typeof requestSchema>, model: NonNullable<ReturnType<typeof chooseRoute>["model"]>) {
+  const prompt = contextPrompt(input);
+
+  const replyResult = streamText({
+    model,
+    system: `${SYSTEM_PROMPT} Return only the 1-2 sentence reply. Do not return the artifact.`,
+    prompt,
+  });
+
+  let reply = "";
+  for await (const delta of replyResult.textStream) {
+    reply += delta;
+  }
+
+  const artifactResult = await withTimeout(generateObject({
+    model,
+    schema: turnSchema.pick({ artifact: true }),
+    system: `${SYSTEM_PROMPT} Return only the structured artifact object or null inside the artifact key.`,
+    prompt,
+  }));
+
+  return turnSchema.parse({
+    reply: reply.trim() || "Done.",
+    artifact: artifactResult.object.artifact,
+  });
+}
+
+function enqueue(controller: ReadableStreamDefaultController<Uint8Array>, event: Record<string, unknown>) {
+  controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+}
+
+async function emitFallback(controller: ReadableStreamDefaultController<Uint8Array>, turn: WorkTurn) {
+  const parts = turn.reply.split(/(\s+)/);
+  for (const part of parts) {
+    enqueue(controller, { type: "reply_delta", text: part });
+    await new Promise((resolve) => setTimeout(resolve, 14));
+  }
+  enqueue(controller, { type: "artifact", artifact: turn.artifact });
+  enqueue(controller, { type: "done" });
+}
+
+async function emitModel(controller: ReadableStreamDefaultController<Uint8Array>, turn: WorkTurn) {
+  for (const part of turn.reply.split(/(\s+)/)) {
+    enqueue(controller, { type: "reply_delta", text: part });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  enqueue(controller, { type: "artifact", artifact: turn.artifact });
+  enqueue(controller, { type: "done" });
+}
+
+export async function POST(request: NextRequest) {
+  let input: z.infer<typeof requestSchema>;
+  try {
+    input = requestSchema.parse(await request.json());
+  } catch {
+    return Response.json({ error: "invalid_work_os_turn" }, { status: 400 });
+  }
+
+  const route = chooseRoute(input.prompt);
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      enqueue(controller, { type: "route", route: route.label, reason: route.reason });
+      try {
+        const turn = route.model
+          ? await modelTurn(input, route.model)
+          : fallbackTurn(input, route.reason);
+        await emitModel(controller, turn);
+      } catch {
+        await emitFallback(controller, fallbackTurn(input, route.reason));
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Cache-Control": "no-store",
+      "Content-Type": "application/x-ndjson; charset=utf-8",
+    },
+  });
+}

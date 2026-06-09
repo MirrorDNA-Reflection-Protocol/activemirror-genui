@@ -1,5 +1,4 @@
-import ActiveMirrorHomepage from "@/components/active-mirror/ActiveMirrorHomepage";
-import { SessionProvider } from "next-auth/react";
+import ActiveMirrorSite from "@/components/active-mirror/ActiveMirrorSite";
 
 export default function Page() {
   const jsonLd = {
@@ -14,27 +13,25 @@ export default function Page() {
       name: "N1 Intelligence (OPC) Pvt Ltd",
     },
     description:
-      "Active Mirror is a generated work OS for documents, browser research, charts, proof trails, files, vaults, and governed AI workflows.",
+      "Active Mirror is a Made-in-India sovereign runtime and trust layer around frontier and local models.",
     featureList: [
-      "Generated documents and PDF-ready artifacts",
-      "Browser research surfaces",
-      "Charts and data views",
-      "Governance and proof trails",
-      "MirrorKernel public proof surface",
-      "Local MirrorSeed personalization",
-      "Vault-ready paid continuity",
-      "PWA installation",
-      "Generated access and waitlist forms",
+      "Trust by Design runtime",
+      "Static public teaser with no model call",
+      "Work OS product route",
+      "MirrorGate governance",
+      "Proof ledger and governed export path",
+      "Revocation, continuity, critique, and ratchet contracts",
+      "Local-first deployment posture",
     ],
   };
 
   return (
-    <SessionProvider>
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ActiveMirrorHomepage />
-    </SessionProvider>
+      <ActiveMirrorSite />
+    </>
   );
 }
