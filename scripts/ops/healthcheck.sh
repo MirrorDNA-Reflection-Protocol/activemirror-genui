@@ -24,6 +24,18 @@ curl_code() {
 
 root_code="$(curl_code GET "$BASE_URL/")"
 [[ "$root_code" == "200" ]] || fail "root returned HTTP $root_code"
+grep -q "Turn one important AI workflow into a reviewable workspace" "$TMP_DIR/body" || fail "root did not expose current buyer-facing headline"
+grep -q 'data-testid="front-door-panel"' "$TMP_DIR/body" || fail "root did not expose public front door panel"
+grep -q "No pitch theatre" "$TMP_DIR/body" || fail "root did not expose sprint deliverables"
+
+mirror_code="$(curl_code GET "$BASE_URL/mirror")"
+[[ "$mirror_code" == "200" ]] || fail "mirror route returned HTTP $mirror_code"
+grep -q 'data-testid="work-os-stage"' "$TMP_DIR/body" || fail "mirror route did not expose Work OS stage"
+
+for route in trust compare glass intake; do
+  route_code="$(curl_code GET "$BASE_URL/$route")"
+  [[ "$route_code" == "200" ]] || fail "$route route returned HTTP $route_code"
+done
 
 system_code="$(curl_code GET "$BASE_URL/api/mirror/system")"
 [[ "$system_code" == "200" ]] || fail "system endpoint returned HTTP $system_code"

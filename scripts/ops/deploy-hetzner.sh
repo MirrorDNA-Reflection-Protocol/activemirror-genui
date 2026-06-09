@@ -11,7 +11,10 @@ PORT="${ACTIVEMIRROR_PORT:-3456}"
 CANARY_PORT="${ACTIVEMIRROR_CANARY_PORT:-3457}"
 INSTANCES="${ACTIVEMIRROR_INSTANCES:-2}"
 REPO_URL="${ACTIVEMIRROR_REPO_URL:-https://github.com/MirrorDNA-Reflection-Protocol/activemirror-genui.git}"
-REF="${ACTIVEMIRROR_REF:-main}"
+DEFAULT_REF="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || echo main)"
+REF="${ACTIVEMIRROR_REF:-$DEFAULT_REF}"
+
+echo "Deploying $APP_NAME from $REPO_URL ref $REF"
 
 # Values are intentionally expanded locally, then passed as a constrained remote environment.
 # shellcheck disable=SC2029
