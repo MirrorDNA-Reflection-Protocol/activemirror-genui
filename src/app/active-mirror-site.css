@@ -456,6 +456,8 @@
 .intake__followup h3 { margin: 6px 0 0; font-family: var(--font-display); font-size: 21px; color: var(--text-primary); }
 .intake__followup p { margin: 8px 0 0; color: var(--text-secondary); font-size: 13.5px; line-height: 1.5; }
 .intake__followup ul { margin: 12px 0 0; padding-left: 18px; color: var(--text-secondary); font-size: 13px; line-height: 1.55; }
+.intake__receipt { font-family: var(--font-data); font-size: 12px !important; color: var(--text-tertiary) !important; }
+.intake__receipt b { color: var(--text-primary); font-weight: 500; }
 .intake__boundary { color: var(--text-tertiary) !important; }
 .intake__error { margin-top: 12px; color: var(--danger); font-size: 13px; }
 .intake__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }

@@ -225,6 +225,7 @@ test.describe('Active Mirror work OS front door', () => {
         body: JSON.stringify({
           ok: true,
           captured: true,
+          captureId: 'amlead_test_1234',
           deliveryStatus: 'capture_only',
           mailto: 'mailto:paul@activemirror.ai?subject=Active%20Mirror%20test',
           followUp: {
@@ -251,6 +252,7 @@ test.describe('Active Mirror work OS front door', () => {
 
     await expect(page.getByTestId('intake-followup')).toContainText('reviewable evidence workspace');
     await expect(page.getByTestId('intake-followup')).toContainText('Who owns approval for the first proof?');
+    await expect(page.getByTestId('intake-followup')).toContainText('Reference: amlead_test_1234');
     await expect(page.getByTestId('intake-followup')).toContainText('No private files');
     await expect(page.getByRole('link', { name: 'Open prepared email' })).toHaveAttribute('href', /mailto:paul@activemirror\.ai/);
   });

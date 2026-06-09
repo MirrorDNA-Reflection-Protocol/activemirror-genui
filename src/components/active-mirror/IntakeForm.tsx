@@ -107,6 +107,7 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
   const [error, setError] = useState("");
   const [mailto, setMailto] = useState("");
   const [followUp, setFollowUp] = useState<PublicFollowUp | null>(null);
+  const [captureId, setCaptureId] = useState("");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -137,6 +138,7 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
     setState("sending");
     setError("");
     setFollowUp(null);
+    setCaptureId("");
     trackSiteEvent({
       event: "intake_submit",
       target: "lead_form",
@@ -172,6 +174,7 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
       if (!response.ok) throw new Error(payload?.error || "Lead capture failed");
       setMailto(payload.mailto || fallbackMailto(form));
       setFollowUp(payload.followUp || null);
+      setCaptureId(payload.captureId || "");
       setState("ready");
       trackSiteEvent({
         event: "intake_ready",
@@ -189,6 +192,7 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
       setError(err instanceof Error ? err.message : "Lead capture failed");
       setMailto(fallbackMailto(form));
       setFollowUp(null);
+      setCaptureId("");
       setState("error");
       trackSiteEvent({
         event: "intake_error",
@@ -299,6 +303,7 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
           <ul>
             {followUp.scopeQuestions.map((question) => <li key={question}>{question}</li>)}
           </ul>
+          {captureId ? <p className="intake__receipt">Reference: <b>{captureId}</b></p> : null}
           <p className="intake__boundary">{followUp.riskBoundary}</p>
         </div>
       ) : null}
