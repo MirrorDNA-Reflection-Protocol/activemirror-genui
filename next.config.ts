@@ -1,45 +1,4 @@
 import type { NextConfig } from "next";
-import withPWAInit from "next-pwa";
-
-const withPWA = withPWAInit({
-  dest: "public",
-  disable: process.env.NODE_ENV === "development",
-  register: false,
-  skipWaiting: true,
-  clientsClaim: true,
-  cleanupOutdatedCaches: true,
-  cacheStartUrl: false,
-  dynamicStartUrl: false,
-  publicExcludes: ["!noprecache/**/*", "!manifest.json"],
-  reloadOnOnline: true,
-  runtimeCaching: [
-    {
-      urlPattern: ({ url }: { url: URL }) =>
-        url.origin === self.origin && url.pathname.startsWith("/api/"),
-      handler: "NetworkOnly",
-      method: "GET",
-    },
-    {
-      urlPattern: ({ url }: { url: URL }) =>
-        url.origin === self.origin && url.pathname.startsWith("/_next/static/"),
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "active-mirror-app-code",
-        networkTimeoutSeconds: 3,
-        expiration: {
-          maxEntries: 64,
-          maxAgeSeconds: 60 * 5,
-        },
-      },
-    },
-    {
-      urlPattern: ({ url }: { url: URL }) =>
-        url.origin === self.origin &&
-        ["/", "/manifest.json", "/sw.js"].includes(url.pathname),
-      handler: "NetworkOnly",
-    },
-  ],
-});
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -103,4 +62,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPWA(nextConfig);
+export default nextConfig;
