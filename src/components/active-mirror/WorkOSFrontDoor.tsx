@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import SiteTelemetry from "./SiteTelemetry";
+import { trackSiteEvent } from "@/lib/siteAnalytics";
 
 type ArtifactBlock = {
   heading: string;
@@ -153,14 +155,20 @@ type SheetId =
   | "kernel";
 
 const STARTERS = [
-  "Outline a deck for next week's meeting",
-  "Turn a messy request into a plan",
-  "Draft an email I've been avoiding",
-  "Think through a decision with me",
+  "Build a vendor evidence workspace",
+  "Prepare a board memo with evidence",
+  "Audit a claim before I send it",
+  "Create a deployment plan with approvals",
 ];
 
 function makeId() {
   return `r_${Math.random().toString(16).slice(2, 8)}`;
+}
+
+function lengthBucket(value: string) {
+  if (value.length < 80) return "short";
+  if (value.length < 300) return "medium";
+  return "long";
 }
 
 async function getJson<T>(route: string): Promise<T | null> {
@@ -195,7 +203,9 @@ function contractSheetId(id: string): SheetId {
 
 function contractSurfaceLabel(contract: RuntimeContract) {
   if (contract.id === "decision_critique_stream") return "Decision critique";
-  if (contract.id === "proof_ledger_export") return "Receipt-chain export";
+  if (contract.id === "proof_ledger_export") return "Evidence export";
+  if (contract.id === "revocation_cascade") return "Removal effects";
+  if (contract.id === "identity_continuity_measure") return "Continuity score";
   return contract.surface;
 }
 
@@ -208,6 +218,7 @@ export default function WorkOSFrontDoor() {
   const [artifact, setArtifact] = useState<WorkArtifact | null>(null);
   const [sheet, setSheet] = useState<SheetId | null>(null);
   const [routeLabel, setRouteLabel] = useState("selecting");
+  const [seedState, setSeedState] = useState<"none" | "sample">("none");
   const [runtime, setRuntime] = useState<RuntimeState>({
     registry: null,
     kernel: null,
@@ -224,6 +235,21 @@ export default function WorkOSFrontDoor() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).catch(() => null);
     }
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hasSeed = params.has("seed") || params.has("mirrorseed");
+    const prompt = params.get("prompt");
+    const storedSeed = window.localStorage.getItem("active_mirror.mirrorseed.sample");
+    const frame = window.requestAnimationFrame(() => {
+      if (prompt) setInput(prompt);
+      if (hasSeed || storedSeed) {
+        setSeedState("sample");
+        setRouteLabel("sample · local");
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
@@ -277,6 +303,15 @@ export default function WorkOSFrontDoor() {
     setInput("");
     const nextUserTurns = userTurns + 1;
     setUserTurns(nextUserTurns);
+    trackSiteEvent({
+      event: "workspace_prompt_submit",
+      target: "mirror_app",
+      meta: {
+        promptLengthBucket: lengthBucket(prompt),
+        turn: nextUserTurns,
+        sampleContext: seedState === "sample",
+      },
+    });
 
     const assistantId = makeId();
     const nextTurns: DialogueTurn[] = [
@@ -297,6 +332,7 @@ export default function WorkOSFrontDoor() {
           prompt,
           turn: nextUserTurns,
           currentArtifact: artifact,
+          mirrorSeed: seedState === "sample" ? "sample_public_seed_loaded" : null,
         }),
       });
 
@@ -325,16 +361,48 @@ export default function WorkOSFrontDoor() {
           if (event.type === "artifact" && event.artifact) {
             setArtifact(event.artifact);
             setDelivered(true);
+            trackSiteEvent({
+              event: "workspace_artifact_delivered",
+              target: event.artifact.type,
+              label: event.artifact.title,
+              meta: {
+                blocks: event.artifact.blocks.length,
+                assumptions: event.artifact.assumptions.length,
+                unknowns: event.artifact.unknowns.length,
+                turn: nextUserTurns,
+              },
+            });
           }
         }
       }
     } catch {
+      trackSiteEvent({
+        event: "workspace_prompt_error",
+        target: "mirror_app",
+        meta: {
+          promptLengthBucket: lengthBucket(prompt),
+          turn: nextUserTurns,
+          sampleContext: seedState === "sample",
+        },
+      });
       appendAssistantText(assistantId, "Tell me a little more — what's the goal, and who's it for? Even a sentence lets me draft something useful.");
     } finally {
       setBusy(false);
       requestAnimationFrame(() => inputRef.current?.focus());
     }
-  }, [appendAssistantText, artifact, busy, turns, userTurns]);
+  }, [appendAssistantText, artifact, busy, seedState, turns, userTurns]);
+
+  const importSampleSeed = useCallback(() => {
+    window.localStorage.setItem("active_mirror.mirrorseed.sample", JSON.stringify({
+      schema: "active_mirror.mirrorseed.public_sample.v1",
+      state: "local_browser_only",
+      preference: "proof before promotion",
+      boundary: "no private saved memory imported",
+    }));
+    setSeedState("sample");
+    setRouteLabel("sample · local");
+    trackSiteEvent({ event: "sample_context_imported", target: "mirror_app" });
+  }, []);
 
   const submit = useCallback(() => {
     void send(input);
@@ -342,8 +410,13 @@ export default function WorkOSFrontDoor() {
 
   const sheetContent = useMemo(() => (sheet ? buildSheet(sheet, runtime) : null), [runtime, sheet]);
 
+  useEffect(() => {
+    if (sheet) trackSiteEvent({ event: "workspace_sheet_opened", target: sheet });
+  }, [sheet]);
+
   return (
     <main className="os">
+      <SiteTelemetry surface="mirror_app" />
       <OpenSheetBridge onOpen={setSheet} />
       <header className="os__top">
         <div className="os__brand"><span className="gl">⟡</span><b>Active Mirror</b></div>
@@ -352,9 +425,10 @@ export default function WorkOSFrontDoor() {
             <span className="route__k">routed</span>
             <span className="route__v" id="route-v">{routeLabel}</span>
           </button>
-          <a className="os__about" href="/about">the thesis</a>
+          <a className="os__about" href="/trust">review</a>
+          <a className="os__about" href="/glass">evidence</a>
           <button className="os__runtime" id="runtime-btn" data-testid="runtime-btn" onClick={() => setSheet("runtime")}>
-            <span className="d" />runtime
+            <span className="d" />controls
           </button>
         </nav>
       </header>
@@ -377,7 +451,8 @@ export default function WorkOSFrontDoor() {
         </aside>
 
         <section className="stage" id="stage" data-testid="work-os-stage">
-          {artifact ? <Workpiece artifact={artifact} onOpenSheet={setSheet} /> : <EmptyStage onStarter={send} />}
+          <MobileControlStrip seedState={seedState} onSeed={importSampleSeed} onOpenSheet={setSheet} />
+          {artifact ? <Workpiece artifact={artifact} seedState={seedState} onOpenSheet={setSheet} /> : <EmptyStage seedState={seedState} onStarter={send} onSeed={importSampleSeed} />}
         </section>
 
         <div className="composer">
@@ -437,12 +512,29 @@ export default function WorkOSFrontDoor() {
   );
 }
 
-function EmptyStage({ onStarter }: { onStarter: (value: string) => void }) {
+function MobileControlStrip({ seedState, onSeed, onOpenSheet }: { seedState: "none" | "sample"; onSeed: () => void; onOpenSheet: (sheet: SheetId) => void }) {
+  return (
+    <div className="mobile-controls" data-testid="mobile-control-strip">
+      <button className={seedState === "sample" ? "mobile-chip is-on" : "mobile-chip"} onClick={onSeed}>
+        <span className="d" />{seedState === "sample" ? "seed local" : "import seed"}
+      </button>
+      <button className="mobile-chip" onClick={() => onOpenSheet("ledger")}><span className="d ok" />evidence</button>
+      <button className="mobile-chip" onClick={() => onOpenSheet("routing")}><span className="d warn" />route</button>
+      <button className="mobile-chip" onClick={() => onOpenSheet("runtime")}><span className="d" />controls</button>
+    </div>
+  );
+}
+
+function EmptyStage({ seedState, onStarter, onSeed }: { seedState: "none" | "sample"; onStarter: (value: string) => void; onSeed: () => void }) {
   return (
     <div className="empty">
       <div className="empty__mark">⟡</div>
       <div className="empty__line">What are we making?</div>
       <div className="empty__sub">Tell me the goal. I&apos;ll ask only what I need, then build the real thing here — and refine it as we talk.</div>
+      <button className={seedState === "sample" ? "seed-import is-on" : "seed-import"} data-testid="seed-import" onClick={onSeed}>
+        {seedState === "sample" ? "Sample context loaded locally" : "Import sample context"}
+        <span>{seedState === "sample" ? "public sample · no private context" : "local browser sample"}</span>
+      </button>
       <div className="starters">
         {STARTERS.map((starter) => (
           <button key={starter} className="starter" onClick={() => onStarter(starter)}>
@@ -454,7 +546,7 @@ function EmptyStage({ onStarter }: { onStarter: (value: string) => void }) {
   );
 }
 
-function Workpiece({ artifact, onOpenSheet }: { artifact: WorkArtifact; onOpenSheet: (sheet: SheetId) => void }) {
+function Workpiece({ artifact, seedState, onOpenSheet }: { artifact: WorkArtifact; seedState: "none" | "sample"; onOpenSheet: (sheet: SheetId) => void }) {
   const [approved, setApproved] = useState(false);
   const assumptions = artifact.assumptions || [];
   const unknowns = artifact.unknowns || [];
@@ -463,19 +555,24 @@ function Workpiece({ artifact, onOpenSheet }: { artifact: WorkArtifact; onOpenSh
     <div className="work refresh" data-testid="workpiece">
       <div className="work__top">
         <span className="work__type">{artifact.type || "draft"}</span>
-        <span className="work__title">{artifact.title || "Draft"}</span>
+        <span className="work__title" data-testid="workpiece-title">{artifact.title || "Draft"}</span>
       </div>
       <p className="work__summary">{artifact.summary}</p>
       {artifact.blocks.map((block) => <ArtifactBlockView key={`${block.heading}-${block.type}`} block={block} />)}
       <div className="work__foot">
+        <span className={seedState === "sample" ? "fnote fnote--seed on" : "fnote fnote--seed"} data-testid="seed-state">
+          <span className="fk assume">context</span> {seedState === "sample" ? "local sample loaded · no private context" : "not imported"}
+        </span>
+        <span className="fnote"><span className="fk gap">actions</span> files, browser, sends, and devices still require approval</span>
         <button className="proofbtn" data-sheet="ledger" onClick={() => onOpenSheet("ledger")}>
-          <span className={`d${unknowns.length ? " warn" : ""}`} />proof{assumptions.length ? ` · ${assumptions.length} assumed` : ""}{unknowns.length ? ` · ${unknowns.length} open` : ""}
+          <span className={`d${unknowns.length ? " warn" : ""}`} />evidence{assumptions.length ? ` · ${assumptions.length} assumed` : ""}{unknowns.length ? ` · ${unknowns.length} open` : ""}
         </button>
-        {assumptions.length ? <span className="fnote"><span className="fk assume">assumed</span>{assumptions.join(" · ")}</span> : null}
-        {unknowns.length ? <span className="fnote"><span className="fk gap">open</span>{unknowns.join(" · ")}</span> : null}
+        {assumptions.length ? <span className="fnote"><span className="fk assume">assumed</span> {assumptions.join(" · ")}</span> : null}
+        {unknowns.length ? <span className="fnote"><span className="fk gap">open</span> {unknowns.join(" · ")}</span> : null}
         {artifact.nextAction ? (
           <button
             className={`nextbtn na-btn${approved ? " done" : ""}`}
+            data-testid="next-action"
             onClick={() => {
               setApproved(true);
               onOpenSheet("ledger");
@@ -546,13 +643,13 @@ function routingSheet() {
     ["gemini · flash", "workhorse · fast", "ok", "high-volume turns, first drafts"],
     ["claude · sonnet/opus", "workhorse · quality", "ok", "hard tasks, the real deliverable"],
     ["openai", "workhorse · fallback", "ok", "failover and specific strengths"],
-    ["sarvam · sovereign", "reserved", "warn", "Indian languages · sovereign demo"],
+    ["Indian-language route", "reserved", "warn", "Hindi, Tamil, Telugu, and other local-language work"],
     ["local · ollama", "reserved", "warn", "sensitive data that must not leave the box"],
   ];
   return {
     title: "Routing",
     binds: ["policy", "intelligence routed · identity local"] as [string, string],
-    claim: "Intelligence is rented; identity is local. The model is routed to whatever is fastest under the gate — including sovereign models when the data demands it. The gate, memory, provenance, and proof always run locally, whichever model answered.",
+    claim: "The model is routed to the best available lane for the job. The approval checks, saved context, source trail, and evidence record stay with Active Mirror, whichever model answered.",
     body: (
       <>
         <div className="sectlabel">model lanes</div>
@@ -566,7 +663,7 @@ function routingSheet() {
           </div>
         ))}
         <div className="sectlabel">rule</div>
-        <p className="sheet-copy">If the task touches private or sensitive data, route local or sovereign. Otherwise use a frontier workhorse. Continuity is scored across every swap so it stays you.</p>
+        <p className="sheet-copy">If the task touches private or sensitive data, use a local route when possible. Otherwise use the strongest hosted model available and keep the review trail attached.</p>
       </>
     ),
   };
@@ -576,28 +673,28 @@ function runtimeSheet(runtime: RuntimeState) {
   const registry = runtime.registry;
   const contracts = registry?.contracts || [];
   return {
-    title: "Runtime",
+    title: "Controls",
     binds: ["GET /api/mirror/contracts", registry?.schemaVersion || "active_mirror.contract_registry.v1"] as [string, string],
-    claim: "The trust layer is here when you want it — every deliverable can show its source, proof, and what stays gated. You never have to look at it to use the product.",
+    claim: "Every deliverable can show its sources, evidence, and approval boundary. You do not have to inspect this panel to use the product.",
     body: (
       <>
-        <div className="sectlabel">live contracts</div>
+        <div className="sectlabel">live controls</div>
         <button className="rt-row" data-testid="mirrorkernel-proof" onClick={() => document.dispatchEvent(new CustomEvent("am:open-sheet", { detail: "kernel" }))}>
-          <div className="rt-row__top"><span className="rt-row__nm">MirrorKernel</span><span className={`rt-row__st st-${stateTone(runtime.kernel?.state)}`}><span className="d" />{runtime.kernel?.state || "body_unavailable"}</span></div>
-          <div className="rt-row__sub">{runtime.kernel?.version || "2026.06.09-mirrorkernel-identity-score-v6"}</div>
+          <div className="rt-row__top"><span className="rt-row__nm">Identity controls</span><span className={`rt-row__st st-${stateTone(runtime.kernel?.state)}`}><span className="d" />{runtime.kernel?.state || "offline"}</span></div>
+          <div className="rt-row__sub">public review packet</div>
         </button>
         <button className="rt-row" data-testid="mirror-ratchet-proof" onClick={() => document.dispatchEvent(new CustomEvent("am:open-sheet", { detail: "ratchet" }))}>
           <div className="rt-row__top">
-            <span className="rt-row__nm">Trust ratchet</span>
+            <span className="rt-row__nm">Reliability checks</span>
             <span className="rt-row__st st-ok"><span className="d" />{runtime.ratchet?.score.passing || 0}/{runtime.ratchet?.score.total || 0} · {runtime.ratchet?.score.coveragePct || 0}%</span>
           </div>
-          <div className="rt-row__sub">monotonic · controlled truth, not a raw IQ claim</div>
+          <div className="rt-row__sub">controlled truth, not a raw IQ claim</div>
         </button>
         {contracts.map((contract) => (
           <button key={contract.id} className="rt-row" data-testid={contract.id === "proof_ledger_export" ? "mirror-sovereign-contracts" : undefined} onClick={() => document.dispatchEvent(new CustomEvent("am:open-sheet", { detail: contractSheetId(contract.id) }))}>
             <div className="rt-row__top">
               <span className="rt-row__nm">{contractSurfaceLabel(contract)}</span>
-              <span className={`rt-row__st st-${contract.status === "public_contract_ready" ? "ok" : "warn"}`}><span className="d" />{contract.status === "public_contract_ready" ? "ready" : "receipt required"}</span>
+              <span className={`rt-row__st st-${contract.status === "public_contract_ready" ? "ok" : "warn"}`}><span className="d" />{contract.status === "public_contract_ready" ? "ready" : "record required"}</span>
             </div>
             <div className="rt-row__sub">{contract.route}</div>
           </button>
@@ -609,9 +706,9 @@ function runtimeSheet(runtime: RuntimeState) {
 
 function ledgerSheet(ledger: ProofLedger | null) {
   return {
-    title: "Proof",
+    title: "Evidence",
     binds: ["GET /api/mirror/proof-ledger", ledger?.schemaVersion || "active_mirror.proof_ledger_export.v1"] as [string, string],
-    claim: ledger?.claimBoundary || "Your proof, exportable and re-walkable by anyone — not a vendor audit log.",
+    claim: ledger?.claimBoundary || "Your evidence record is exportable and reviewable — not a vendor audit log.",
     body: (
       <>
         <div className="ledger-meta">
@@ -629,7 +726,7 @@ function ledgerSheet(ledger: ProofLedger | null) {
           </div>
         ))}
         <div className="sectlabel">queued private events</div>
-        {(ledger?.queuedPrivateEvents || ["private vault writeback", "signed body-receipt attach"]).map((event) => (
+        {(ledger?.queuedPrivateEvents || ["private context writeback", "signed work-record attach"]).map((event) => (
           <div key={event} className="pl__v off sheet-state"><span className="d" />{event} · queued</div>
         ))}
         <Shape label="ProofLedgerEntry" code={"{ index, id, kind, statement,\n  state: proven|available|missing|queued|gated,\n  source, previousHash, hash }"} />
@@ -639,23 +736,25 @@ function ledgerSheet(ledger: ProofLedger | null) {
 }
 
 function revocationSheet(revocation: RevocationCascade | null) {
+  const displayToken = (value: string | undefined, fallback: string) => (value || fallback).replaceAll("_", " ");
+
   return {
-    title: "Revocation cascade",
+    title: "Removal effects",
     binds: ["GET /api/mirror/revocation-cascade", revocation?.schemaVersion || "active_mirror.revocation_cascade.v1"] as [string, string],
-    claim: revocation?.claimBoundary || "The cascade contract is public; the actual downstream rewrite runs only on the private body.",
+    claim: revocation?.claimBoundary || "The public page can show the removal plan; the actual downstream rewrite runs only where the private work lives.",
     body: (
       <>
-        <div className="sectlabel">revoke → downstream → receipt</div>
+        <div className="sectlabel">remove → downstream → record</div>
         {(revocation?.events || []).map((event) => (
           <div key={event.sequence} className="cascade-card">
             <div className="cascade-top"><span>#{event.sequence}</span><span className={`pl__v ${stateTone(event.state)}`}><span className="d" />{event.state}</span></div>
             <div className="cascade-revoke"><span>revoke</span> · {event.revoke}</div>
             <div className="cascade-effect">↳ {event.downstreamEffect}</div>
-            <div className="cascade-receipt">receiptRequired · {event.receiptRequired}</div>
+            <div className="cascade-receipt">record required · {displayToken(event.receiptRequired, "work record")}</div>
           </div>
         ))}
-        <div className="pl__v off sheet-state"><span className="d" />privateEnforcement · {revocation?.privateEnforcement || "body_required"} (gate, not error)</div>
-        <Shape label="RevocationCascadeEvent" code={"{ sequence, revoke, downstreamEffect,\n  state, receiptRequired }"} />
+        <div className="pl__v off sheet-state"><span className="d" />private enforcement · {displayToken(revocation?.privateEnforcement, "private runner required")} (approval boundary, not error)</div>
+        <Shape label="RemovalEffectEvent" code={"{ sequence, remove, downstreamEffect,\n  state, requiredRecord }"} />
       </>
     ),
   };
@@ -666,7 +765,7 @@ function continuitySheet(continuity: ContinuityMeasure | null) {
   return {
     title: "Continuity score",
     binds: ["POST /api/mirror/identity-continuity/measure", continuity?.schemaVersion || "active_mirror.identity_continuity_measure.v1"] as [string, string],
-    claim: continuity?.claimBoundary || "Public-safe preview only; a signed model-swap receipt is required to trust private identity continuity.",
+    claim: continuity?.claimBoundary || "Public-safe preview only; a signed model-change record is required to trust private continuity.",
     body: (
       <>
         <div className="continuity-score">
@@ -679,9 +778,9 @@ function continuitySheet(continuity: ContinuityMeasure | null) {
             <div className="score-drift-value">{(continuity?.drift || 0).toFixed(3)}</div>
           </div>
         </div>
-        <div className="route-pair">{continuity?.beforeModel || "frontier"} → {continuity?.afterModel || "sovereign"}</div>
-        <div className="pl__v warn sheet-state"><span className="d" />receiptState · {continuity?.receiptState || "unsigned_public_preview"}</div>
-        <div className="pl__v off sheet-state"><span className="d" />requiredReceipt · {continuity?.requiredReceipt || "signed_model_swap_identity_receipt"}</div>
+        <div className="route-pair">{continuity?.beforeModel || "hosted model"} → {continuity?.afterModel || "reviewed route"}</div>
+        <div className="pl__v warn sheet-state"><span className="d" />record state · {(continuity?.receiptState || "unsigned_public_preview").replaceAll("_", " ")}</div>
+        <div className="pl__v off sheet-state"><span className="d" />required record · {(continuity?.requiredReceipt || "signed_model_change_record").replaceAll("_", " ")}</div>
         <div className="sectlabel">vectorDelta · explainable</div>
         {vector.map((item) => (
           <div key={item.id} className="vector-row">
@@ -691,7 +790,7 @@ function continuitySheet(continuity: ContinuityMeasure | null) {
             <div><div style={{ width: `${Math.round(item.stability * 100)}%` }} /></div>
           </div>
         ))}
-        <Shape label="IdentityVectorDelta" code={"{ id, label, before, after, delta, stability, weight }"} />
+        <Shape label="ContinuityDelta" code={"{ id, label, before, after, delta, stability, weight }"} />
       </>
     ),
   };
@@ -725,21 +824,21 @@ function critiqueSheet(critique: CritiqueStream | null) {
 
 function ratchetSheet(ratchet: RatchetStatus | null) {
   return {
-    title: "Trust ratchet",
+    title: "Reliability checks",
     binds: ["GET /api/mirror/ratchet", ratchet?.version || "2026.06.09-mirror-ratchet-v5"] as [string, string],
-    claim: ratchet?.claimBoundary || "Controlled truth / provenance / permission / generation — not a raw IQ claim.",
+    claim: ratchet?.claimBoundary || "Controlled truth, source trail, approval, and generation checks — not a raw IQ claim.",
     body: (
       <>
         <div className="ratchet-score"><div>{ratchet?.score.passing || 0}/{ratchet?.score.total || 0}</div><span>{ratchet?.score.coveragePct || 0}% · monotonic · target {ratchet?.targetPasses || 1000}</span></div>
-        <div className="sectlabel">frontier-failure coverage</div>
+        <div className="sectlabel">hosted-model failure coverage</div>
         {(ratchet?.checks || []).map((check) => (
           <div key={check.id} className="ratchet-check">
             <div><span>{check.label}</span><span className={`pl__v ${stateTone(check.state)}`}><span className="d" />{check.state}</span></div>
-            <p><span>frontier</span> · {check.frontierFailure}</p>
+            <p><span>hosted model</span> · {check.frontierFailure}</p>
             <p><span>control</span> · {check.activeMirrorControl}</p>
           </div>
         ))}
-        <Shape label="MirrorRatchetStatus.checks[]" code={"{ id, label, state,\n  frontierFailure, activeMirrorControl }"} />
+        <Shape label="ReliabilityCheck[]" code={"{ id, label, state,\n  hostedModelFailure, activeMirrorControl }"} />
       </>
     ),
   };
@@ -748,18 +847,18 @@ function ratchetSheet(ratchet: RatchetStatus | null) {
 function kernelSheet(kernel: KernelStatus | null) {
   const controls = kernel?.controlPlane || [];
   return {
-    title: "MirrorKernel",
+    title: "Identity controls",
     binds: ["GET /api/mirror/kernel", kernel?.version || "2026.06.09-mirrorkernel-identity-score-v6"] as [string, string],
-    claim: kernel?.publicClaim || kernel?.claimBoundary || "Public route receives a redacted proof packet; private body truth is body_unavailable.",
+    claim: kernel?.publicClaim || kernel?.claimBoundary || "The public route receives a redacted review packet; private machine truth stays unavailable unless approved.",
     body: (
       <>
-        <div className={`pl__v ${stateTone(kernel?.state)} sheet-state`}><span className="d" />state · {kernel?.state || "body_unavailable"}</div>
+        <div className={`pl__v ${stateTone(kernel?.state)} sheet-state`}><span className="d" />state · {kernel?.state || "offline"}</div>
         <div className={`pl__v ${stateTone(capabilityStatus(kernel))} sheet-state`}><span className="d" />capabilityKernel · {capabilityStatus(kernel)}</div>
-        <div className="sectlabel">control plane</div>
+        <div className="sectlabel">control layer</div>
         {controls.map((control) => (
           <div key={control.label} className="kernel-control">{control.label} · {control.state || "enforced"}</div>
         ))}
-        <p className="sheet-copy">Fresh private body truth is <b>body_unavailable</b> on this public route. The public surface can still build a workspace, but private execution needs a signed receipt.</p>
+        <p className="sheet-copy">Fresh private machine truth is unavailable on this public route. The public surface can still build a workspace, but private execution needs a signed record.</p>
       </>
     ),
   };

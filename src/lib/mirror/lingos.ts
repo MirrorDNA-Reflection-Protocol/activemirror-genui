@@ -67,12 +67,12 @@ function hasFinishModeIntent(lower: string) {
 }
 
 function hasOfficialDemoIntent(lower: string) {
-  return /\b(official demo|official active mirror|product demo|working product|people can demo|canonical demo|official working product|strategy route)\b/.test(lower) ||
+  return /\b(official demo|official active mirror|product demo|product preview|working product|people can demo|canonical demo|official working product|strategy route)\b/.test(lower) ||
     /\b(implementation and strategy|strategy and implementation)\b/.test(lower);
 }
 
 function hasClientIntakeIntent(lower: string) {
-  return /\b(client intake|customer intake|intake workspace|intake form|collect goals|collect files|file slots|approval states|approvals|handoff pack|demo scope|72-hour demo scope|72 hour demo scope)\b/.test(lower);
+  return /\b(client intake|customer intake|intake workspace|intake form|collect goals|collect files|file slots|approval states|approvals|handoff pack|sprint scope|proof sprint scope|72-hour proof scope|72 hour proof scope|demo scope|72-hour demo scope|72 hour demo scope)\b/.test(lower);
 }
 
 function hasPublicSectorEvidenceIntent(lower: string) {
@@ -163,7 +163,7 @@ export function compileLingOS(prompt: string): LingOSCompilation {
   const hasSmallBusiness = /\b(small business|smb|local business|shop|restaurant|clinic|salon|agency|solo operator|owner operator|retailer|tradesperson)\b/.test(lower);
   const hasOfficialDemo = hasOfficialDemoIntent(lower);
   const hasBuildArtifact = hasSmallBusiness || hasClientIntakeIntent(lower) || hasAutomationIntent(lower) || hasDocumentIntent(lower) || hasDeckIntent(lower) || hasLeadIntent(lower) || hasFinishModeIntent(lower) || hasFocusHarnessIntent(lower) || /\b(demo|app preview|generated app|workspace|form|calculator)\b/.test(lower);
-  const hasMarketing = /\b(marketing|positioning|campaign|launch|sales|copy|brand|pricing|commercial|mirrorprod)\b/.test(lower);
+  const hasMarketing = /\b(marketing|positioning|campaign|launch|sales|copy|brand|pricing|commercial)\b/.test(lower);
 
   if (/\b(hack|exploit|bypass|steal|phish|malware|credential|password|token|private key|dox|scrape personal|unhackable)\b/.test(lower)) {
     return { route: "gate", tokens: [...tokens, "GATE", "STOP"], needsProof: true };
@@ -175,11 +175,11 @@ export function compileLingOS(prompt: string): LingOSCompilation {
   if (/\b(multilingual|multi-language|multilanguage|translate|translation|localize|localized|locale|language|hindi|arabic|spanish|french|tamil|telugu|marathi|bengali)\b/.test(lower)) {
     return { route: "language", tokens: [...tokens, "LING", "LOCALIZE"], needsProof: false };
   }
-  if (/\b(ecosystem|operating map|chetana|mirrorgate protects|full working demo|show me your system)\b/.test(lower)) {
+  if (/\b(ecosystem|operating map|operating model|full working proof|full working demo|show me your system)\b/.test(lower)) {
     return { route: "ecosystem", tokens: [...tokens, "MAP", "TRUST"], needsProof: true };
   }
   if (hasCompany) return { route: "company", tokens: [...tokens, "ORG", "SRC", "FIT"], needsProof: true };
-  if (hasBuildArtifact && !/\b(campaign|launch|positioning|copy|brand|pricing|mirrorprod)\b/.test(lower)) {
+  if (hasBuildArtifact && !/\b(campaign|launch|positioning|copy|brand|pricing)\b/.test(lower)) {
     return { route: "build", tokens: [...tokens, "GEN", "SPEC", "EXPORT"], needsProof: hasLookup };
   }
   if (hasMarketing) return { route: "marketing", tokens: [...tokens, "MKT", "PROOF"], needsProof: true };
@@ -192,10 +192,10 @@ export function requestIntent(prompt: string) {
   const route = compileLingOS(prompt);
   return {
     lingos: route,
-    ecosystem: /\b(ecosystem|operating map|chetana|mirrorgate protects|full working demo|show me your system)\b/.test(lower),
+    ecosystem: /\b(ecosystem|operating map|operating model|full working proof|full working demo|show me your system)\b/.test(lower),
     company: Boolean(extractCompanyTarget(prompt)),
     software: hasOfficialDemoIntent(lower) || hasClientIntakeIntent(lower) || hasPublicSectorEvidenceIntent(lower) || hasUxFeedbackIntent(lower) || /\b(software-on-demand|software on demand|app preview|generated app|generate an app|website preview|workspace|dashboard|calculator|form|explainer|one-pager|deck|download|export pack|individual|team|enterprise|public-sector|public sector|government|small business|smb|local business|shop|restaurant|clinic|salon)\b/.test(lower) || hasAutomationIntent(lower) || hasDocumentIntent(lower) || hasLeadIntent(lower) || hasFinishModeIntent(lower) || hasFocusHarnessIntent(lower) || hasSiteAuditIntent(lower),
-    marketing: /\b(marketing|positioning|campaign|launch|sales|copy|brand|pricing|commercial|mirrorprod)\b/.test(lower),
+    marketing: /\b(marketing|positioning|campaign|launch|sales|copy|brand|pricing|commercial)\b/.test(lower),
     lookup: /\b(lookup|internet|online|source|sources|citation|citations|research|browse|browser|current|latest|news|who is|what is available)\b/.test(lower),
     multilingual: /\b(multilingual|multi-language|multilanguage|translate|translation|localize|localized|locale|language|hindi|arabic|spanish|french|tamil|telugu|marathi|bengali)\b/.test(lower),
     video: /\b(video|veo|veo 3|storyboard|mp4|render|text-to-video|generate video)\b/.test(lower),
@@ -220,25 +220,25 @@ export function workspaceProfile(prompt: string): WorkspaceProfile {
     return {
       title: "Client Intake Workspace",
       audience: "Client-facing team",
-      promise: "A working intake builder opens with goals, file slots, approval states, demo scope, exportable handoff, and reviewed activation path.",
+      promise: "A working intake builder opens with goals, file slots, approval states, proof-sprint scope, exportable handoff, and reviewed activation path.",
       primaryAction: "Build intake",
-      modules: ["Goal capture", "File slots", "Approval states", "72-hour scope", "Handoff pack"],
+      modules: ["Goal capture", "File slots", "Approval states", "72-hour proof scope", "Handoff pack"],
     };
   }
   if (hasOfficialDemoIntent(lower)) {
     return {
-      title: "Official Product Demo Workspace",
-      audience: "Demo visitor",
-      promise: "A real visitor starts with one request and gets a generated workspace, proof boundary, export pack, and reviewed 72-hour demo route without seeing private setup.",
-      primaryAction: "Run demo",
-      modules: ["Ask surface", "Generated workspace", "Proof boundary", "Download pack", "Demo request"],
+      title: "Official Product Preview Workspace",
+      audience: "Visitor",
+      promise: "A real visitor starts with one request and gets a generated workspace, review boundary, export pack, and qualified 72-hour proof-sprint route without seeing private setup.",
+      primaryAction: "Run preview",
+      modules: ["Ask surface", "Generated workspace", "Review boundary", "Download pack", "Proof-sprint request"],
     };
   }
   if (hasAutomationIntent(lower)) {
     return {
       title: "Automation Builder Workspace",
       audience: "Operator",
-      promise: "A workflow builder opens with trigger, checks, schedule, proof receipt, alert copy, and reviewed activation path.",
+      promise: "A workflow builder opens with trigger, checks, schedule, evidence record, alert copy, and reviewed activation path.",
       primaryAction: "Prepare automation",
       modules: ["Trigger", "Checks", "Schedule", "Receipt", "Alert path"],
     };
@@ -298,9 +298,9 @@ export function workspaceProfile(prompt: string): WorkspaceProfile {
     return {
       title: "Lead Capture Workspace",
       audience: "Buyer or visitor",
-      promise: "A generated intake surface opens with form fields, consent note, routing copy, email handoff, and downloadable demo brief.",
+      promise: "A generated intake surface opens with form fields, consent note, routing copy, email handoff, and downloadable proof brief.",
       primaryAction: "Prepare intake",
-      modules: ["Intake form", "Consent note", "Routing email", "Demo brief", "Access gate"],
+      modules: ["Intake form", "Consent note", "Routing email", "Proof brief", "Access gate"],
     };
   }
   const company = extractCompanyTarget(prompt);
@@ -320,7 +320,7 @@ export function workspaceProfile(prompt: string): WorkspaceProfile {
     return {
       title: "Research Browser Workspace",
       audience: "Research user",
-      promise: "A browser-style lookup workspace with source targets, proof notes, downloadable brief, and a scoped demo path.",
+      promise: "A browser-style lookup workspace with source targets, proof notes, downloadable brief, and a scoped proof-sprint path.",
       primaryAction: "Open source path",
       modules: ["Search surface", "Source notes", "Research brief", "Downloadable spec"],
       lookupUrl: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
@@ -475,7 +475,7 @@ export function pluginLanesForPrompt(prompt: string): PluginLane[] {
       state: "prepared",
       action: "Create visual data view",
       description: "Prepares chart-ready interpretation for trends, comparisons, and KPI-style prompts.",
-      proof: "Numbers are demo or user-provided unless source lookup is approved.",
+      proof: "Numbers are sample or user-provided unless source lookup is approved.",
     });
   }
 
@@ -486,7 +486,7 @@ export function pluginLanesForPrompt(prompt: string): PluginLane[] {
       icon: "automation",
       state: "review_required",
       action: "Generate workflow spec",
-      description: "Drafts triggers, checks, schedule, alert copy, and receipt format. Live sends require approval.",
+      description: "Drafts triggers, checks, schedule, alert copy, and evidence-record format. Live sends require approval.",
       proof: "Prepared as a spec; no automation is activated from the public preview.",
     });
   }
@@ -518,8 +518,8 @@ export function pluginLanesForPrompt(prompt: string): PluginLane[] {
     label: "Access Path",
     icon: "lead",
     state: "prepared",
-    action: "Route scoped demo",
-    description: "Offers a short project brief and 72-hour demo path after a useful artifact exists.",
+    action: "Route proof sprint",
+    description: "Offers a short project brief and qualified 72-hour proof-sprint path after a useful artifact exists.",
     proof: "Lead form uses contact and project scope only.",
   });
 

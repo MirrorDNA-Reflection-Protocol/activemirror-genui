@@ -9,7 +9,7 @@ interface AIJourneyPromptProps {
 }
 
 export default function AIJourneyPrompt({ onSubmit }: AIJourneyPromptProps) {
-  const [value, setValue] = useState("How does the Sovereign OS govern AI?");
+  const [value, setValue] = useState("Build a reviewed workflow for a real business task.");
 
   const handleSubmit = () => {
     if (value.trim()) {

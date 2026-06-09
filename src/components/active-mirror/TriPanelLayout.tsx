@@ -64,7 +64,7 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
   const displaySurfaces = surfaceNodes.filter((n) => n?.type !== 'governance_node');
   const hasSurfaces = displaySurfaces.length > 0;
   const stackSurfaces = hasSurfaces && isNarrow;
-  const isGovernedWorkspace = (dataModel["generated_preview.title"] || "").toLowerCase().includes("governed genui");
+  const isGovernedWorkspace = /(governed genui|review-controlled)/i.test(String(dataModel["generated_preview.title"] || ""));
 
   const closeSurface = (id: string) => {
     setClosedSurfaces(prev => new Set([...prev, id]));
@@ -309,7 +309,7 @@ export default function TriPanelLayout({ messages, a2uiState, isLoading }: TriPa
                 <div>
                   <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Generated Workspace</div>
                   <div className="text-sm font-semibold text-gray-950">
-                    {isGovernedWorkspace ? "Provenance, doctrine, approvals, and receipts" : "Preview, artifact, proof, and next step"}
+                    {isGovernedWorkspace ? "Sources, approvals, evidence, and next step" : "Preview, artifact, proof, and next step"}
                   </div>
                 </div>
                 <div className="hidden items-center gap-2 text-[11px] font-medium text-gray-500 sm:flex">

@@ -62,11 +62,11 @@ const receipt = {
   screenshot: screenshotPath,
   checks: {
     root: false,
-    landingTeaser: false,
+    landingFrontDoor: false,
     landingStatic: false,
     mirrorRoute: false,
-    kernelPanel: false,
-    ratchetPanel: false,
+    identityControls: false,
+    reliabilityChecks: false,
     noPrivatePathLeak: false,
     serviceWorkerControlled: false,
   },
@@ -77,14 +77,17 @@ try {
   await page.goto(`${baseUrl}/?qa=canary`, { waitUntil: "domcontentloaded", timeout: 20_000 });
   receipt.checks.root = page.url().startsWith(baseUrl);
 
-  await page.waitForSelector("[data-testid=site-teaser-console]", { timeout: 15_000 });
+  await page.waitForSelector("[data-testid=front-door-panel]", { timeout: 15_000 });
   const landing = await page.evaluate(() => ({
-    teaser: Boolean(document.querySelector("[data-testid=site-teaser-console]")),
+    frontDoor: document.body.innerText.includes("Active Mirror builds the AI workspace") &&
+      document.body.innerText.includes("72-hour proof sprint") &&
+      Boolean(document.querySelector("[data-testid=front-door-panel]")),
     hasInput: Boolean(document.querySelector("textarea, input")),
-    openHref: document.querySelector('a[href="/mirror"]')?.getAttribute("href") || "",
+    sprintHref: document.querySelector('a[href="/intake?focus=pilot"]')?.getAttribute("href") || "",
+    workspaceHref: document.querySelector('a[href="/mirror"]')?.getAttribute("href") || "",
     privatePathLeak: document.body.innerText.includes("/Users/mirror-pro"),
   }));
-  receipt.checks.landingTeaser = landing.teaser && landing.openHref === "/mirror";
+  receipt.checks.landingFrontDoor = landing.frontDoor && landing.sprintHref === "/intake?focus=pilot" && landing.workspaceHref === "/mirror";
   receipt.checks.landingStatic = !landing.hasInput;
 
   await page.goto(`${baseUrl}/mirror?qa=canary`, { waitUntil: "domcontentloaded", timeout: 20_000 });
@@ -97,12 +100,12 @@ try {
   await page.screenshot({ path: screenshotPath, fullPage: true, timeout: 60_000 });
 
   const rendered = await page.evaluate(() => ({
-    kernelPanel: Boolean(document.querySelector("[data-testid=mirrorkernel-proof]")),
-    ratchetPanel: Boolean(document.querySelector("[data-testid=mirror-ratchet-proof]")),
+    identityControls: document.body.innerText.includes("Identity controls"),
+    reliabilityChecks: document.body.innerText.includes("Reliability checks"),
     privatePathLeak: document.body.innerText.includes("/Users/mirror-pro"),
   }));
-  receipt.checks.kernelPanel = rendered.kernelPanel;
-  receipt.checks.ratchetPanel = rendered.ratchetPanel;
+  receipt.checks.identityControls = rendered.identityControls;
+  receipt.checks.reliabilityChecks = rendered.reliabilityChecks;
   receipt.checks.noPrivatePathLeak = !landing.privatePathLeak && !rendered.privatePathLeak;
 
   receipt.serviceWorker = await waitForServiceWorkerControl(page, serviceWorkerTimeoutMs);

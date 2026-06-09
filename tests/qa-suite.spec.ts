@@ -9,10 +9,11 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByTestId('work-os-stage')).toBeVisible();
     await expect(page.getByText('What are we making?')).toBeVisible();
     await expect(page.getByText("Tell me the goal. I'll ask only what I need")).toBeVisible();
-    await expect(page.getByRole('button', { name: "Outline a deck for next week's meeting" })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Build a vendor evidence workspace' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Import sample context/i })).toBeVisible();
     await expect(page.getByTestId('solution-path')).toContainText('solution path · a deliverable by step 10');
     await expect(page.getByTestId('route-btn')).toContainText('selecting');
-    await expect(page.getByTestId('runtime-btn')).toContainText('runtime');
+    await expect(page.getByTestId('runtime-btn')).toContainText('controls');
     await expect(page.getByText('Say what you need. Active Mirror makes the workspace.')).toHaveCount(0);
     await expect(page.getByText('Generated Workspace', { exact: true })).toHaveCount(0);
     await expect(page.getByText('Ask SWFI')).toHaveCount(0);
@@ -20,16 +21,16 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByText('/Users/mirror-pro')).toHaveCount(0);
   });
 
-  test('runtime sheet binds the live proof contracts behind one tap', async ({ page }) => {
+  test('controls sheet binds the live review contracts behind one tap', async ({ page }) => {
     await page.goto('/mirror?qa=1');
 
     await page.getByTestId('runtime-btn').click();
     await expect(page.getByTestId('runtime-sheet')).toBeVisible();
     await expect(page.getByText('GET /api/mirror/contracts')).toBeVisible();
-    await expect(page.getByTestId('mirrorkernel-proof')).toContainText('MirrorKernel');
-    await expect(page.getByTestId('mirror-ratchet-proof')).toContainText('Trust ratchet');
-    await expect(page.getByText('Receipt-chain export')).toBeVisible();
-    await expect(page.getByText('Revocation cascade')).toBeVisible();
+    await expect(page.getByTestId('mirrorkernel-proof')).toContainText('Identity controls');
+    await expect(page.getByTestId('mirror-ratchet-proof')).toContainText('Reliability checks');
+    await expect(page.getByText('Evidence export')).toBeVisible();
+    await expect(page.getByText('Removal effects')).toBeVisible();
     await expect(page.getByText('Continuity score')).toBeVisible();
     await expect(page.getByText('Decision critique')).toBeVisible();
 
@@ -52,37 +53,38 @@ test.describe('Active Mirror work OS front door', () => {
     ]);
   });
 
-  test('starter prompt creates one evolving artifact on the stage with proof and a gated next action', async ({ page }) => {
+  test('starter prompt creates one evolving artifact on the stage with evidence and a gated next action', async ({ page }) => {
     await page.goto('/mirror?qa=1');
 
-    await page.getByRole('button', { name: "Outline a deck for next week's meeting" }).click();
+    await page.getByRole('button', { name: 'Build a vendor evidence workspace' }).click();
 
-    await expect(page.getByText('Meeting deck outline')).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByTestId('workpiece')).toBeVisible();
-    await expect(page.getByText('Slides')).toBeVisible();
-    await expect(page.getByText('The ask and next steps')).toBeVisible();
+    await expect(page.getByTestId('workpiece')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('workpiece').locator('.work__title')).toHaveText('Vendor evidence workspace');
+    await expect(page.getByTestId('workpiece').locator('.block__h').filter({ hasText: 'Source route' })).toBeVisible();
+    await expect(page.getByTestId('workpiece').locator('.block__h').filter({ hasText: 'Approval gates' })).toBeVisible();
+    await expect(page.getByTestId('workpiece').getByText('source_gap until opened or attached')).toBeVisible();
     await expect(page.getByTestId('conversation-margin')).toContainText('you');
     await expect(page.getByTestId('conversation-margin')).toContainText('Active Mirror');
     await expect(page.getByTestId('solution-path')).toContainText('delivered');
-    await expect(page.getByRole('button', { name: /proof/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Export the outline — needs approval/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /evidence/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Approve source route — needs approval/i })).toBeVisible();
 
-    await page.getByRole('button', { name: /Export the outline — needs approval/i }).click();
+    await page.getByRole('button', { name: /Approve source route — needs approval/i }).click();
     await expect(page.getByTestId('ledger-sheet')).toBeVisible();
     await expect(page.getByText('GET /api/mirror/proof-ledger')).toBeVisible();
     await expect(page.getByText('ProofLedgerEntry')).toBeVisible();
   });
 
-  test('typed sensitive prompt routes away from default frontier path honestly', async ({ page }) => {
+  test('typed sensitive prompt routes away from the hosted-model path honestly', async ({ page }) => {
     await page.goto('/mirror?qa=1');
 
     const textarea = page.locator('#cap-input');
-    await textarea.fill('Draft a private vault plan that must stay local only.');
+    await textarea.fill('Draft a private saved-context plan that must stay local only.');
     await textarea.press('Enter');
 
     await expect(page.getByTestId('workpiece').getByText('Working plan')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId('route-btn')).toContainText('local · gated');
-    await expect(page.getByText('body_unavailable')).toBeVisible();
+    await expect(page.getByText('Private runtime state is unavailable')).toBeVisible();
     await expect(page.getByText('Generated Workspace', { exact: true })).toHaveCount(0);
   });
 
@@ -91,7 +93,7 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.getByTestId('route-btn').click();
     await expect(page.getByTestId('routing-sheet')).toBeVisible();
-    await expect(page.getByText('Intelligence is rented; identity is local.')).toBeVisible();
+    await expect(page.getByText('The model is routed to the best available lane for the job.')).toBeVisible();
     await expect(page.getByText('gemini · flash')).toBeVisible();
     await expect(page.getByText('claude · sonnet/opus')).toBeVisible();
     await expect(page.getByText('local · ollama')).toBeVisible();
@@ -106,7 +108,7 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByText('What are we making?')).toBeVisible();
   });
 
-  test('public landing is the Claude site with a static teaser and product CTA', async ({ page }) => {
+  test('public landing is a plain business front door with no model call', async ({ page }) => {
     const modelCalls: string[] = [];
     page.on('request', (request) => {
       const url = request.url();
@@ -117,21 +119,77 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: /Not another model/i })).toBeVisible();
-    await expect(page.getByText('TRUST BY DESIGN™ · SOVEREIGN AI RUNTIME')).toBeVisible();
-    await expect(page.getByTestId('site-teaser-console')).toContainText('read-only');
-    await expect(page.getByTestId('site-teaser-console')).toContainText('Vendor evidence workspace');
-    await expect(page.getByTestId('site-teaser-console')).toContainText('receiptRequired');
-    await expect(page.getByRole('link', { name: /See it run/i })).toHaveAttribute('href', '/mirror');
-    await expect(page.getByText('Portable identity before memory.')).toBeVisible();
-    await expect(page.getByRole('link', { name: /Create your MirrorSeed/i }).first()).toHaveAttribute(
-      'href',
-      'https://id.activemirror.ai/docs/identity.html#generator',
-    );
-    await expect(page.getByText("Five laws we don't break.")).toBeVisible();
-    await expect(page.getByText('There must be one sacred thing')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Active Mirror builds the AI workspace/i })).toBeVisible();
+    await expect(page.locator('header').getByText('72-hour proof sprint')).toBeVisible();
+    await expect(page.getByTestId('front-door-panel')).toContainText('I need to make a decision');
+    await expect(page.getByTestId('front-door-panel')).toContainText('I need to use sensitive context');
+    await expect(page.getByRole('link', { name: /Start a decision brief/i })).toHaveAttribute('href', /\/mirror\?prompt=/);
+    await expect(page.getByRole('link', { name: /Apply for a 72-hour sprint/i }).first()).toHaveAttribute('href', '/intake?focus=pilot');
+    await expect(page.getByText('Give us one workflow your current AI cannot safely finish.')).toBeVisible();
+    await expect(page.locator('.usecase__label').filter({ hasText: /^People$/ })).toBeVisible();
+    await expect(page.locator('.usecase__label').filter({ hasText: /^Companies$/ })).toBeVisible();
+    await expect(page.locator('.usecase__label').filter({ hasText: /^Governments$/ })).toBeVisible();
+    await expect(page.locator('.usecase__label').filter({ hasText: /^Countries$/ })).toBeVisible();
+    await expect(page.getByText('Not a smarter chat box. A way to make AI work usable.')).toBeVisible();
+    await expect(page.locator('#proof').getByRole('link', { name: /Review boundary/i })).toHaveAttribute('href', '/trust');
+    await expect(page.locator('#proof').getByRole('link', { name: /Public evidence examples/i })).toHaveAttribute('href', '/glass');
+    await expect(page.getByText('MirrorGate')).toHaveCount(0);
+    await expect(page.getByText('Chetana')).toHaveCount(0);
+    await expect(page.getByText('MirrorProd')).toHaveCount(0);
+    await expect(page.getByText('body_unavailable')).toHaveCount(0);
     await expect(page.locator('textarea, input')).toHaveCount(0);
     expect(modelCalls).toEqual([]);
+  });
+
+  test('public telemetry captures funnel events without private text', async ({ page }) => {
+    const events: unknown[] = [];
+
+    await page.route('**/api/analytics', async (route) => {
+      const data = route.request().postData();
+      if (data) events.push(JSON.parse(data));
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true,"stored":false}' });
+    });
+
+    await page.goto('/?utm_source=qa');
+    await expect.poll(() => events.some((event) => {
+      const record = event as { event?: string; target?: string };
+      return record.event === 'page_view' && record.target === 'public_site';
+    })).toBeTruthy();
+
+    await page.getByRole('link', { name: /Apply for a 72-hour sprint/i }).first().click();
+    await expect(page).toHaveURL(/\/intake\?focus=pilot/);
+    await expect.poll(() => events.some((event) => {
+      const record = event as { event?: string; target?: string };
+      return record.event === 'cta_click' && record.target === 'hero_72h_sprint';
+    })).toBeTruthy();
+
+    const raw = JSON.stringify(events);
+    expect(raw).toContain('utm_source');
+    expect(raw).not.toContain('Draft a private');
+    expect(raw).not.toContain('saved-context plan');
+  });
+
+  test('public trust, compare, glass, and intake routes expose review boundaries', async ({ page }) => {
+    await page.goto('/trust');
+    await expect(page.getByRole('heading', { name: /Useful AI work without silent access/i })).toBeVisible();
+    await expect(page.getByText('Private files', { exact: true })).toBeVisible();
+    await expect(page.getByText('ask first', { exact: true }).first()).toBeVisible();
+
+    await page.goto('/compare');
+    await expect(page.getByRole('heading', { name: /A chatbot gives an answer/i })).toBeVisible();
+    await expect(page.locator('.comparetable__row').filter({ hasText: 'Active Mirror' })).toBeVisible();
+    await expect(page.getByText('Builds the workspace')).toBeVisible();
+
+    await page.goto('/glass');
+    await expect(page.getByRole('heading', { name: /Inspect the work/i })).toBeVisible();
+    await expect(page.getByText('Evidence record sample')).toBeVisible();
+    await expect(page.getByRole('link', { name: /Download sample/i })).toHaveAttribute('href', '/api/mirror/proof-ledger?format=markdown');
+
+    await page.goto('/intake');
+    await expect(page.getByRole('heading', { name: /workflow that needs better AI control/i })).toBeVisible();
+    await expect(page.getByLabel('How sensitive is it?')).toBeVisible();
+    await expect(page.getByLabel('Where should it run?')).toBeVisible();
+    await expect(page.getByText('No files uploaded.')).toBeVisible();
   });
 
   test('about route uses the same static site surface without live generation', async ({ page }) => {
@@ -145,9 +203,9 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.goto('/about');
 
-    await expect(page.getByRole('heading', { name: /Not another model/i })).toBeVisible();
-    await expect(page.getByTestId('site-teaser-console')).toContainText('no model call');
-    await expect(page.getByRole('link', { name: /See it run/i })).toHaveAttribute('href', '/mirror');
+    await expect(page.getByRole('heading', { name: /Active Mirror builds the AI workspace/i })).toBeVisible();
+    await expect(page.getByTestId('front-door-panel')).toContainText('What do you need to get done?');
+    await expect(page.getByRole('link', { name: /Try the workspace/i }).first()).toHaveAttribute('href', '/mirror');
     await expect(page.locator('textarea, input')).toHaveCount(0);
     expect(modelCalls).toEqual([]);
   });
@@ -158,6 +216,7 @@ test.describe('Active Mirror work OS front door', () => {
 
     await expect(page.getByTestId('conversation-margin')).toBeHidden();
     await expect(page.getByTestId('work-os-stage')).toBeVisible();
+    await expect(page.getByTestId('mobile-control-strip')).toBeVisible();
     await expect(page.getByText('What are we making?')).toBeVisible();
 
     const textarea = page.locator('#cap-input');
@@ -166,7 +225,7 @@ test.describe('Active Mirror work OS front door', () => {
 
     await expect(page.getByTestId('workpiece').getByText('Working plan')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId('workpiece')).toBeVisible();
-    await page.getByRole('button', { name: /proof/i }).click();
+    await page.getByTestId('workpiece').getByRole('button', { name: /evidence/i }).click();
     await expect(page.getByTestId('ledger-sheet')).toBeVisible();
   });
 });

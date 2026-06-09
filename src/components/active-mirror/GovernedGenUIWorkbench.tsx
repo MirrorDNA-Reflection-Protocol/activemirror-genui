@@ -44,7 +44,7 @@ const ROUTES = [
     mobileLabel: "Finish",
     body: "Draft the plan, checklist, message, brief, or next move.",
     icon: CheckCircle2,
-    placeholder: "Example: I need a client-ready proposal by tomorrow for a 72-hour AI demo.",
+    placeholder: "Example: I need a client-ready proposal by tomorrow for a 72-hour proof sprint.",
   },
   {
     id: "build-workspace",
@@ -76,13 +76,13 @@ const TRUST_ITEMS = [
     icon: FileText,
   },
   {
-    label: "Proof stays visible",
-    body: "Facts, assumptions, unknowns, sources, and receipts are separated.",
+    label: "Evidence stays visible",
+    body: "Facts, assumptions, unknowns, sources, and evidence records are separated.",
     icon: ShieldCheck,
   },
   {
     label: "Private actions gated",
-    body: "Files, accounts, devices, sends, and vault memory require approval.",
+    body: "Files, accounts, devices, sends, and saved memory require approval.",
     icon: LockKeyhole,
   },
 ] as const;
@@ -182,13 +182,13 @@ export default function GovernedGenUIWorkbench({
             <Image src="/logo.png" alt="Active Mirror" width={30} height={30} className="h-[30px] w-[30px] object-contain" priority />
             <div className="min-w-0">
               <h1 className="truncate text-[14px] font-semibold text-[var(--text-primary)]">Active Mirror</h1>
-              <p className="hidden text-[11px] text-[var(--text-faint)] sm:block">governed reflective work OS</p>
+              <p className="hidden text-[11px] text-[var(--text-faint)] sm:block">reviewed AI workspace</p>
             </div>
           </div>
 
           <div className="ml-1 hidden items-center gap-2 rounded-full border border-[var(--hairline)] px-3 py-1 text-[11px] text-[var(--text-tertiary)] [font-family:var(--font-data)] sm:inline-flex">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--text-tertiary)]" />
-            {kernelStatus?.state === "active" ? "body online" : "body_unavailable · public route"}
+            {kernelStatus?.state === "active" ? "private runtime online" : "private runtime unavailable · public route"}
           </div>
 
           <a href="/about" className="ml-auto hidden text-[11px] text-[var(--text-faint)] transition-colors hover:text-[var(--text-primary)] [font-family:var(--font-data)] sm:inline">
@@ -368,7 +368,7 @@ export default function GovernedGenUIWorkbench({
                 })}
               </div>
               <p className="mt-2 text-xs leading-5 text-[var(--text-faint)]">
-                Private files, account actions, devices, and sends stay gated; offline private body work is marked body_unavailable.
+                Private files, account actions, devices, and sends stay gated; offline private-runtime work is marked unavailable.
               </p>
             </section>
 
@@ -423,8 +423,8 @@ function ProofLine({ status }: { status: MirrorKernelPublicStatus | null }) {
     { key: "assumptions", value: "separated", tone: "ok" },
     { key: "unknowns", value: "visible", tone: "warn" },
     { key: "gate", value: "approval required", tone: "gate" },
-    { key: "receipt", value: receiptState, tone: receiptState === "verified" ? "ok" : "off" },
-    { key: "body", value: freshPrivateActions ? "available after approval" : "body_unavailable", tone: freshPrivateActions ? "ok" : "off" },
+    { key: "record", value: receiptState, tone: receiptState === "verified" ? "ok" : "off" },
+    { key: "private runtime", value: freshPrivateActions ? "available after approval" : "unavailable", tone: freshPrivateActions ? "ok" : "off" },
   ] as const;
 
   return (
@@ -463,15 +463,15 @@ function MirrorSovereignContractsStrip({ status }: { status: MirrorKernelPublicS
       state: "public_safe",
     },
     {
-      label: "Revocation cascade",
+      label: "Removal effects",
       value: `${status.revocation.events.length} effects`,
-      body: "Memory, source, export, and body receipt revocations show downstream consequences.",
+      body: "Memory, source, export, and evidence-record removals show downstream consequences.",
       state: status.revocation.privateEnforcement,
     },
     {
-      label: "Identity continuity",
+      label: "Identity controls",
       value: status.identityContinuity.crossModelDiff.measurementState.replaceAll("_", " "),
-      body: "Public identity vector stays stable; private drift requires a signed receipt.",
+      body: "The public identity signal stays stable; private drift checks require a signed record.",
       state: status.identityContinuity.status,
     },
   ];
@@ -480,20 +480,20 @@ function MirrorSovereignContractsStrip({ status }: { status: MirrorKernelPublicS
     <section
       data-testid="mirror-sovereign-contracts"
       className="rounded-xl border border-[var(--hairline)] bg-[var(--ink-950)] p-3"
-      aria-label="Active Mirror sovereign proof contracts"
+      aria-label="Active Mirror review controls"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Sovereign proof contracts</h2>
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Review controls</h2>
           <p className="mt-1 text-[11px] leading-4 text-[var(--text-faint)]">
-            User-owned proof, revocation, continuity, and self-transparency.
+            User-owned evidence, removal effects, continuity, and system transparency.
           </p>
         </div>
         <a
           href="/api/mirror/proof-ledger?format=markdown"
           className="shrink-0 rounded-md border border-[var(--hairline)] bg-[var(--surface-subtle)] px-2 py-1 text-[10px] font-semibold text-[var(--text-accent)] transition-colors hover:border-[var(--border-strong)]"
         >
-          Export proof ledger
+          Export evidence record
         </a>
       </div>
 
@@ -524,15 +524,15 @@ function MirrorRatchetStrip({ status }: { status: MirrorKernelPublicStatus | nul
     <section
       data-testid="mirror-ratchet-proof"
       className="rounded-xl border border-[var(--hairline)] bg-[var(--ink-950)] p-3"
-      aria-label="MirrorRatchet frontier failure coverage"
+      aria-label="AI failure coverage"
     >
       <div className="flex items-start gap-3">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--green-tint)] text-[var(--success)]">
           <ShieldCheck className="h-4 w-4" />
         </span>
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">MirrorRatchet</h2>
-          <p className="text-[11px] leading-4 text-[var(--text-faint)]">Covers frontier-model failure modes with canonical controls.</p>
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Reliability checks</h2>
+          <p className="text-[11px] leading-4 text-[var(--text-faint)]">Covers known AI failure modes with review controls.</p>
         </div>
       </div>
 
@@ -566,7 +566,7 @@ function MirrorRatchetStrip({ status }: { status: MirrorKernelPublicStatus | nul
 function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus | null }) {
   const stateLabel =
     status?.state === "active"
-      ? "Kernel online"
+      ? "Identity controls online"
       : status?.state === "public_body_synced"
         ? "Public body synced"
         : status?.state === "compiled_body_gated"
@@ -578,7 +578,7 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
     status?.capabilityKernel.status === "compiled"
       ? "compiled"
       : status?.capabilityKernel.status || "public-safe";
-  const kerneldLabel = status?.kerneld.status || "body_unavailable";
+  const kerneldLabel = status?.kerneld.status === "online" ? "online" : "unavailable";
   const receiptProofState = bodyReceiptProofState(status);
   const freshPrivateActions = hasVerifiedUnexpiredReceipt(status);
   const compiledAt = status?.capabilityKernel.compiledAt
@@ -601,7 +601,7 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
     <section
       data-testid="mirrorkernel-proof"
       className="rounded-xl border border-[var(--hairline)] bg-[var(--ink-950)] p-3"
-      aria-label="MirrorKernel proof surface"
+      aria-label="Identity controls"
     >
       <div className="flex min-w-0 gap-3">
         <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--reflect-tint)] text-[var(--reflect-300)]">
@@ -609,13 +609,13 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
         </span>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-sm font-semibold text-[var(--text-primary)]">MirrorKernel</h2>
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Identity controls</h2>
             <span className="rounded-md border border-[rgba(100,112,230,0.20)] bg-[var(--reflect-tint)] px-2 py-0.5 text-[10px] font-semibold text-[var(--reflect-300)] [font-family:var(--font-data)]">
               {stateLabel}
             </span>
           </div>
           <p className="mt-1 text-[11px] leading-4 text-[var(--text-faint)]">
-            Contextual memory actualization under consent. Probabilistic engines propose; canonical runtime verifies.
+            Saved context activates only with consent. Models propose; review controls verify.
           </p>
         </div>
       </div>
@@ -626,7 +626,7 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
           <div className="mt-1 text-[var(--reflect-300)]">{capabilityLabel}</div>
         </div>
         <div className="rounded-lg border border-[var(--hairline)] bg-[var(--surface-subtle)] px-2.5 py-2">
-          <div className="text-[var(--text-faint)]">Kerneld</div>
+          <div className="text-[var(--text-faint)]">Private runtime</div>
           <div className="mt-1 text-[var(--reflect-300)]">{kerneldLabel}</div>
         </div>
         <div className="rounded-lg border border-[var(--hairline)] bg-[var(--surface-subtle)] px-2.5 py-2">
@@ -634,7 +634,7 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
           <div className="mt-1 text-[var(--reflect-300)]">proposer only</div>
         </div>
         <div className="rounded-lg border border-[var(--hairline)] bg-[var(--surface-subtle)] px-2.5 py-2">
-          <div className="text-[var(--text-faint)]">Receipt</div>
+          <div className="text-[var(--text-faint)]">Evidence record</div>
           <div className="mt-1 text-[var(--reflect-300)]">{receiptProofState}</div>
         </div>
       </div>
@@ -643,16 +643,16 @@ function MirrorKernelProofStrip({ status }: { status: MirrorKernelPublicStatus |
         <span className="rounded-md bg-[var(--surface-active)] px-2 py-1">Public-safe packet</span>
         <span className="rounded-md bg-[var(--surface-active)] px-2 py-1">Trust rule: accuracy without fabrication</span>
         <span className="rounded-md bg-[var(--surface-active)] px-2 py-1">
-          Fresh private actions: {freshPrivateActions ? "available after approval" : "body_unavailable"}
+          Fresh private actions: {freshPrivateActions ? "available after approval" : "unavailable"}
         </span>
       </div>
       <div className="sr-only">
-        Private topology redacted. Memory actualization: consent-gated. Compiled: {compiledAt || "missing"}. Body receipt: {bodyReceiptAt || "missing"}.
-        Receipt proof: {receiptProofState}. Doctrine: accuracy without fabrication. Canonical runtime verifies.
+        Private topology redacted. Saved context: consent-gated. Compiled: {compiledAt || "missing"}. Private sync record: {bodyReceiptAt || "missing"}.
+        Evidence record: {receiptProofState}. Rule: accuracy without fabrication. Review controls verify.
       </div>
 
       <div data-testid="kernel-control-matrix" className="sr-only">
-        Context firewall, memory actualization, writeback firewall, source proof, accuracy mode, action gate, model routing, canonical promotion.
+        Context firewall, saved-context activation, writeback firewall, source proof, accuracy mode, action gate, model routing, review promotion.
       </div>
     </section>
   );

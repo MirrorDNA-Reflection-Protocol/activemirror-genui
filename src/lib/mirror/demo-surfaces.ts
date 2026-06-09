@@ -100,7 +100,7 @@ const EXPLAIN_SURFACE: MirrorSurfaceSpec = {
     },
     {
       claim: "Schema-rendered UI prevents arbitrary code execution",
-      source: "MirrorGate Security Specification",
+      source: "Review Gate Security Specification",
       confidence: "high",
       last_updated: "2026-05-30",
       model_used: "Demo Mode",
@@ -165,7 +165,7 @@ const DEMO_SURFACE: MirrorSurfaceSpec = {
       id: "step-gate",
       type: "governance_card",
       title: "Gate",
-      body: "MirrorGate validates the proposed action against policy, authority, and memory boundaries.",
+      body: "The review gate validates the proposed action against policy, authority, and memory boundaries.",
       icon: "shield-check",
       severity: "medium",
     },
@@ -197,7 +197,7 @@ const DEMO_SURFACE: MirrorSurfaceSpec = {
   evidence: [
     {
       claim: "Every workflow step is gated and logged",
-      source: "MirrorGate Workflow Engine",
+      source: "Review Gate Workflow Engine",
       confidence: "high",
       last_updated: "2026-05-30",
       model_used: "Demo Mode",
@@ -266,7 +266,7 @@ const AUDIT_SURFACE: MirrorSurfaceSpec = {
         "Query received: 2026-05-30T14:30:00Z",
         "Knowledge source: Approved corpus v2.1",
         "Model: Demo Mode (no live inference)",
-        "Policy version: MirrorGate v3.2",
+        "Policy version: Review Gate v3.2",
       ],
     },
     {
@@ -294,7 +294,7 @@ const AUDIT_SURFACE: MirrorSurfaceSpec = {
   evidence: [
     {
       claim: "Risk detection operates on every response",
-      source: "MirrorGate Risk Engine",
+      source: "Review Gate Risk Engine",
       confidence: "high",
       last_updated: "2026-05-30",
       model_used: "Demo Mode",
@@ -449,7 +449,7 @@ const RED_TEAM_SURFACE: MirrorSurfaceSpec = {
       bullets: [
         "Attack type: Prompt injection",
         "Target: Policy override",
-        "Status: Blocked by MirrorGate",
+        "Status: Blocked by review gate",
       ],
     },
     {
@@ -460,7 +460,7 @@ const RED_TEAM_SURFACE: MirrorSurfaceSpec = {
       icon: "shield-off",
       severity: "blocked",
       bullets: [
-        "Blocked by: MirrorGate Policy Engine",
+        "Blocked by: Review Gate Policy Engine",
         "Reason: Authority boundary conflict",
         "Required: Human review",
       ],
@@ -504,7 +504,7 @@ const RED_TEAM_SURFACE: MirrorSurfaceSpec = {
   evidence: [
     {
       claim: "Prompt injection attempts are detected and blocked",
-      source: "MirrorGate Adversarial Defense",
+      source: "Review Gate Adversarial Defense",
       confidence: "high",
       last_updated: "2026-05-30",
       model_used: "Demo Mode",
@@ -590,14 +590,14 @@ const SALES_SURFACE: MirrorSurfaceSpec = {
       id: "recommended-package",
       type: "pricing_card",
       title: "Recommended Package",
-      body: "Based on typical enterprise needs: Active Mirror Enterprise with MirrorGate, MirrorProof, and dedicated support.",
+      body: "Based on typical enterprise needs: Active Mirror Enterprise with review gates, evidence export, and dedicated support.",
       icon: "package",
       severity: "info",
     },
     {
       id: "contact",
       type: "lead_card",
-      title: "Book a Demo",
+      title: "Scope a Proof Sprint",
       body: "Ready to see Active Mirror in action with your data and workflows? Schedule a technical walkthrough.",
       icon: "calendar",
       severity: "info",

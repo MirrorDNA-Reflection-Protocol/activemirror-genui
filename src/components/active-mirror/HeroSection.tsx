@@ -18,7 +18,7 @@ export default function HeroSection({ onConsent, hasConsented }: HeroSectionProp
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="text-[2.5rem] leading-tight sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight"
       >
-        The AI Enterprise Firewall.
+        AI workspaces with review before action.
       </motion.h1>
       <motion.p
         initial={{ opacity: 0, y: 12 }}
@@ -26,8 +26,8 @@ export default function HeroSection({ onConsent, hasConsented }: HeroSectionProp
         transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
         className="mt-6 text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed font-medium"
       >
-        Controlled access, auditable actions, and clear data boundaries.<br className="mt-1" />
-        <span className="text-gray-500">Powered by a reflective work OS built for governed AI sessions.</span>
+        Controlled access, visible review steps, and clear data boundaries.<br className="mt-1" />
+        <span className="text-gray-500">Built for serious AI work that needs proof before action.</span>
       </motion.p>
       
       <motion.div
@@ -38,13 +38,13 @@ export default function HeroSection({ onConsent, hasConsented }: HeroSectionProp
       >
         <div className="inline-flex flex-col items-center p-6 rounded-2xl bg-gray-900 shadow-2xl border border-gray-800">
           <p className="text-sm text-gray-300 mb-6 max-w-md text-left font-mono leading-relaxed">
-            <span className="text-amber-500 font-bold">[POLICY]</span> This session is cryptographically anchored. All actions are immutable. Zero data will leave this sovereign environment.
+            <span className="text-amber-500 font-bold">[REVIEW]</span> Sensitive actions wait for approval. The workspace records what happened, what is missing, and what did not run.
           </p>
           <button 
-            onClick={() => onConsent?.("[SYSTEM AUTO-TRIGGER: Initialize Sovereign Session]")}
+            onClick={() => onConsent?.("Start a reviewed Active Mirror workspace.")}
             className="w-full sm:w-auto px-8 py-3.5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5 duration-200"
           >
-            Acknowledge & Initialize Sovereign Session
+            Start reviewed workspace
           </button>
         </div>
       </motion.div>

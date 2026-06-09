@@ -4,10 +4,10 @@ import { ShieldCheck, Network, BrainCircuit, KeySquare } from "lucide-react";
 import { motion } from "motion/react";
 
 const categories = [
-  { icon: ShieldCheck, label: "Chetana API", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100", prompt: "[SYSTEM AUTO-TRIGGER: Route to Chetana Shield API and analyze synthetic media risks]" },
-  { icon: BrainCircuit, label: "MirrorBrain", color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-100", prompt: "[SYSTEM AUTO-TRIGGER: Explore MirrorBrain Sovereign Consciousness Layer and QualiaEngine]" },
-  { icon: KeySquare, label: "LingOS State", color: "text-teal-600", bg: "bg-teal-50", border: "border-teal-100", prompt: "[SYSTEM AUTO-TRIGGER: Trigger LingOS Cryptographic State Audit with Ed25519 hash chain]" },
-  { icon: Network, label: "6-Tier Router", color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-100", prompt: "[SYSTEM AUTO-TRIGGER: Explain the 6-Tier Model Router and local vs cloud governance]" },
+  { icon: ShieldCheck, label: "Risk check", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100", prompt: "Check this request for media, privacy, and source-risk before acting." },
+  { icon: BrainCircuit, label: "Reasoning route", color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-100", prompt: "Show how Active Mirror would reason through this task and what it still needs." },
+  { icon: KeySquare, label: "Review trail", color: "text-teal-600", bg: "bg-teal-50", border: "border-teal-100", prompt: "Prepare a review trail for this request with sources, assumptions, gaps, and approvals." },
+  { icon: Network, label: "Model route", color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-100", prompt: "Explain which model or tool route should handle this task and what stays gated." },
 ];
 
 interface CategoryIconsProps {

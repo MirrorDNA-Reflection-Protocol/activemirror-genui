@@ -10,10 +10,19 @@ function clean(value: unknown, max = 500) {
   return String(value || "").trim().slice(0, max);
 }
 
-function mailtoFromLead(lead: { name: string; email: string; company: string; useCase: string }) {
+function mailtoFromLead(lead: { name: string; email: string; company: string; useCase: string; sensitivity?: string; infrastructure?: string; timeline?: string }) {
   const subject = encodeURIComponent("Active Mirror access request");
   const body = encodeURIComponent(
-    `Name: ${lead.name}\nEmail: ${lead.email}\nCompany: ${lead.company}\nUse case: ${lead.useCase}`
+    [
+      `Name: ${lead.name}`,
+      `Email: ${lead.email}`,
+      `Company: ${lead.company}`,
+      lead.sensitivity ? `Sensitivity: ${lead.sensitivity}` : "",
+      lead.infrastructure ? `Infrastructure: ${lead.infrastructure}` : "",
+      lead.timeline ? `Timeline: ${lead.timeline}` : "",
+      "",
+      `Use case: ${lead.useCase}`,
+    ].filter(Boolean).join("\n")
   );
   return `mailto:${LEAD_TO}?subject=${subject}&body=${body}`;
 }
@@ -48,6 +57,9 @@ export async function POST(request: NextRequest) {
       name: clean(body?.name, 120),
       email: clean(body?.email, 160),
       company: clean(body?.company, 160),
+      sensitivity: clean(body?.sensitivity, 120),
+      infrastructure: clean(body?.infrastructure, 160),
+      timeline: clean(body?.timeline, 120),
       useCase: clean(body?.useCase, 1000),
     };
 
@@ -63,7 +75,7 @@ export async function POST(request: NextRequest) {
           ...lead,
           destination: LEAD_TO,
           delivered: false,
-          source: "public_genui",
+          source: "public_structured_intake",
         }),
         severity: "INFO",
       },

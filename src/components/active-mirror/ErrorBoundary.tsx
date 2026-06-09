@@ -24,7 +24,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("MirrorGate Intercepted an Error:", error, errorInfo);
+    console.error("Active Mirror blocked a rendering error:", error, errorInfo);
   }
 
   public render() {
@@ -39,7 +39,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             <div className="flex items-center gap-2">
               <ShieldOff className="w-5 h-5 text-red-600" />
               <span className="text-sm font-semibold text-red-800 tracking-wide uppercase">
-                MirrorGate Interception
+                Review Gate
               </span>
             </div>
             <span className="text-xs font-mono text-red-500/70">ERR_CORRUPT_PAYLOAD</span>
@@ -52,7 +52,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             <div>
               <h3 className="text-gray-900 font-semibold mb-1">Payload Corrupted or Incomplete</h3>
               <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                The Sovereign OS intercepted a malformed or hallucinated response from the AI Engine. To protect enterprise safety boundaries, the rendering of this surface has been blocked.
+                Active Mirror blocked an incomplete response before it reached the workspace. The page can recover without pretending the output is usable.
               </p>
               
               <div className="bg-gray-50 border border-gray-100 rounded-lg p-3 font-mono text-xs text-gray-500 mb-4 break-all">

@@ -13,7 +13,7 @@ import type { MirrorMode } from "@/lib/mirror/types";
 
 const modes: { mode: MirrorMode; label: string; icon: typeof BookOpen }[] = [
   { mode: "explain", label: "Explain", icon: BookOpen },
-  { mode: "demo", label: "Demo", icon: Play },
+  { mode: "demo", label: "Preview", icon: Play },
   { mode: "audit", label: "Audit", icon: ShieldCheck },
   { mode: "build", label: "Build", icon: Wrench },
   { mode: "red_team", label: "Red Team", icon: Swords },

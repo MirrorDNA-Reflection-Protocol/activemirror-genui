@@ -49,7 +49,7 @@ export default function RedTeamDrawer() {
               <div className="flex items-center gap-2">
                 <AlertOctagon className="w-5 h-5 text-red-500" />
                 <span className="text-sm font-bold text-red-700">
-                  Blocked by MirrorGate
+                  Blocked by review gate
                 </span>
               </div>
 
@@ -80,8 +80,8 @@ export default function RedTeamDrawer() {
 
               <div className="flex items-center gap-2 pt-1">
                 <ShieldOff className="w-4 h-4 text-red-400" />
-                <span className="text-[11px] text-gray-500">
-                  This attempt has been recorded in the immutable audit trail.
+                  <span className="text-[11px] text-gray-500">
+                  This attempt has been recorded in the review trail.
                 </span>
               </div>
             </div>

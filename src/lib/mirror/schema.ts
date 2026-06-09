@@ -11,7 +11,7 @@ export const mirrorSurfaceSchema = z.object({
       type: z.enum([
         "artifact_node", "browser_node", "chart_node", "governance_node", "lead_node", "graph_node"
       ]),
-      agent_id: z.enum(["MirrorGate", "Chetana", "MirrorBrain", "MirrorProof", "MirrorProd", "ActiveMirror"]).nullable(),
+      agent_id: z.enum(["ActiveMirror", "ApprovalGate", "ProofRecord", "Reviewer"]).nullable(),
       title: z.string(),
       body: z.string(),
       severity: z.enum(["info", "low", "medium", "high", "blocked"]).nullable(),

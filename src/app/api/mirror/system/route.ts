@@ -7,8 +7,8 @@ export async function GET() {
   const mirrorKernel = await getMirrorKernelPublicStatus();
 
   return NextResponse.json({
-    name: "Active Mirror public GenUI",
-    doctrine: "tokenized",
+    name: "Active Mirror public system",
+    rules: "loaded",
     localSupervisor: ACTIVE_MIRROR_LOCAL_SUPERVISOR_VERSION,
     mirrorKernel,
     freeTurnLimit: FREE_TURN_LIMIT,

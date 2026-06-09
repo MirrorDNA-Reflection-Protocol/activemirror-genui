@@ -25,9 +25,9 @@ function slugFromTitle(title: string) {
 function previewModules(markdown: string) {
   if (/Source Registry/i.test(markdown) && /Surface Contract/i.test(markdown)) {
     return [
-      { title: "Source registry", body: "Canonical repositories and public pointers are visible before claims become durable." },
-      { title: "Doctrine contract", body: "Generated, sourced, estimated, unknown, gated, approved, and exported states stay separate." },
-      { title: "Runtime route", body: "Browser cache, KV cache, model route, computer use, and receipts are explicit." },
+      { title: "Source registry", body: "Public pointers are visible before claims become durable." },
+      { title: "Review contract", body: "Generated, sourced, estimated, unknown, gated, approved, and exported states stay separate." },
+      { title: "Execution route", body: "Browser cache, KV cache, model route, computer use, and evidence records are explicit." },
       { title: "Approval boundary", body: "Browser, files, devices, external sends, and computer use stay gated until reviewed." },
     ];
   }
@@ -45,16 +45,16 @@ function previewModules(markdown: string) {
   return [
     { title: "Generated preview", body: "A task-specific screen appears first, so the user sees the solution before the explanation." },
     { title: "Downloadable spec", body: "A scoped brief and checklist can be saved immediately to reduce extra turns." },
-    { title: "Proof path", body: "Sources, files, review notes, and claims appear only when relevant." },
-    { title: "Working demo", body: "The final step offers a 72-hour scoped demo build from the generated spec." },
+    { title: "Evidence path", body: "Sources, files, review notes, and claims appear only when relevant." },
+    { title: "Proof sprint", body: "The final step offers a qualified 72-hour proof sprint from the generated spec." },
   ];
 }
 
 function surfaceSubtitle(title: string) {
   const lower = title.toLowerCase();
-  if (lower.includes("governed genui")) return "Provenance, doctrine, runtime route, approvals, files, and receipts are visible before deeper execution.";
+  if (lower.includes("review-controlled") || lower.includes("governed genui")) return "Sources, review route, approvals, files, and evidence records are visible before deeper execution.";
   if (lower.includes("ux repair")) return "The feedback became a focused repair path with one visible fix, one proof line, and one export.";
-  if (lower.includes("official product demo")) return "The request became a working product surface with proof, export, and a clear next step.";
+  if (lower.includes("official product preview")) return "The request became a working product surface with proof, export, and a clear next step.";
   if (lower.includes("research")) return "Source targets, assumptions, and a concise brief are separated before live lookup runs.";
   return "A task-specific surface is ready with a useful lane, proof line, and download path.";
 }

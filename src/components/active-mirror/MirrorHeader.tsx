@@ -53,7 +53,7 @@ export default function MirrorHeader({ vaultSyncing = false, onAutoPrompt, onRes
         {vaultSyncing && (
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-medium mr-2">
             <CloudSync className="w-3.5 h-3.5 animate-pulse" />
-            <span>Vault Sync</span>
+            <span>Saved context sync</span>
           </div>
         )}
         
@@ -90,7 +90,7 @@ export default function MirrorHeader({ vaultSyncing = false, onAutoPrompt, onRes
         )}
         
         <button
-          onClick={() => onAutoPrompt?.("[SYSTEM AUTO-TRIGGER: Orchestrate a new session]")}
+          onClick={() => onAutoPrompt?.("Start a new reviewed workspace.")}
           className="w-9 h-9 lg:w-10 lg:h-10 flex items-center justify-center rounded-xl border border-gray-200 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-colors"
           aria-label="New session"
         >

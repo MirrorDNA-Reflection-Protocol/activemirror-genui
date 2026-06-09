@@ -26,7 +26,7 @@ export default function GeneratedSurfacePanel({
   // Defensive defaults for streaming partial data
   const mode = surface?.mode || "explain";
   const title = surface?.title || "Generating Surface...";
-  const summary = surface?.summary || "Establishing sovereign connection and formatting data...";
+  const summary = surface?.summary || "Preparing the reviewed workspace and formatting the useful output...";
   const autonomyLevel = surface?.autonomy_level || "observe";
   const authorityBoundary = surface?.authority_boundary || [];
   const memoryBoundary = surface?.memory_boundary || { session: true, vault: false, client_data: false, proof_trail: false, sales_memory: false };

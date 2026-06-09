@@ -34,7 +34,7 @@ export default function ProofDrawer({ evidence, isAdmin = false }: ProofDrawerPr
         className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-gray-200/80 text-sm text-gray-600 hover:bg-white hover:border-blue-200 hover:text-blue-600 transition-all"
       >
         <FileSearch className="w-4 h-4" />
-        Show Proof
+        Show evidence
       </button>
 
       {/* Drawer overlay */}
@@ -63,7 +63,7 @@ export default function ProofDrawer({ evidence, isAdmin = false }: ProofDrawerPr
                 <div className="flex items-center gap-2">
                   <FileSearch className="w-5 h-5 text-blue-500" />
                   <h3 className="text-base font-semibold text-gray-900">
-                    Proof Trail
+                    Evidence trail
                   </h3>
                 </div>
                 <button
@@ -77,7 +77,7 @@ export default function ProofDrawer({ evidence, isAdmin = false }: ProofDrawerPr
 
               {/* Demo notice */}
               <div className="mx-5 mt-4 px-3 py-2 rounded-lg bg-amber-50 border border-amber-100 text-xs text-amber-700">
-                [DEMO] These values are simulated for demonstration purposes.
+                [SAMPLE] These values are simulated for preview purposes.
                 No live backend is connected.
               </div>
 
@@ -95,7 +95,7 @@ export default function ProofDrawer({ evidence, isAdmin = false }: ProofDrawerPr
                     Schema-rendered UI, not model-rendered code
                   </p>
                   <p className="text-[11px] text-gray-500 mt-1">
-                    The model proposes interface intent. MirrorGate validates
+                    The model proposes the interface intent. The review gate validates
                     it. The approved component catalog renders it.
                   </p>
                 </div>

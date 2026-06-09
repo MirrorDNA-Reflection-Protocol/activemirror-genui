@@ -29,6 +29,7 @@ const requestSchema = z.object({
   prompt: z.string().min(1).max(8000),
   turn: z.number().int().min(1).max(100).default(1),
   currentArtifact: artifactSchema.nullable().optional(),
+  mirrorSeed: z.string().nullable().optional(),
   messages: z.array(z.object({
     role: z.enum(["user", "assistant"]),
     content: z.string().max(8000),
@@ -63,7 +64,7 @@ function chooseRoute(prompt: string) {
     return {
       label: "local · gated",
       model: null,
-      reason: "sensitive route held off frontier path",
+      reason: "sensitive route held off hosted-model path",
     };
   }
 
@@ -95,6 +96,7 @@ function contextPrompt(input: z.infer<typeof requestSchema>) {
   return [
     `Exchange ${input.turn} of 10.`,
     input.turn >= 8 ? "Deliver or refine the artifact now. No more questions." : "Deliver an artifact as soon as you have enough. Do not over-interview.",
+    input.mirrorSeed ? "A public-safe sample context is loaded. Use it only as a preference signal: proof before promotion, concise output, no private saved memory." : "No sample context is loaded.",
     "Return the reply and artifact according to the schema.",
     current,
     `Conversation:\n${prior}`,
@@ -113,6 +115,9 @@ function withTimeout<T>(promise: Promise<T>) {
 
 function specificItems(prompt: string) {
   const trimmed = prompt.trim().replace(/\s+/g, " ");
+  if (/vendor|evidence|prove|proof|source route|research|procurement|claim|audit/i.test(trimmed)) {
+    return fallbackEvidenceWorkspace(trimmed);
+  }
   if (/deck|slide|present|ppt|powerpoint|meeting/i.test(trimmed)) {
     return fallbackDeck();
   }
@@ -126,6 +131,72 @@ function specificItems(prompt: string) {
     return fallbackPlan(trimmed);
   }
   return null;
+}
+
+function shouldForceEvidenceWorkspace(prompt: string) {
+  return /\b(vendor|evidence|prove|proof|source route|research|procurement|audit a claim)\b/i.test(prompt);
+}
+
+function deterministicTurn(input: z.infer<typeof requestSchema>) {
+  if (!input.currentArtifact && shouldForceEvidenceWorkspace(input.prompt)) {
+    return fallbackEvidenceWorkspace(input.prompt);
+  }
+  return null;
+}
+
+function fallbackEvidenceWorkspace(prompt: string): WorkTurn {
+  return {
+    reply: "I turned this into an evidence workspace, not a generic answer. Source route, assumptions, gaps, approval, and export state stay visible.",
+    artifact: {
+      title: "Vendor evidence workspace",
+      type: "brief",
+      summary: "A proof-first workspace for validating a vendor, claim, or decision without pretending private lookup or file access already happened.",
+      blocks: [
+        {
+          heading: "Source route",
+          type: "steps",
+          items: [
+            `Frame the decision or claim: ${prompt}`,
+            "List source targets before lookup: vendor site, contract, public registry, customer proof, independent references",
+            "Separate current facts from estimates and unknowns",
+            "Run live browser or private-file checks only after approval",
+            "Promote findings into an evidence-backed brief",
+          ],
+        },
+        {
+          heading: "Evidence table",
+          type: "fields",
+          items: [
+            "Claim — queued for source check",
+            "Source — source_gap until opened or attached",
+            "Confidence — not promoted",
+            "Private files — approval_required",
+            "Export — held until evidence record",
+          ],
+        },
+        {
+          heading: "Approval gates",
+          type: "checklist",
+          items: [
+            "Approve live browser/source lookup",
+            "Approve private file or saved-context access if needed",
+            "Approve external send or export destination",
+            "Attach an evidence record before final promotion",
+          ],
+        },
+      ],
+      assumptions: [
+        "The useful first output is an evidence brief with a source route.",
+        "The user wants proof before recommendation.",
+      ],
+      unknowns: [
+        "Exact vendor or claim target",
+        "Which sources are approved to open",
+        "Whether private documents are needed",
+      ],
+      nextAction: "Approve source route",
+    },
+  };
 }
 
 function needsQuestion(prompt: string, turn: number, currentArtifact?: WorkArtifact | null) {
@@ -265,7 +336,7 @@ function fallbackPlan(prompt: string): WorkTurn {
           items: [
             "Mark unsupported claims as assumptions",
             "Keep private files and account actions gated",
-            "Attach source or receipt when a claim matters",
+            "Attach source or evidence when a claim matters",
             "Leave a visible next safe step when blocked",
           ],
         },
@@ -285,7 +356,7 @@ function fallbackTurn(input: z.infer<typeof requestSchema>, routeReason: string)
     };
   }
 
-  if (routeReason === "sensitive route held off frontier path") {
+  if (routeReason === "sensitive route held off hosted-model path") {
     const plan = fallbackPlan(input.prompt).artifact!;
     return {
       reply: "This looks sensitive, so I kept it on the gated path and drafted a safe working plan.",
@@ -293,7 +364,7 @@ function fallbackTurn(input: z.infer<typeof requestSchema>, routeReason: string)
         ...plan,
         unknowns: [
           ...plan.unknowns,
-          "Private body state is body_unavailable until a signed approval exists.",
+          "Private runtime state is unavailable until a signed approval exists.",
         ],
       },
     };
@@ -386,7 +457,10 @@ export async function POST(request: NextRequest) {
     async start(controller) {
       enqueue(controller, { type: "route", route: route.label, reason: route.reason });
       try {
-        const turn = route.model
+        const forcedTurn = deterministicTurn(input);
+        const turn = forcedTurn
+          ? forcedTurn
+          : route.model
           ? await modelTurn(input, route.model)
           : fallbackTurn(input, route.reason);
         await emitModel(controller, turn);

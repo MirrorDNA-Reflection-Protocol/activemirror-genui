@@ -13,15 +13,13 @@ export default function Page() {
       name: "N1 Intelligence (OPC) Pvt Ltd",
     },
     description:
-      "Active Mirror is a Made-in-India sovereign runtime and trust layer around frontier and local models.",
+      "Bring one workflow your current AI cannot safely finish. Active Mirror scopes it, builds a reviewable workspace, and keeps sources, approvals, and next actions visible.",
     featureList: [
-      "Trust by Design runtime",
-      "Static public teaser with no model call",
-      "Work OS product route",
-      "MirrorGate governance",
-      "Proof ledger and governed export path",
-      "Revocation, continuity, critique, and ratchet contracts",
-      "Local-first deployment posture",
+      "Reviewable business workspaces",
+      "Evidence and assumption separation",
+      "Sensitive-context approval boundaries",
+      "Exportable briefs and work records",
+      "Local or cloud deployment planning",
     ],
   };
 

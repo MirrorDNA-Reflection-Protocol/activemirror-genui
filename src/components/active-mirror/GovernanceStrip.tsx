@@ -113,7 +113,7 @@ export default function GovernanceStrip({
 
         {/* Memory Boundary */}
         <CollapsibleSection
-          label="Memory Boundary"
+          label="Saved Context Boundary"
           icon={<Database className="w-3.5 h-3.5 text-gray-500" />}
           open={showMemory}
           onToggle={() => setShowMemory(!showMemory)}
@@ -124,9 +124,9 @@ export default function GovernanceStrip({
               active={memoryBoundary.session}
             />
             <MemoryRow
-              label="Vault memory"
+              label="Saved context"
               active={memoryBoundary.vault}
-              note="Not connected in demo"
+              note="Not connected in preview"
             />
             <MemoryRow
               label="Client data"
@@ -134,7 +134,7 @@ export default function GovernanceStrip({
               note="Not available"
             />
             <MemoryRow
-              label="Proof trail"
+              label="Evidence trail"
               active={memoryBoundary.proof_trail}
             />
             <MemoryRow

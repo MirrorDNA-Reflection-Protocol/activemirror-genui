@@ -518,6 +518,32 @@ html {
   max-width: 46ch;
 }
 
+.seed-import {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid color-mix(in srgb, var(--success) 22%, var(--border-default));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--success) 7%, transparent);
+  color: var(--success);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.seed-import span {
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: var(--text-faint);
+  font-weight: 400;
+}
+
+.seed-import.is-on {
+  border-color: color-mix(in srgb, var(--success) 38%, var(--border-default));
+  background: var(--green-tint);
+}
+
 .starters {
   display: flex;
   flex-wrap: wrap;
@@ -736,6 +762,10 @@ html {
   color: var(--gold-400);
 }
 
+.fnote--seed.on {
+  color: var(--success);
+}
+
 .proofbtn {
   display: inline-flex;
   align-items: center;
@@ -922,6 +952,10 @@ html {
 .composer__send:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+.mobile-controls {
+  display: none;
 }
 
 .scrim {
@@ -1516,6 +1550,50 @@ html {
     padding: 22px 18px;
   }
 
+  .mobile-controls {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 18px;
+  }
+
+  .mobile-chip {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    background: var(--ink-950);
+    color: var(--text-tertiary);
+    padding: 8px 7px;
+    font-family: var(--font-data);
+    font-size: 10.5px;
+  }
+
+  .mobile-chip .d {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+  }
+
+  .mobile-chip .d.ok {
+    color: var(--success);
+  }
+
+  .mobile-chip .d.warn {
+    color: var(--gold-400);
+  }
+
+  .mobile-chip.is-on {
+    color: var(--success);
+    border-color: color-mix(in srgb, var(--success) 32%, var(--hairline));
+    background: var(--green-tint);
+  }
+
   .work,
   .work__summary,
   .path,
@@ -1537,6 +1615,31 @@ html {
 
   .empty__line {
     font-size: 21px;
+  }
+
+  .starters {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .starter {
+    text-align: left;
+  }
+
+  .work__top {
+    flex-wrap: wrap;
+  }
+
+  .work__title {
+    width: 100%;
+    font-size: 21px;
+  }
+
+  .nextbtn {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
   }
 
   .sheet {

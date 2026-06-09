@@ -35,10 +35,10 @@ function buildDefaultGraph(): { nodes: Node[]; edges: Edge[] } {
   const items = [
     { id: 'user', label: 'User', type: 'default' },
     { id: 'am', label: 'Active Mirror', type: 'agent' },
-    { id: 'mg', label: 'MirrorGate', type: 'security' },
-    { id: 'ch', label: 'Chetana', type: 'service' },
-    { id: 'prod', label: 'MirrorProd', type: 'agent' },
-    { id: 'proof', label: 'MirrorProof', type: 'data' },
+    { id: 'review', label: 'Review gate', type: 'security' },
+    { id: 'source', label: 'Source check', type: 'service' },
+    { id: 'action', label: 'Action route', type: 'agent' },
+    { id: 'evidence', label: 'Evidence trail', type: 'data' },
   ];
 
   const nodes: Node[] = items.map((item, i) => {
@@ -67,12 +67,12 @@ function buildDefaultGraph(): { nodes: Node[]; edges: Edge[] } {
 
   const edges: Edge[] = [
     { id: 'e1', source: 'user', target: 'am', animated: true, style: { stroke: '#8B5CF6' } },
-    { id: 'e2', source: 'am', target: 'mg', label: 'gate', animated: true, style: { stroke: '#EF4444' } },
-    { id: 'e3', source: 'am', target: 'ch', label: 'site shield', animated: true, style: { stroke: '#3B82F6' } },
-    { id: 'e4', source: 'am', target: 'prod', label: 'market', animated: true, style: { stroke: '#8B5CF6' } },
-    { id: 'e5', source: 'mg', target: 'proof', label: 'receipt', style: { stroke: '#EF4444', strokeDasharray: '6 3' } },
-    { id: 'e6', source: 'ch', target: 'proof', label: 'signals', style: { stroke: '#10B981' } },
-    { id: 'e7', source: 'prod', target: 'proof', label: 'claims', style: { stroke: '#8B5CF6' } },
+    { id: 'e2', source: 'am', target: 'review', label: 'approval', animated: true, style: { stroke: '#EF4444' } },
+    { id: 'e3', source: 'am', target: 'source', label: 'check', animated: true, style: { stroke: '#3B82F6' } },
+    { id: 'e4', source: 'am', target: 'action', label: 'next step', animated: true, style: { stroke: '#8B5CF6' } },
+    { id: 'e5', source: 'review', target: 'evidence', label: 'record', style: { stroke: '#EF4444', strokeDasharray: '6 3' } },
+    { id: 'e6', source: 'source', target: 'evidence', label: 'sources', style: { stroke: '#10B981' } },
+    { id: 'e7', source: 'action', target: 'evidence', label: 'decision', style: { stroke: '#8B5CF6' } },
   ];
 
   return { nodes, edges };

@@ -261,10 +261,10 @@ The workspace treats this as product feedback, not as a new project request. The
 Apply the cleanup, export the short UX plan, and keep the visitor moving with one next action instead of another stack of repeated cards.`;
   }
 
-  if (lowerTitle.includes("official product demo")) {
+  if (lowerTitle.includes("official product preview")) {
     return `# ${profile.title}
 
-## Demo Control Room
+## Product Preview Room
 The visitor asks for an outcome. Active Mirror opens the right working surface, marks the proof boundary, and gives one useful download path.
 
 | Zone | What the visitor sees | State |
@@ -273,40 +273,40 @@ The visitor asks for an outcome. Active Mirror opens the right working surface, 
 | Work surface | Document, browser, workflow, form, chart, or media brief | Ready |
 | Proof | Real, assumed, gated, and reviewed items are separated | Visible |
 | Export | One concise pack saves the work | Ready |
-| Demo request | 72-hour scoped build path appears after value | Gated |
+| Proof-sprint request | 72-hour scoped build path appears after value | Gated |
 
 ## Working Areas
 - **Ask:** The user starts with a real problem, not a menu of internal capabilities.
 - **Generate:** The workspace becomes the missing tool for that task.
 - **Prove:** Claims and actions are marked as live, assumed, gated, or reviewed.
-- **Finish:** The visitor downloads the useful pack or requests a scoped demo.
+- **Finish:** The visitor downloads the useful pack or requests a scoped proof sprint.
 
 ## Product Feel
 This should feel like software appearing on demand: one live surface, one proof line, one artifact pack, one next step.
 
 ## Finish Route
-Use this as the official live demo. Keep the screen compact: show generated work first, then proof, export, and reviewed access.`;
+Use this as the official live preview. Keep the screen compact: show generated work first, then proof, export, and reviewed access.`;
   }
 
   if (lowerTitle.includes("client intake")) {
     return `# ${profile.title}
 
 ## Intake Form Builder
-The workspace turns "${intent}" into a client-facing intake tool. It captures the request, files, approvals, 72-hour demo scope, and handoff pack before any private action runs.
+The workspace turns "${intent}" into a client-facing intake tool. It captures the request, files, approvals, 72-hour proof sprint scope, and handoff pack before any private action runs.
 
 | Area | What opens | State |
 | --- | --- | --- |
 | Goal capture | Outcome, audience, urgency, success measure | Ready |
 | File slots | Links, uploads, source notes, missing inputs | Prepared |
 | Approval states | Client review, internal review, send/export gates | Visible |
-| 72-hour scope | First demo surface, required assets, blockers | Drafted |
-| Handoff pack | Markdown brief, checklist, email, receipt fields | Ready |
+| 72-hour scope | First proof surface, required assets, blockers | Drafted |
+| Handoff pack | Markdown brief, checklist, email, evidence fields | Ready |
 
 ## Working Areas
 - **Client request:** Converts vague asks into structured goals and constraints.
 - **File lane:** Prepares file slots without claiming private file access.
 - **Approval queue:** Shows what can be drafted, exported, sent, or gated.
-- **Demo scope:** Produces the minimum viable 72-hour build path.
+- **Sprint scope:** Produces the minimum viable 72-hour build path.
 - **Handoff pack:** Gives the team a usable artifact before lead capture.
 
 ## Finish Route
@@ -377,14 +377,14 @@ The workspace opens a public-service preview for: "${intent}". It behaves like a
 
 ## Working Areas
 - **Service brief:** A citizen-facing service page with goal, channel, owner, and first useful outcome.
-- **Consent boundary:** A visible line between public demo content, sensitive data, and reviewed access.
+- **Consent boundary:** A visible line between public preview content, sensitive data, and reviewed access.
 - **Evidence checklist:** A claim list that starts as assumptions and becomes proof only after source review.
 - **Review path:** Procurement, legal, accessibility, and security steps routed before real deployment.
 
 ## Specialist Handoff
 - **Research lane:** Opens source checks and browser previews only when current evidence is needed.
 - **Document lane:** Exports the brief, checklist, and PDF-ready copy immediately.
-- **Build lane:** Turns the approved scope into a 72-hour working demo.
+- **Build lane:** Turns the approved scope into a 72-hour working proof.
 - **Gate lane:** Blocks private data, unsafe claims, or unapproved public-service decisions.
 ${sourceLine}
 
@@ -404,7 +404,7 @@ The workspace opens a practical small-business app for: "${intent}". It helps th
 | Offer page | Clear value proposition, packages, proof notes | Drafted |
 | Quote and invoice | Estimate outline, payment note, handoff email | Ready |
 | Follow-up automation | SMS/email sequence, reminder, owner next step | Drafted |
-| Export tray | One-pager, checklist, customer email, demo spec | Ready |
+| Export tray | One-pager, checklist, customer email, proof-sprint spec | Ready |
 
 ## Working Areas
 - **Customer intake:** Captures the customer's need without forcing the owner to build a form first.
@@ -417,7 +417,7 @@ The workspace opens a practical small-business app for: "${intent}". It helps th
 Active Mirror should feel like a business assistant that becomes the missing tool: mini-CRM, quote desk, website draft, campaign brief, review checklist, or customer follow-up surface.
 
 ## Finish Route
-Export the action pack now. Use reviewed access for live website lookup, payment integrations, customer data, automation sends, or a 72-hour working demo.`;
+Export the action pack now. Use reviewed access for live website lookup, payment integrations, customer data, automation sends, or a 72-hour working proof.`;
   }
 
   if (lowerTitle.includes("video")) {
@@ -487,7 +487,7 @@ ${sourceLine}
 - **Search surface:** The first browser target is prepared without pretending the lookup already ran.
 - **Source notes:** Claims stay separated into facts, estimates, and unknowns.
 - **Research brief:** A downloadable summary captures the useful output and open questions.
-- **Demo route:** Deeper browser work moves through reviewed access when cost, privacy, or current facts matter.
+- **Proof-sprint route:** Deeper browser work moves through reviewed access when cost, privacy, or current facts matter.
 
 ## Finish Route
 Open the source target if current truth matters. Otherwise export the brief and continue with one focused follow-up.`;
@@ -537,7 +537,7 @@ ${sourceLine}
 - **Outreach brief:** Packages the first conversation around proof, not hype.
 
 ## Finish Route
-Open the public source, verify the company facts, export the brief, then offer a scoped demo.`;
+Open the public source, verify the company facts, export the brief, then offer a scoped proof sprint.`;
   }
 
   return `# ${profile.title}
@@ -550,7 +550,7 @@ The workspace opens a task-specific app preview for: "${intent}". The user sees 
 | Workbench | Tailored surface for the request | Ready |
 | Proof line | What is real, assumed, gated, or unknown | Visible |
 | File tray | One-pager, checklist, handoff note | Ready |
-| Access route | Browser, media, vault, device, or demo handoff | Gated |
+| Access route | Browser, media, saved context, device, or proof-sprint handoff | Gated |
 
 ## Working Areas
 ${profile.modules.map((module) => `- **${module}:** A visible workspace area with a useful draft, control, or export path.`).join("\n")}
@@ -559,7 +559,7 @@ ${profile.modules.map((module) => `- **${module}:** A visible workspace area wit
 - **Browser lane:** Live lookup and citations when current facts are needed.
 - **Document lane:** Markdown and PDF-ready copy for low-cost completion.
 - **Media lane:** Storyboards first; image/video/audio render only after approval.
-- **Build lane:** Scoped 72-hour demo after the artifact is useful.
+- **Build lane:** Scoped 72-hour proof sprint after the artifact is useful.
 
 ## Finish Route
 Use the preview, download the artifact, then route expensive or sensitive work through reviewed access.`;
@@ -567,7 +567,7 @@ Use the preview, download the artifact, then route expensive or sensitive work t
 
 function publicRequestLabel(prompt: string) {
   const profile = workspaceProfile(prompt);
-  if (profile.title.includes("Official Product Demo")) return "Run the official Active Mirror demo.";
+  if (profile.title.includes("Official Product Preview")) return "Run the official Active Mirror preview.";
   if (profile.title.includes("UX Repair")) return "Improve the workspace usability.";
   return cleanIntent(prompt);
 }
@@ -594,8 +594,8 @@ function exportPackContent(prompt: string) {
 - Assumptions and gated actions remain visible.
 - No repeated generic cards appear for the same turn.`;
   }
-  if (profile.title.includes("Official Product Demo")) {
-    return `## Official Demo Pack
+  if (profile.title.includes("Official Product Preview")) {
+    return `## Official Product Preview Pack
 
 **What the visitor just saw**
 - A request became a generated workspace.
@@ -605,11 +605,11 @@ function exportPackContent(prompt: string) {
 
 **What unlocks next**
 - Live browser/source lookup when current facts matter.
-- File, media, automation, vault, or device lanes only after reviewed access.
-- A scoped 72-hour demo when the visitor has a real use case.
+- File, media, automation, saved-context, or device lanes only after reviewed access.
+- A scoped 72-hour proof sprint when the visitor has a real use case.
 
 **Next action**
-Download this pack or send a short demo brief to paul@activemirror.ai.`;
+Download this pack or send a short proof-sprint brief to paul@activemirror.ai.`;
   }
   if (profile.title.includes("Client Intake")) {
     return `## Client Intake Export Pack
@@ -620,8 +620,8 @@ Download this pack or send a short demo brief to paul@activemirror.ai.`;
 - Intake questions for goals, constraints, audience, urgency, and success measure
 - File and source slots with missing-input labels
 - Approval states for draft, reviewed, export, send, and implementation
-- 72-hour demo scope with assets, blockers, and first surface
-- Handoff email and receipt fields
+- 72-hour proof sprint scope with assets, blockers, and first surface
+- Handoff email and evidence fields
 
 **Gates**
 - No private files were opened.
@@ -630,7 +630,7 @@ Download this pack or send a short demo brief to paul@activemirror.ai.`;
 - Implementation starts only after reviewed access.
 
 **Next action**
-Use this pack as the client intake brief or request a scoped working demo.`;
+Use this pack as the client intake brief or request a scoped working proof.`;
   }
   if (profile.title.includes("Finish Mode")) {
     return `## Finish Mode Export Pack
@@ -671,11 +671,11 @@ Use the artifact, complete the next action, then reopen parked ideas.`;
 **Next action**
 Export this brief, then run official source checks or attach approved source files.`;
   }
-  return `## Working Demo Offer
+  return `## Working Proof Offer
 
 Active Mirror extracted a first spec for: ${intent}
 
-**Demo scope**
+**Sprint scope**
 - Generated preview screen
 - Downloadable one-pager
 - Working intake or workflow surface
@@ -686,24 +686,24 @@ Active Mirror extracted a first spec for: ${intent}
 Download the spec, review it offline, then come back with one focused change instead of spending turns to rediscover context.
 
 **Ask**
-Would you like Active Mirror to turn this spec into a working demo?
+Would you like Active Mirror to turn this spec into a working proof?
 
 **Turnaround**
-Scoped working-demo target: 72 hours after the spec, access needs, and review boundaries are confirmed.
+Scoped working-proof target: 72 hours after the spec, access needs, and review boundaries are confirmed.
 
-**Available in a scoped demo**
+**Available in a scoped proof sprint**
 - Live browser/source lookup
 - File-specific workspace
 - Media render job
-- Vault-backed continuity
+- Saved-context continuity
 ${profile.lookupUrl ? `\n**First browser target:** [${profile.lookupLabel}](${profile.lookupUrl})` : ""}
 
 ## Paid Access Lanes
 | Lane | What unlocks | Gate |
 | --- | --- | --- |
-| Vault continuity | Private memory, persona, receipts, exports | Local vault setup |
+| Saved context | Private memory, preferences, evidence records, exports | Local setup |
 | Research+ | Live browser lookups, citations, source previews | Source review and cost cap |
-| Build+ | Working app/demo, automation, custom workflow | Scoped work order |
+| Build+ | Working app, automation, custom workflow | Scoped work order |
 | Media+ | Image, audio, video render jobs | Brand, safety, and spend approval |
 | Device helper | Files, desktop, browser, phone actions | Installed helper and permissions |
 | Team/Gov | Roles, review queues, procurement proof | Admin and legal boundary |
@@ -721,9 +721,9 @@ function finishRouteContent(prompt: string) {
 
 The workspace has a focused cleanup plan. Apply the simpler flow, export the UX pack, then test one real visitor prompt before adding more surfaces.`;
   }
-  return `## Request Working Demo
+  return `## Request Working Proof
 
-The useful preview and downloadable artifacts are ready. Share contact and project scope only if you want Active Mirror to prepare the reviewed 72-hour demo path.`;
+The useful preview and downloadable artifacts are ready. Share contact and project scope only if you want Active Mirror to prepare the reviewed 72-hour proof sprint path.`;
 }
 
 function createGeneratedSpecContent(prompt: string) {
@@ -753,28 +753,28 @@ Reduce friction so a visitor can understand the generated workspace, use the fir
 - The main generated surface contains concrete labels and one next action.
 - The artifact is short enough to scan and download.`;
   }
-  if (profile.title.includes("Official Product Demo")) {
-    return `# Official Demo Spec
+  if (profile.title.includes("Official Product Preview")) {
+    return `# Official Product Preview Spec
 
 ## Request
 ${intent}
 
 ## Visitor Promise
-Ask or speak a task. Active Mirror generates the working surface, proof line, export pack, and reviewed demo path.
+Ask or speak a task. Active Mirror generates the working surface, proof line, export pack, and qualified proof-sprint path.
 
 ## First Screen
 - One chat surface
 - One generated workspace
 - One proof boundary
 - One download pack
-- One demo request path
+- One proof-sprint request path
 
 ## Acceptance Criteria
 - The visitor understands the product in under 30 seconds.
 - The generated workspace appears before long explanation.
 - Artifacts summarize the value instead of repeating the starter prompt.
-- Browser, media, vault, automation, and device lanes stay gated until relevant.
-- The demo request appears only after a useful output exists.`;
+- Browser, media, saved-context, automation, and device lanes stay gated until relevant.
+- The proof-sprint request appears only after a useful output exists.`;
   }
   if (profile.title.includes("Client Intake")) {
     return `# Client Intake Workspace Spec
@@ -783,7 +783,7 @@ Ask or speak a task. Active Mirror generates the working surface, proof line, ex
 ${intent}
 
 ## Screen
-Client-facing intake builder with goal capture, file slots, approval states, 72-hour scope, and exportable handoff pack.
+Client-facing intake builder with goal capture, file slots, approval states, 72-hour proof scope, and exportable handoff pack.
 
 ## Required Fields
 - Client/company
@@ -865,7 +865,7 @@ Reviewer-ready evidence desk with source route, fact table, assumptions, unknown
 - Procurement and reviewer gates are visible.
 - The brief can be exported before live lookup.`;
   }
-  return `# Working Demo Spec
+  return `# Working Proof Spec
 
 ## Request
 ${intent}
@@ -876,12 +876,12 @@ ${profile.title}
 ## User Outcome
 ${profile.promise}
 
-## First Demo Screen
+## First Proof Screen
 - Prompt-led workspace
 - Browser-style preview
 - Downloadable brief/spec
 - Finish plan
-- Demo offer and lead capture after the spec
+- Proof-sprint offer and lead capture after the spec
 
 ## Inputs Needed
 - Company or user context
@@ -900,11 +900,11 @@ ${profile.promise}
 - The first screen answers the user request visually.
 - The browser preview opens relevant sources when sources are provided.
 - The spec can be downloaded.
-- The demo offer appears only after useful generated content exists.
+- The proof-sprint offer appears only after useful generated content exists.
 - Claims are marked as assumptions unless verified by source lookup or user-provided files.
 
-## Demo Question
-Would you like Active Mirror to turn this downloadable spec into a working demo within a scoped 72-hour build window?`;
+## Proof-Sprint Question
+Would you like Active Mirror to turn this downloadable spec into a working proof within a scoped 72-hour build window?`;
 }
 
 function createGeneratedDocumentContent(prompt: string) {
@@ -932,8 +932,8 @@ ${profile.promise}
 - [ ] No repeated cards for the same content
 - [ ] Browser/source pane only when research is requested`;
   }
-  if (profile.title.includes("Official Product Demo")) {
-    return `# Official Demo One-Pager
+  if (profile.title.includes("Official Product Preview")) {
+    return `# Official Product Preview One-Pager
 
 ## What Active Mirror Does
 Active Mirror turns a request into the working surface needed to finish: document, research browser, workflow, form, chart, media brief, or governed handoff.
@@ -944,11 +944,11 @@ The visitor does not need to learn the product first. They describe the outcome,
 ## Proof Boundary
 - Generated preview: visible now
 - Sources and citations: opened only when relevant
-- Files, media, automations, vault, and device work: reviewed access
-- Claims: marked as demo, assumed, source-ready, or reviewed
+- Files, media, automations, saved-context, and device work: reviewed access
+- Claims: marked as sample, assumed, source-ready, or reviewed
 
 ## Next Step
-Download the pack or request a scoped 72-hour demo.`;
+Download the pack or request a scoped 72-hour proof sprint.`;
   }
   if (profile.title.includes("Client Intake")) {
     return `# Client Intake Handoff Pack
@@ -961,7 +961,7 @@ ${intent}
 2. Who will use the workspace?
 3. What files, links, or examples are needed?
 4. What must be reviewed before export or send?
-5. What is the first 72-hour demo surface?
+5. What is the first 72-hour proof sprint surface?
 
 ## Approval Queue
 | Item | State | Note |
@@ -969,10 +969,10 @@ ${intent}
 | Goals | Ready | Captured from prompt |
 | Files | approval_required | User must attach or approve access |
 | Client send | blocked | Requires explicit approval |
-| Demo scope | drafted | Ready for review |
+| Sprint scope | drafted | Ready for review |
 | Export pack | ready | Downloadable artifact |
 
-## 72-Hour Demo Scope
+## 72-Hour Proof Scope
 - Day 1: confirm intake fields and first surface
 - Day 2: build workspace preview and proof line
 - Day 3: package handoff, exports, and reviewed access path
@@ -991,7 +991,7 @@ A one-page product constitution patch: define the killer loop, the first public 
 
 ## Parked Ideas
 - Deep connector marketplace
-- Full vault onboarding
+- Full saved-context onboarding
 - Device helper setup
 - Enterprise admin console
 - Public-sector source automation
@@ -1056,7 +1056,7 @@ ${profile.lookupUrl ? `\n## First Browser Target\n[${profile.lookupLabel}](${pro
 1. Generate the first useful preview.
 2. Export the one-pager and checklist.
 3. Refine only the missing section.
-4. Move live lookup, files, media, or vault continuity into reviewed access.
+4. Move live lookup, files, media, or saved-context continuity into reviewed access.
 
 ## Checklist
 - [ ] Confirm the audience
@@ -1072,7 +1072,7 @@ I want Active Mirror to prepare a workspace for: ${intent}
 
 The first output I need is: ${profile.title}
 
-Please scope the files, source lookup, media, vault, and review path required to finish this quickly.`;
+Please scope the files, source lookup, media, saved context, and review path required to finish this quickly.`;
 }
 
 function shouldEmitChart(prompt: string) {
@@ -1093,13 +1093,13 @@ ${intent}
 - Source sensitivity: 72
 - Automation fit: 68
 - Export value: 86
-- Demo readiness: 74
+- Proof-sprint readiness: 74
 
 These values are a generated planning map, not verified market data. Replace them with sourced numbers after browser lookup or user-provided files are approved.`;
 }
 
 function shouldOfferLeadAccess(prompt: string) {
-  return /\b(72-hour|72 hour|working demo|deploy|deployment|vault|computer use|device|team|enterprise|external send|account action|paid|contact|paul@activemirror\.ai)\b/i.test(prompt);
+  return /\b(72-hour|72 hour|working proof|proof sprint|deploy|deployment|saved context|vault|computer use|device|team|enterprise|external send|account action|paid|contact|paul@activemirror\.ai)\b/i.test(prompt);
 }
 
 function primaryArtifactTitle(prompt: string) {
@@ -1132,8 +1132,8 @@ function proofBoundaryContent(prompt: string) {
 
 **Still gated**
 - Live browser/source checks run only when requested.
-- Private files, vault memory, computer use, account actions, and external sends require approval.
-- If the private body is offline, fresh private actions stay marked body_unavailable.
+- Private files, saved memory, computer use, account actions, and external sends require approval.
+- If the private runtime is offline, fresh private actions stay marked unavailable.
 
 **Next action**
 Use the artifact, ask for one specific refinement, or request the gated route that should actually run.`;
@@ -1188,7 +1188,7 @@ function isGovernedGenUIPrompt(prompt: string) {
 function governedPreviewContent(prompt: string) {
   const intent = cleanIntent(prompt);
   const supervisor = createLocalSupervisorDecision(prompt);
-  return `# Governed GenUI Workbench
+  return `# Review-Controlled AI Workspace
 
 ## Request
 ${intent}
@@ -1196,15 +1196,15 @@ ${intent}
 ## Boot Status
 | Layer | State | Public note |
 | --- | --- | --- |
-| Canonical contract | Loaded | Private bootloader source is active; raw paths withheld |
-| Local supervisor | Active | ${supervisor.version}; deterministic authority before model route |
-| Built-in skill | Active | ${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.name} v${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.version} |
-| Boot packet | Compiled | Authority, doctrine, gates, storage, route, and receipt rules |
-| Runtime surface | Ready | Deterministic scaffold first, model route only when needed |
-| Frontier model | ${supervisor.frontierRole === "proposer_only" ? "Gated" : "Not called"} | Frontier output is proposer_only and cannot grant permissions |
+| Operating rules | Loaded | Private boot source is active; raw paths withheld |
+| Local review gate | Active | ${supervisor.version}; deterministic authority before model route |
+| Built-in rules | Active | ${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.version} |
+| Session packet | Compiled | Authority, gates, storage, route, and evidence rules |
+| Workspace surface | Ready | Deterministic scaffold first, model route only when needed |
+| Hosted model | ${supervisor.frontierRole === "proposer_only" ? "Gated" : "Not called"} | Hosted model output cannot grant permissions |
 | Tool actions | Approval required | Browser, files, devices, sends, and computer use stay gated |
-| Durable memory | Opt-in only | Public preview remains ephemeral unless vault setup is approved |
-| Private body | Conditional | If offline, private/fresh actions become body_unavailable |
+| Saved context | Opt-in only | Public preview remains ephemeral unless saved context is approved |
+| Private runtime | Conditional | If offline, private/fresh actions are marked unavailable |
 
 ## Local Supervisor Route
 | Field | Decision |
@@ -1212,21 +1212,21 @@ ${intent}
 | Mode | ${supervisor.mode} |
 | Route | ${supervisor.route} |
 | Workspace | ${supervisor.workspace} |
-| Frontier role | ${supervisor.frontierRole} |
+| Hosted model role | ${supervisor.frontierRole} |
 | Local model role | ${supervisor.localModelRole} |
 | Approvals needed | ${supervisor.approvalsRequired.length ? supervisor.approvalsRequired.join(", ") : "none for public preview"} |
 
-## Local Gate Contract
+## Local Review Contract
 ${ACTIVE_MIRROR_LOCAL_SUPERVISOR_CONTRACT.map((rule, index) => `${index + 1}. ${rule}`).join("\n")}
 
 ## Source Registry
 | Source | Role | Public pointer |
 | --- | --- | --- |
 | Active Mirror Bootloader | Private instruction contract | loaded internally; raw topology withheld |
-| MirrorDNA Standard | Canonical behavior source | https://github.com/MirrorDNA-Reflection-Protocol/MirrorDNA-Standard |
-| AI Behavioral Governance | Doctrine and harm boundary | https://github.com/MirrorDNA-Reflection-Protocol/ai-behavioral-governance |
-| SCD Protocol | Compression and contract packet pattern | https://github.com/MirrorDNA-Reflection-Protocol/SCD-Protocol |
-| Active Mirror GenUI repo | Public workbench implementation | https://github.com/MirrorDNA-Reflection-Protocol/activemirror-genui |
+| MirrorDNA Standard | Behavior source | https://github.com/MirrorDNA-Reflection-Protocol/MirrorDNA-Standard |
+| AI behavior rules | Behavior and harm boundary | https://github.com/MirrorDNA-Reflection-Protocol/ai-behavioral-governance |
+| SCD Protocol | Compression pattern | https://github.com/MirrorDNA-Reflection-Protocol/SCD-Protocol |
+| Active Mirror public app | Public workbench implementation | https://github.com/MirrorDNA-Reflection-Protocol/activemirror-genui |
 
 ## Boot Sequence
 ${ACTIVE_MIRROR_BOOT_SEQUENCE.map((step, index) => `${index + 1}. ${step}`).join("\n")}
@@ -1238,13 +1238,13 @@ Every generated surface must show what is generated, sourced, estimated, unknown
 | Lane | Behavior |
 | --- | --- |
 | Browser cache | Instant replay for recent local surfaces |
-| KV cache | Canonical receipt and surface lookup when available |
-| Local supervisor | Deterministic route, context, tool, storage, approval, and receipt gate |
+| KV cache | Evidence-record and surface lookup when available |
+| Local review gate | Deterministic route, context, tool, storage, approval, and evidence gate |
 | Local model | Optional advisory classifier only; cannot override policy |
-| Model route | Live model only when deterministic doctrine scaffolding is insufficient |
-| Frontier model | Proposer-only drafting route behind local verification |
+| Model route | Live model only when deterministic review scaffolding is insufficient |
+| Hosted model | Drafting route behind local verification |
 | Computer use | Prepared route only; explicit approval required |
-| Receipt | Surface id, source state, approval state, and export state |
+| Evidence record | Surface id, source state, approval state, and export state |
 
 ## Storage Model
 | Store | Location | What it keeps | Rule |
@@ -1252,11 +1252,11 @@ Every generated surface must show what is generated, sourced, estimated, unknown
 ${ACTIVE_MIRROR_STORAGE_ROWS.map((row) => `| ${row.store} | ${row.location} | ${row.keeps} | ${row.rule} |`).join("\n")}
 
 ## Finish State
-The first useful workspace is open. The next step is to download the doctrine pack or request reviewed execution for live browser, files, computer use, or team deployment.`;
+The first useful workspace is open. The next step is to download the rules pack or request reviewed execution for live browser, files, computer use, or team deployment.`;
 }
 
 function governedDoctrineContent() {
-  return `# Canonical Doctrine Contract
+  return `# Operating Rules
 
 ## Operating Law
 Purpose precedes identity. Identity precedes memory. Memory precedes inference. Inference never precedes responsibility.
@@ -1279,18 +1279,18 @@ ${ACTIVE_MIRROR_AVAILABILITY_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
 ## Public Surface Rules
 - Facts, estimates, and unknowns stay separate.
 - If a fact is not verified by source, label it as generated or unknown.
-- Do not claim a file, browser action, deployment, approval, receipt, or external send happened unless it actually happened.
+- Do not claim a file, browser action, deployment, approval, evidence record, or external send happened unless it actually happened.
 - Browser automation, local files, device control, account actions, and computer use require explicit approval and revocation path.
 - Use the smallest model/tool route that can finish the job.
 
-## Doctrine Checks
+## Review Checks
 | Check | Contract |
 | --- | --- |
 | Authority | Paul or the current user approves actions that affect accounts, files, devices, people, or money |
 | Harm | Stop, reduce scope, or ask for review when harm is foreseeable or unclear |
-| Provenance | Every durable claim gets a source, receipt, or source_gap |
+| Evidence | Every durable claim gets a source, record, or source_gap |
 | Export | Downloads are user-initiated and carry their generated/proof state |
-| Continuity | Browser cache is local; vault memory requires opt-in setup |
+| Continuity | Browser cache is local; saved memory requires opt-in setup |
 
 ## Signature Skills
 ${ACTIVE_MIRROR_SIGNATURE_SKILLS.map((skill) => `- ${skill}`).join("\n")}
@@ -1307,22 +1307,22 @@ function governedApprovalContent() {
 
 | Action | Current state | Next gate |
 | --- | --- | --- |
-| Local supervisor | Active | Deterministic gate must approve route and context |
+| Local review gate | Active | Deterministic gate must approve route and context |
 | Local model advisory | Optional | Classifier output cannot grant permissions |
-| Frontier model | Proposer only | Local verifier must pass output before durable render |
+| Hosted model | Proposer only | Local verifier must pass output before durable render |
 | Browser/source lookup | Prepared | User opens source or asks for live lookup |
-| KV/cache replay | Ready | Canonical key or receipt id |
+| KV/cache replay | Ready | Evidence key or record id |
 | Bootloader source | Loaded/private | Public output shows only sanitized status |
-| Built-in doctrine skill | Loaded | Stateful doctrine applies to this session |
-| Private body/fresh lattice | Conditional | body_unavailable if private authority plane is offline |
+| Built-in rules | Loaded | Review rules apply to this session |
+| Private runtime/fresh state | Conditional | unavailable if private authority plane is offline |
 | File export | Ready | User downloads generated pack |
-| Computer use | Blocked | Explicit approval, scoped target, receipt |
+| Computer use | Blocked | Explicit approval, scoped target, evidence record |
 | Account or external send | Blocked | Review, permission, and revocation path |
 | Team/enterprise route | Scoped | Admin roles, logs, and legal boundary |
 
-## Receipt Fields
+## Evidence Fields
 - request id
-- local supervisor version
+- local review gate version
 - generated surface id
 - source state
 - model role or deterministic route
@@ -1334,12 +1334,12 @@ function governedApprovalContent() {
 function governedArtifactPackContent(prompt: string) {
   const intent = cleanIntent(prompt);
   const supervisor = createLocalSupervisorDecision(prompt);
-  return `# Active Mirror Doctrine Pack
+  return `# Active Mirror Rules Pack
 
 ## Prompt
 ${intent}
 
-## Canonical Packet
+## Review Packet
 \`\`\`json
 {
   "surface": "governed-genui-workbench",
@@ -1351,23 +1351,23 @@ ${intent}
   },
   "boot_sequence": ${JSON.stringify(ACTIVE_MIRROR_BOOT_SEQUENCE, null, 2).replace(/\n/g, "\n  ")},
   "local_supervisor": ${JSON.stringify(supervisor, null, 2).replace(/\n/g, "\n  ")},
-  "provenance": "required",
-  "doctrine_contract": "required",
+  "source_record": "required",
+  "rules_contract": "required",
   "browser_cache": "local_replay",
-  "kv_cache": "canonical_receipt_lookup",
-  "vault_memory": "opt_in_only",
+  "kv_cache": "evidence_record_lookup",
+  "saved_context": "opt_in_only",
   "file_access": "approval_required",
   "model_route": "on_demand",
-  "frontier_model": "proposer_only",
+  "hosted_model": "proposer_only",
   "computer_use": "approval_required",
   "external_send": "approval_required",
-  "offline_private_body": "body_unavailable",
-  "receipt": "required"
+  "offline_private_runtime": "private_runtime_unavailable",
+  "evidence_record": "required"
 }
 \`\`\`
 
 ## Built-In Skill
-**${ACTIVE_MIRROR_CANONICAL_DOCTRINE_SKILL.name}** keeps doctrine, provenance, reflection, storage, approvals, and receipts stateful across the generated surface. It is public-safe and versioned; raw private source files remain outside the public site.
+Active Mirror keeps operating rules, source state, reflection, storage, approvals, and evidence records stateful across the generated surface. It is public-safe and versioned; raw private source files remain outside the public site.
 
 ## Local Supervisor
 ${ACTIVE_MIRROR_LOCAL_SUPERVISOR_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
@@ -1376,7 +1376,7 @@ ${ACTIVE_MIRROR_LOCAL_SUPERVISOR_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
 ${ACTIVE_MIRROR_STORAGE_CONTRACT.map((rule) => `- ${rule}`).join("\n")}
 
 ## Export Notes
-This pack is generated in the public preview. Live browser checks, private files, account actions, computer use, and deployment actions require separate approval and receipts.`;
+This pack is generated in the public preview. Live browser checks, private files, account actions, computer use, and deployment actions require separate approval and evidence records.`;
 }
 
 function createGovernedGenUIStream(prompt: string) {
@@ -1391,16 +1391,16 @@ function createGovernedGenUIStream(prompt: string) {
 
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "root_grid", type: "fluid_grid", props: { layout: "adaptive_split", transition: "spring" } } });
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Bootloader contract loaded; private paths withheld." } }, 40);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "generated_preview", type: "browser_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Governed GenUI Workbench", severity: "info" } } }, 60);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "generated_preview.title": "Governed GenUI Workbench", "generated_preview.content": governedPreviewContent(prompt) } }, 40);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "doctrine_contract", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Canonical Doctrine Contract", severity: "info" } } }, 60);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "doctrine_contract.title": "Canonical Doctrine Contract", "doctrine_contract.content": governedDoctrineContent() } }, 40);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "approval_queue", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Approval Queue", severity: "info" } } }, 60);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "generated_preview", type: "browser_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Review-Controlled AI Workspace", severity: "info" } } }, 60);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "generated_preview.title": "Review-Controlled AI Workspace", "generated_preview.content": governedPreviewContent(prompt) } }, 40);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "rules_contract", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Operating Rules", severity: "info" } } }, 60);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "rules_contract.title": "Operating Rules", "rules_contract.content": governedDoctrineContent() } }, 40);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "approval_queue", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Approval Queue", severity: "info" } } }, 60);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "approval_queue.title": "Approval Queue", "approval_queue.content": governedApprovalContent() } }, 40);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "artifact_pack", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Doctrine Export Pack", severity: "info" } } }, 60);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "artifact_pack.title": "Doctrine Export Pack", "artifact_pack.content": governedArtifactPackContent(prompt) } }, 40);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "trust_boundary", type: "governance_node", parent_id: "root_grid", props: { agent_id: "Chetana + MirrorGate", title: "Trust Boundary", severity: "info" } } }, 60);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "trust_boundary.content": "This route used deterministic doctrine scaffolding first. No browser action, file access, computer use, external send, or private memory write ran." } }, 40);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "artifact_pack", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Rules Export Pack", severity: "info" } } }, 60);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "artifact_pack.title": "Rules Export Pack", "artifact_pack.content": governedArtifactPackContent(prompt) } }, 40);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "trust_boundary", type: "governance_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Trust Boundary", severity: "info" } } }, 60);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "trust_boundary.content": "This route used deterministic review scaffolding first. No browser action, file access, computer use, external send, or private memory write ran." } }, 40);
       await yieldEnvelope({ envelope: "beginRendering", surface_id }, 40);
       controller.close();
     }
@@ -1428,7 +1428,7 @@ function createSoftwareWorkspaceStream(prompt: string) {
       }
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "primary_artifact", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: primaryArtifactTitle(prompt), severity: "info" } } }, 110);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "primary_artifact.title": primaryArtifactTitle(prompt), "primary_artifact.content": primaryArtifactContent(prompt) } }, 80);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "proof_boundary", type: "governance_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Proof + Next Step", severity: "info" } } }, 90);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "proof_boundary", type: "governance_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Proof + Next Step", severity: "info" } } }, 90);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "proof_boundary.title": "Proof + Next Step", "proof_boundary.content": proofBoundaryContent(prompt) } }, 70);
       if (shouldOfferLeadAccess(prompt)) {
         await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "lead_access", type: "lead_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Request Reviewed Access", severity: "info" } } }, 90);
@@ -1452,9 +1452,9 @@ function createGovernanceStream(reason: string, detail: string) {
 
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "root_grid", type: "fluid_grid", props: { layout: "adaptive_split", transition: "spring" } } });
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Review boundary checked." } }, 80);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "guardrail", type: "governance_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: reason, severity: "blocked" } } }, 80);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "guardrail", type: "governance_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: reason, severity: "blocked" } } }, 80);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "guardrail.content": detail } }, 80);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "lead_access", type: "lead_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Request Reviewed Access", severity: "info" } } }, 80);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "lead_access", type: "lead_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Request Reviewed Access", severity: "info" } } }, 80);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "lead_access.content": "This public preview will not process sensitive data, credentials, unsafe workflows, or definitive professional advice. Share a brief use case and Active Mirror can prepare the right reviewed workspace." } }, 80);
       await yieldEnvelope({ envelope: "beginRendering", surface_id }, 80);
       controller.close();
@@ -1473,13 +1473,13 @@ function createEcosystemStream() {
       };
 
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "root_grid", type: "fluid_grid", props: { layout: "adaptive_split", transition: "spring" } } });
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Opening the ecosystem map." } }, 100);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "ecosystem_graph", type: "graph_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Active Mirror Ecosystem", severity: "info" } } }, 120);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "ecosystem_graph.content": "User -> Active Mirror -> MirrorGate, Chetana, MirrorProd, MirrorProof. Chetana watches trust signals. MirrorGate protects authority, privacy, legal boundaries, cost, and execution. MirrorProd turns proof into buyer-safe marketing and launch assets." } }, 100);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "trust_boundary", type: "governance_node", parent_id: "root_grid", props: { agent_id: "Chetana + MirrorGate", title: "Trust Boundary", severity: "info" } } }, 120);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "trust_boundary.content": "Chetana protects the site journey by watching abuse, scam, prompt-injection, and unsafe interaction signals. MirrorGate protects authority, privacy, legal/risk boundaries, cost, and execution. The public demo stays useful but does not run private files, device actions, live sends, or unsupported claims." } }, 100);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "mirrorprod_launch", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "MirrorProd", title: "MirrorProd Launch Surface", severity: "info" } } }, 120);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "mirrorprod_launch.content": "## Launch Surface\n\n**Core offer:** Speak, type, or upload context and Active Mirror generates the working surface you need: document, browser lookup, chart, proof trail, file handoff, form, or governed workflow.\n\n**Buyer paths:** Individuals get finish mode. Teams get shared workspaces. Enterprises get governance, audit, security, and cost controls. Government users get proof, procurement language, and review boundaries.\n\n**Proof posture:** Every claim should point to a generated artifact, visible source, approval gate, receipt, or clear limitation.\n\n**Next move:** Ask for the task. Active Mirror should show the work first, then explain the path to finish." } }, 100);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Opening the operating model." } }, 100);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "operating_model", type: "graph_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Active Mirror Operating Model", severity: "info" } } }, 120);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "operating_model.content": "User request -> reflected goal -> generated workspace -> source route -> approval boundary -> exportable proof. There are no extra named products in this public route; private files, account actions, devices, and external sends remain blocked until reviewed access is approved." } }, 100);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "trust_boundary", type: "governance_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Trust Boundary", severity: "info" } } }, 120);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "trust_boundary.content": "The public preview can prepare a useful workspace and proof path. It does not claim live private access, customer deployment, account control, or unsupported security guarantees." } }, 100);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "pilot_brief", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Pilot Brief", severity: "info" } } }, 120);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "pilot_brief.content": "## Pilot Brief\n\n**Best first workflow:** one decision, deployment, or private-context process where sources and approvals matter.\n\n**What Active Mirror builds:** the workspace, source queue, approval boundary, and exportable proof pack.\n\n**What stays gated:** live browser checks, private files, account actions, device work, and external sends.\n\n**Next move:** scope the pilot with the workflow, sensitivity, where it should run, and timeline." } }, 100);
       await yieldEnvelope({ envelope: "beginRendering", surface_id }, 100);
       controller.close();
     }
@@ -1501,8 +1501,8 @@ function createMultilingualStream(prompt: string) {
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "generated_preview", type: "browser_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Localized App Preview", severity: "info" } } }, 120);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "generated_preview.content": generatedPreviewContent(prompt) } }, 100);
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "language_pack", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Multilingual Onboarding Pack", severity: "info" } } }, 120);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "language_pack.content": "## English\nActive Mirror is a generated work OS. Ask for a task and it creates the document, browser lookup, chart, proof trail, file, form, or workflow surface.\n\n## Hindi\nActive Mirror ek generated work OS hai. Aap task bolte ya likhte hain, aur system document, browser lookup, chart, proof trail, file, form ya workflow surface bana deta hai.\n\n## Arabic\nActive Mirror هو نظام عمل توليدي. اطلب المهمة وسيقوم بإنشاء المستند أو البحث أو المخطط أو مسار الإثبات أو الملف أو النموذج أو سير العمل.\n\n## Spanish\nActive Mirror es un sistema operativo de trabajo generado. Pide una tarea y crea el documento, busqueda, grafico, prueba, archivo, formulario o flujo necesario." } }, 100);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "language_gate", type: "governance_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Language Governance", severity: "info" } } }, 120);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "language_pack.content": "## English\nActive Mirror builds the workspace for the task: document, browser lookup, chart, evidence trail, file, form, or workflow surface.\n\n## Hindi\nActive Mirror task ke liye workspace banata hai: document, browser lookup, chart, evidence trail, file, form ya workflow surface.\n\n## Arabic\nActive Mirror يبني مساحة العمل للمهمة: مستند أو بحث أو مخطط أو سجل أدلة أو ملف أو نموذج أو سير عمل.\n\n## Spanish\nActive Mirror crea el espacio de trabajo para la tarea: documento, busqueda, grafico, evidencia, archivo, formulario o flujo necesario." } }, 100);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "language_gate", type: "governance_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Language Review", severity: "info" } } }, 120);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "language_gate.content": "Multilingual drafts should preserve meaning, product claims, consent language, and regional nuance. Regulated or legal wording needs a qualified reviewer before publishing." } }, 100);
       await yieldEnvelope({ envelope: "beginRendering", surface_id }, 100);
       controller.close();
@@ -1524,9 +1524,9 @@ function createMarketingStream(prompt: string) {
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Building the launch workspace." } }, 100);
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "generated_preview", type: "browser_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Campaign Preview", severity: "info" } } }, 120);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "generated_preview.content": generatedPreviewContent(prompt) } }, 100);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "commercial_brief", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "MirrorProd", title: "Commercial Launch Brief", severity: "info" } } }, 120);
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "commercial_brief.content": "## Active Mirror Commercial Brief\n\n**Category:** Generated work OS for people and organizations that want the output, not another static chatbot.\n\n**Promise:** Ask, speak, or upload context. Active Mirror creates the surface needed to finish: proposal, research view, browser evidence, chart, PDF-ready document, lead form, governance gate, or export path.\n\n**Best-fit buyers:** founders finishing proposals, teams coordinating work, enterprises controlling AI use, and public-sector groups that need proof and review boundaries.\n\n**Differentiator:** The interface changes with the task. Marketing copy, proof notes, files, browser previews, and governance gates are generated only when they are relevant.\n\n**Conversion path:** Public preview is unlocked while the experience is tuned; deeper source lookup, vault, media, device, and enterprise work routes into a generated access form for paul@activemirror.ai." } }, 100);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "proof_backed_claims", type: "governance_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Proof-Backed Claims", severity: "info" } } }, 120);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "commercial_brief", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Commercial Launch Brief", severity: "info" } } }, 120);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "commercial_brief.content": "## Active Mirror Commercial Brief\n\n**Category:** AI workspaces for people and organizations that want the output, not another static chatbot.\n\n**Promise:** Ask, speak, or bring context. Active Mirror creates the surface needed to finish: proposal, research view, browser evidence, chart, PDF-ready document, intake form, review gate, or export path.\n\n**Best-fit buyers:** founders finishing proposals, teams coordinating work, enterprises controlling AI use, and public-sector groups that need evidence and review boundaries.\n\n**Differentiator:** The interface changes with the task. Marketing copy, evidence notes, files, browser previews, and review gates are generated only when they are relevant.\n\n**Conversion path:** Deeper source lookup, saved context, media, device, and enterprise work route into a generated access form for paul@activemirror.ai." } }, 100);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "proof_backed_claims", type: "governance_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Proof-Ready Claims", severity: "info" } } }, 120);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "proof_backed_claims.content": "Launch material should be proof-backed: no fake customer claims, no unverified security guarantees, and no claim that a file, media asset, deployment, or source lookup exists unless it was actually produced." } }, 100);
       await yieldEnvelope({ envelope: "beginRendering", surface_id }, 100);
       controller.close();
@@ -1549,9 +1549,9 @@ function createVideoWorkbenchStream(prompt: string) {
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Preparing the media workspace." } }, 100);
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "generated_preview", type: "browser_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: profile.title, severity: "info" } } }, 120);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "generated_preview.content": generatedPreviewContent(prompt) } }, 100);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "veo_storyboard", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "MirrorProd", title: "Veo-Ready Storyboard", severity: "info" } } }, 120);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "veo_storyboard", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Veo-Ready Storyboard", severity: "info" } } }, 120);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "veo_storyboard.content": videoStoryboardContent(prompt) } }, 100);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "video_gate", type: "lead_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Video Render Access", severity: "info" } } }, 120);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "video_gate", type: "lead_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Video Review Access", severity: "info" } } }, 120);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "video_gate.content": "Rendering video requires safety checks, spend limits, brand approval, and export handling. Send a brief to prepare an approved render job." } }, 100);
       await yieldEnvelope({ envelope: "beginRendering", surface_id }, 100);
       controller.close();
@@ -1571,7 +1571,7 @@ ${intent}
 2. **Generated output:** The interface opens the right surface instead of a generic chat answer.
 3. **Artifact moment:** A document, source preview, chart, or spec appears with copy/download controls.
 4. **Proof line:** Facts, assumptions, unknowns, and approvals stay visible.
-5. **Finish route:** The user leaves with a saved brief, render prompt, or scoped demo request.
+5. **Finish route:** The user leaves with a saved brief, render prompt, or scoped proof-sprint request.
 
 ## Render Prompt
 A clean screen-capture style product video of Active Mirror, a generated work OS. A user types or speaks a task. The interface smoothly generates the correct work surface: document, browser/source preview, chart, file pack, proof line, and reviewed access route. Minimal premium UI, crisp readable text, stable 16:9 composition, smooth motion, no warped panels, no shaky camera, no fake finished media claims.
@@ -1597,9 +1597,9 @@ function createAudioWorkbenchStream(prompt: string) {
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Preparing an audio brief and export path." } }, 100);
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "generated_preview", type: "browser_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Audio Workbench Preview", severity: "info" } } }, 120);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "generated_preview.content": generatedPreviewContent(prompt) } }, 100);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "audio_brief", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "MirrorProd", title: "Generated Audio Brief", severity: "info" } } }, 120);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "audio_brief", type: "artifact_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Generated Audio Brief", severity: "info" } } }, 120);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "audio_brief.content": "## Audio Workbench\n\n**Voice brief:** Warm, direct, and practical. Explain Active Mirror as software generated on demand for the task.\n\n**Episode outline:** 60-second opener, 3-minute product walkthrough, and 10-minute operator/buyer scenario using fictional or approved participants only.\n\n**Narration script:** Start with the user asking for a task, then let the interface generate the document, research panel, review note, and export path.\n\n**Localization notes:** Add pronunciation, pacing, and translated summary notes when multilingual delivery is requested.\n\n**Export path:** Transcript first, approved render job second, downloadable audio file after a real audio job completes." } }, 100);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "audio_gate", type: "governance_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Audio Consent and Cost Gate", severity: "info" } } }, 120);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "audio_gate", type: "governance_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Audio Consent and Cost Review", severity: "info" } } }, 120);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "audio_gate.content": "Audio work needs voice consent, likeness rights, language accuracy, brand approval, spend limits, and download/export handling. This preview can prepare scripts and render briefs; finished audio requires approved rendering." } }, 100);
       await yieldEnvelope({ envelope: "beginRendering", surface_id }, 100);
       controller.close();
@@ -1618,8 +1618,8 @@ function createLeadStream(reason: string) {
       };
 
       await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "root_grid", type: "fluid_grid", props: { layout: "adaptive_split", transition: "spring" } } });
-      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Free preview protected." } }, 120);
-      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "lead_access", type: "lead_node", parent_id: "root_grid", props: { agent_id: "MirrorGate", title: "Continue with Active Mirror", severity: "info" } } }, 120);
+      await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "thought_process.append": "[ok] Public preview protected." } }, 120);
+      await yieldEnvelope({ envelope: "surfaceUpdate", surface_id, component: { id: "lead_access", type: "lead_node", parent_id: "root_grid", props: { agent_id: "ActiveMirror", title: "Continue with Active Mirror", severity: "info" } } }, 120);
       await yieldEnvelope({ envelope: "dataModelUpdate", surface_id, data: { "lead_access.content": `## ${reason}\n\nThe public preview is open while we tune the experience, but rate limits, safety boundaries, and reviewed access still protect expensive or sensitive work. Send a brief to paul@activemirror.ai so the next workspace can be scoped around your project, approved files, source lookup, media jobs, and review requirements.` } }, 120);
       await yieldEnvelope({ envelope: "beginRendering", surface_id }, 80);
       controller.close();
@@ -1674,7 +1674,7 @@ export async function POST(request: NextRequest) {
     const setCookie = FREE_TURNS_UNLOCKED ? undefined : cookieHeader(nextTurnState);
 
     if (!FREE_TURNS_UNLOCKED && nextTurnState.used > FREE_TURN_LIMIT) {
-      return ndjsonResponse(createLeadStream("Your free preview turns are complete."), setCookie);
+      return ndjsonResponse(createLeadStream("Your public preview turns are complete."), setCookie);
     }
 
     if (intent.unsafe) {
