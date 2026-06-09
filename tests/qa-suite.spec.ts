@@ -79,6 +79,9 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByTestId('solution-path')).toContainText('delivered');
     await expect(page.getByRole('button', { name: /evidence/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /Approve source route — needs approval/i })).toBeVisible();
+    await expect(page.getByTestId('proof-sprint-handoff')).toContainText('Need this working for your team?');
+    await expect(page.getByTestId('proof-sprint-handoff')).toContainText('No prompt or artifact text is sent in the link.');
+    await expect(page.getByTestId('proof-sprint-handoff').getByRole('link', { name: /Apply for a 72-hour sprint/i })).toHaveAttribute('href', '/intake?focus=workspace-proof');
 
     await page.getByRole('button', { name: /Approve source route — needs approval/i }).click();
     await expect(page.getByTestId('ledger-sheet')).toBeVisible();

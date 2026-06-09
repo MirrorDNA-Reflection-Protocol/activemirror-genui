@@ -600,6 +600,28 @@ function Workpiece({ artifact, memoryMode, seedState, onOpenSheet }: { artifact:
           </button>
         ) : null}
       </div>
+      <ProofSprintHandoff />
+    </div>
+  );
+}
+
+function ProofSprintHandoff() {
+  return (
+    <div className="sprint-handoff" data-testid="proof-sprint-handoff">
+      <div>
+        <div className="sprint-handoff__eyebrow">business handoff</div>
+        <div className="sprint-handoff__title">Need this working for your team?</div>
+        <p>
+          Use the workspace as the starting point for a 72-hour proof sprint. Send the workflow, owner,
+          proof target, and deployment boundary when you are ready.
+        </p>
+      </div>
+      <div className="sprint-handoff__actions">
+        <a className="sprint-handoff__cta" data-analytics="workspace_72h_sprint" href="/intake?focus=workspace-proof">
+          Apply for a 72-hour sprint
+        </a>
+        <span>No prompt or artifact text is sent in the link.</span>
+      </div>
     </div>
   );
 }
