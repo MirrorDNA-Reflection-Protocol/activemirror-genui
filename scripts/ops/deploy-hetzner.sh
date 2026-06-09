@@ -42,6 +42,23 @@ run_as_app() {
   fi
 }
 
+wait_for_app_health() {
+  local release_path="$1"
+  local health_url="$2"
+  local attempts="${3:-20}"
+  local attempt
+
+  for attempt in $(seq 1 "$attempts"); do
+    if run_as_app "cd '$release_path' && ACTIVEMIRROR_HEALTH_URL='$health_url' bash scripts/ops/healthcheck.sh"; then
+      return 0
+    fi
+    echo "Healthcheck not ready for $health_url; retry $attempt/$attempts"
+    sleep 2
+  done
+
+  return 1
+}
+
 release_id="$(date -u +%Y%m%dT%H%M%SZ)-$(git ls-remote "$REPO_URL" "$REF" | awk '{print substr($1,1,12)}')"
 release_dir="$REMOTE_ROOT/$release_id"
 
@@ -79,8 +96,7 @@ cleanup_canary() {
   run_as_app "pm2 delete '${APP_NAME}-canary' >/dev/null 2>&1 || true"
 }
 trap cleanup_canary EXIT
-sleep 5
-run_as_app "cd '$release_dir' && ACTIVEMIRROR_HEALTH_URL='http://127.0.0.1:$CANARY_PORT' bash scripts/ops/healthcheck.sh"
+wait_for_app_health "$release_dir" "http://127.0.0.1:$CANARY_PORT" 20
 run_as_app "pm2 delete '${APP_NAME}-canary'"
 trap - EXIT
 
@@ -90,8 +106,7 @@ root_exec chown -h "$REMOTE_USER:$REMOTE_USER" "$CURRENT_LINK"
 run_as_app "pm2 delete '$APP_NAME' >/dev/null 2>&1 || true"
 run_as_app "cd '$CURRENT_LINK' && PORT='$PORT' ACTIVEMIRROR_GENUI_INSTANCES='$INSTANCES' ACTIVEMIRROR_GENUI_ROOT='$CURRENT_LINK' pm2 start ecosystem.config.cjs --only '$APP_NAME' --update-env"
 
-sleep 5
-run_as_app "cd '$CURRENT_LINK' && ACTIVEMIRROR_HEALTH_URL='http://127.0.0.1:$PORT' bash scripts/ops/healthcheck.sh"
+wait_for_app_health "$CURRENT_LINK" "http://127.0.0.1:$PORT" 20
 run_as_app "pm2 save"
 
 old_releases="$(find "$REMOTE_ROOT" -mindepth 1 -maxdepth 1 -type d | sort | head -n -5 || true)"
