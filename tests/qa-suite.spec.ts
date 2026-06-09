@@ -192,6 +192,17 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByText('No files uploaded.')).toBeVisible();
   });
 
+  test('local ops funnel shows the conversion dashboard', async ({ page }) => {
+    await page.goto('/ops/funnel?days=7');
+
+    await expect(page.getByRole('heading', { name: 'Funnel dashboard' })).toBeVisible();
+    await expect(page.getByText('Revenue front door')).toBeVisible();
+    await expect(page.getByText('72h sprint clicks')).toBeVisible();
+    await expect(page.getByText('Captured leads', { exact: true })).toBeVisible();
+    await expect(page.getByText('Next adjustment')).toBeVisible();
+    await expect(page.getByText('Recent leads')).toBeVisible();
+  });
+
   test('about route uses the same static site surface without live generation', async ({ page }) => {
     const modelCalls: string[] = [];
     page.on('request', (request) => {
