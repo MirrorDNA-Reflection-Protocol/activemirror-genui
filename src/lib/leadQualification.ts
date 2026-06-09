@@ -6,6 +6,7 @@ export type LeadQualificationInput = {
   infrastructure?: string;
   timeline?: string;
   decisionRole?: string;
+  focus?: string;
   proofTarget?: string;
   useCase?: string;
 };
@@ -48,13 +49,14 @@ function rankReasons(reasons: string[]) {
     ["success proof named", 2],
     ["specific workflow detail", 3],
     ["matches proof-sprint shape", 4],
-    ["control-sensitive workflow", 5],
-    ["internal champion", 6],
-    ["near-term timeline", 7],
-    ["work email", 8],
-    ["organization named", 9],
-    ["workflow too vague", 10],
-    ["research stage", 11],
+    ["workspace handoff", 5],
+    ["control-sensitive workflow", 6],
+    ["internal champion", 7],
+    ["near-term timeline", 8],
+    ["work email", 9],
+    ["organization named", 10],
+    ["workflow too vague", 11],
+    ["research stage", 12],
   ]);
 
   return [...new Set(reasons)]
@@ -71,6 +73,7 @@ export function qualifyLead(input: LeadQualificationInput): LeadQualification {
   const decisionRole = (input.decisionRole || "").toLowerCase();
   const sensitivity = (input.sensitivity || "").toLowerCase();
   const infrastructure = (input.infrastructure || "").toLowerCase();
+  const focus = (input.focus || "").toLowerCase();
   let score = 20;
 
   if (input.company?.trim()) {
@@ -131,6 +134,11 @@ export function qualifyLead(input: LeadQualificationInput): LeadQualification {
   if (/\b(board|vendor|procurement|deployment|regulated|audit|approval|customer|workflow|automation|evidence|source|private|files|decision)\b/.test(combinedText)) {
     score += 8;
     reasons.push("matches proof-sprint shape");
+  }
+
+  if (/workspace-proof|pilot|challenge/.test(focus)) {
+    score += 6;
+    reasons.push("workspace handoff");
   }
 
   if (useCase.length < 40) {

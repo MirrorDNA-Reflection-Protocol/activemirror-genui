@@ -32,4 +32,19 @@ test.describe('lead qualification', () => {
     expect(lead.reasons).toContain('workflow too vague');
     expect(lead.nextAction).toContain('request a concrete workflow');
   });
+
+  test('recognizes workspace handoff leads as proof-sprint intent', () => {
+    const lead = qualifyLead({
+      email: 'owner@examplecorp.com',
+      company: 'Example Corp',
+      focus: 'workspace-proof',
+      timeline: 'this month',
+      decisionRole: 'I can sponsor or approve it',
+      proofTarget: 'The generated workspace works on our real workflow with source gaps and approvals visible.',
+      useCase: 'I generated a vendor evidence workspace and want to adapt it for our review process before the next leadership meeting.',
+    });
+
+    expect(lead.grade).toBe('priority');
+    expect(lead.reasons).toContain('workspace handoff');
+  });
 });

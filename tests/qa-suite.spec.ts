@@ -210,6 +210,11 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByLabel('What would make the 72-hour proof worth paying attention to?')).toBeVisible();
     await expect(page.getByText('No files uploaded.')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Submit workflow' })).toBeVisible();
+
+    await page.goto('/intake?focus=workspace-proof');
+    await expect(page.getByTestId('intake-focus')).toContainText('From the workspace preview');
+    await expect(page.getByTestId('intake-focus')).toContainText('We do not receive the prompt or artifact from the preview unless you choose to paste it.');
+    await expect(page.getByLabel('What business workflow should Active Mirror help with?')).toHaveAttribute('placeholder', /I generated a vendor evidence workspace/);
   });
 
   test('local ops funnel shows the conversion dashboard', async ({ page }) => {

@@ -9,7 +9,30 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://activemirror.ai/intake" },
 };
 
-export default function IntakePage() {
+type IntakePageProps = {
+  searchParams: Promise<{ focus?: string | string[] | undefined }>;
+};
+
+function firstParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function IntakePage({ searchParams }: IntakePageProps) {
+  const params = await searchParams;
+  const focus = firstParam(params.focus) || "general";
+  const fromWorkspace = focus === "workspace-proof";
+  const hero = fromWorkspace
+    ? {
+        eyebrow: "⟡ Workspace proof sprint",
+        title: "Turn this workspace into something your team can inspect.",
+        body: "Send the workflow, owner, proof target, and deployment boundary. The generated prompt and artifact are not forwarded unless you choose to paste them.",
+      }
+    : {
+        eyebrow: "⟡ Scoped pilot",
+        title: "Tell us the workflow that needs better AI control.",
+        body: "We start with the business outcome, sensitivity, where it should run, and how quickly you need it. No private access is requested from this form.",
+      };
+
   return (
     <main className="proofpage">
       <SiteTelemetry surface="intake" />
@@ -26,15 +49,12 @@ export default function IntakePage() {
         <Link className="proofnav__cta" href="/mirror">Open workspace</Link>
       </nav>
       <header className="proofhero proofhero--intake">
-        <div className="proofhero__k">⟡ Scoped pilot</div>
-        <h1>Tell us the workflow that needs better AI control.</h1>
-        <p>
-          We start with the business outcome, sensitivity, where it should run, and how quickly you need it.
-          No private access is requested from this form.
-        </p>
+        <div className="proofhero__k">{hero.eyebrow}</div>
+        <h1>{hero.title}</h1>
+        <p>{hero.body}</p>
       </header>
       <section className="proofband">
-        <IntakeForm />
+        <IntakeForm initialFocus={focus} />
       </section>
     </main>
   );

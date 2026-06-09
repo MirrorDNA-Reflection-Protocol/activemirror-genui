@@ -17,6 +17,7 @@ type Lead = {
   infrastructure: string;
   timeline: string;
   decisionRole: string;
+  focus: string;
   proofTarget: string;
   useCase: string;
 };
@@ -32,6 +33,7 @@ function mailtoFromLead(lead: Lead) {
       `Name: ${lead.name}`,
       `Email: ${lead.email}`,
       `Company: ${lead.company}`,
+      lead.focus ? `Focus: ${lead.focus}` : "",
       lead.sensitivity ? `Sensitivity: ${lead.sensitivity}` : "",
       lead.infrastructure ? `Infrastructure: ${lead.infrastructure}` : "",
       lead.timeline ? `Timeline: ${lead.timeline}` : "",
@@ -126,6 +128,7 @@ export async function POST(request: NextRequest) {
       infrastructure: clean(body?.infrastructure, 160),
       timeline: clean(body?.timeline, 120),
       decisionRole: clean(body?.decisionRole, 160),
+      focus: clean(body?.focus, 80),
       proofTarget: clean(body?.proofTarget, 700),
       useCase: clean(body?.useCase, 1000),
     };
