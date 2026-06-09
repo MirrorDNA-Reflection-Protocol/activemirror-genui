@@ -3,7 +3,7 @@ set -euo pipefail
 
 BASE_URL="${1:-${ACTIVEMIRROR_HEALTH_URL:-http://127.0.0.1:3456}}"
 BASE_URL="${BASE_URL%/}"
-PROMPT="${ACTIVEMIRROR_HEALTH_PROMPT:-Run the official Active Mirror demo.}"
+PROMPT="${ACTIVEMIRROR_HEALTH_PROMPT:-Run the Active Mirror product preview.}"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
@@ -27,7 +27,7 @@ root_code="$(curl_code GET "$BASE_URL/")"
 
 system_code="$(curl_code GET "$BASE_URL/api/mirror/system")"
 [[ "$system_code" == "200" ]] || fail "system endpoint returned HTTP $system_code"
-grep -q "Active Mirror public GenUI" "$TMP_DIR/body" || fail "system endpoint did not identify Active Mirror"
+grep -q "Active Mirror public system" "$TMP_DIR/body" || fail "system endpoint did not identify Active Mirror"
 grep -q "canonical_verifier" "$TMP_DIR/body" || fail "system endpoint did not expose canonical verifier status"
 
 kernel_code="$(curl_code GET "$BASE_URL/api/mirror/kernel")"
