@@ -206,6 +206,7 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByLabel('Who can move this forward?')).toBeVisible();
     await expect(page.getByLabel('What would make the 72-hour proof worth paying attention to?')).toBeVisible();
     await expect(page.getByText('No files uploaded.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Submit workflow' })).toBeVisible();
   });
 
   test('local ops funnel shows the conversion dashboard', async ({ page }) => {

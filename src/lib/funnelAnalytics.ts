@@ -28,6 +28,9 @@ type LeadRecord = {
   proofTarget?: string;
   useCase: string;
   qualification?: LeadQualification;
+  delivered?: boolean;
+  deliveryStatus?: string;
+  deliveryChannel?: string;
   createdAt: string;
 };
 
@@ -217,6 +220,7 @@ export async function getFunnelSnapshot(days = 14) {
       devices: topMap(byDevice),
       recentLeads: leadsWithQualification.slice(0, 12).map((lead) => ({
         ...lead,
+        deliveryStatus: lead.deliveryStatus || (lead.delivered ? "delivered" : "capture_only"),
         emailDomain: emailDomain(lead.email),
         useCasePreview: lead.useCase.replace(/\s+/g, " ").slice(0, 260),
         proofTargetPreview: (lead.proofTarget || "").replace(/\s+/g, " ").slice(0, 220),

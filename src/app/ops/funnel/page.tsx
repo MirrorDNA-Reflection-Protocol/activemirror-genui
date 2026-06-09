@@ -175,6 +175,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Searc
                 <span>{lead.infrastructure || "infra unknown"}</span>
                 <span>{lead.timeline || "timeline unknown"}</span>
                 <span>{lead.decisionRole || "owner unknown"}</span>
+                <span>{lead.deliveryStatus || "capture_only"}</span>
                 {lead.qualification.reasons.map((reason) => <span key={reason}>{reason}</span>)}
                 <time>{formatDate(lead.createdAt)}</time>
               </footer>

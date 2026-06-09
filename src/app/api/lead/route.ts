@@ -3,16 +3,30 @@ import { prisma } from "@/lib/prisma";
 import { qualifyLead } from "@/lib/leadQualification";
 
 const LEAD_TO = "paul@activemirror.ai";
+const LEAD_WEBHOOK_URL = process.env.MIRROR_LEAD_WEBHOOK_URL || "";
+const LEAD_WEBHOOK_TOKEN = process.env.MIRROR_LEAD_WEBHOOK_TOKEN || "";
 const MAX_BODY_BYTES = Number(process.env.MIRROR_LEAD_MAX_BODY_BYTES || 8_192);
 const ALLOWED_HOST_SUFFIXES = [".activemirror.ai", ".pages.dev"];
 const ALLOWED_EXACT_HOSTS = new Set(["activemirror.ai", "localhost", "127.0.0.1", "::1"]);
+
+type Lead = {
+  name: string;
+  email: string;
+  company: string;
+  sensitivity: string;
+  infrastructure: string;
+  timeline: string;
+  decisionRole: string;
+  proofTarget: string;
+  useCase: string;
+};
 
 function clean(value: unknown, max = 500) {
   return String(value || "").trim().slice(0, max);
 }
 
-function mailtoFromLead(lead: { name: string; email: string; company: string; useCase: string; sensitivity?: string; infrastructure?: string; timeline?: string; decisionRole?: string; proofTarget?: string }) {
-  const subject = encodeURIComponent("Active Mirror access request");
+function mailtoFromLead(lead: Lead) {
+  const subject = encodeURIComponent("Active Mirror 72-hour proof sprint request");
   const body = encodeURIComponent(
     [
       `Name: ${lead.name}`,
@@ -28,6 +42,54 @@ function mailtoFromLead(lead: { name: string; email: string; company: string; us
     ].filter(Boolean).join("\n")
   );
   return `mailto:${LEAD_TO}?subject=${subject}&body=${body}`;
+}
+
+async function deliverLeadNotification(lead: Lead, qualification: ReturnType<typeof qualifyLead>) {
+  if (!LEAD_WEBHOOK_URL) {
+    return {
+      delivered: false,
+      deliveryStatus: "capture_only",
+      deliveryChannel: "audit_log",
+    };
+  }
+
+  try {
+    const url = new URL(LEAD_WEBHOOK_URL);
+    if (url.protocol !== "https:") throw new Error("Webhook URL must use HTTPS.");
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3500);
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        ...(LEAD_WEBHOOK_TOKEN ? { authorization: `Bearer ${LEAD_WEBHOOK_TOKEN}` } : {}),
+      },
+      body: JSON.stringify({
+        schemaVersion: "active_mirror.lead_notification.v1",
+        generatedAt: new Date().toISOString(),
+        destination: LEAD_TO,
+        lead,
+        qualification,
+      }),
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeout));
+
+    if (!response.ok) throw new Error(`Webhook returned ${response.status}.`);
+
+    return {
+      delivered: true,
+      deliveryStatus: "webhook_delivered",
+      deliveryChannel: "webhook",
+    };
+  } catch (error) {
+    console.error("[Lead] notification failed:", error);
+    return {
+      delivered: false,
+      deliveryStatus: "webhook_failed",
+      deliveryChannel: "webhook",
+    };
+  }
 }
 
 function allowedRequestOrigin(request: NextRequest) {
@@ -73,6 +135,7 @@ export async function POST(request: NextRequest) {
     }
 
     const qualification = qualifyLead(lead);
+    const delivery = await deliverLeadNotification(lead, qualification);
 
     await prisma.auditLog.create({
       data: {
@@ -81,7 +144,9 @@ export async function POST(request: NextRequest) {
         details: JSON.stringify({
           ...lead,
           destination: LEAD_TO,
-          delivered: false,
+          delivered: delivery.delivered,
+          deliveryStatus: delivery.deliveryStatus,
+          deliveryChannel: delivery.deliveryChannel,
           source: "public_structured_intake",
           qualification,
         }),
@@ -91,7 +156,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      delivered: false,
+      captured: true,
+      delivered: delivery.delivered,
+      deliveryStatus: delivery.deliveryStatus,
+      deliveryChannel: delivery.deliveryChannel,
       destination: LEAD_TO,
       qualification,
       mailto: mailtoFromLead(lead),

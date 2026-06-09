@@ -6,7 +6,7 @@ import { trackSiteEvent } from "@/lib/siteAnalytics";
 type IntakeState = "idle" | "sending" | "ready" | "error";
 
 function fallbackMailto(form: Record<string, string>) {
-  const subject = encodeURIComponent("Active Mirror scoped workspace request");
+  const subject = encodeURIComponent("Active Mirror 72-hour proof sprint request");
   const body = encodeURIComponent([
     `Name: ${form.name}`,
     `Email: ${form.email}`,
@@ -39,8 +39,8 @@ export default function IntakeForm() {
   });
 
   const proofLine = useMemo(() => {
-    if (state === "ready") return "Request prepared. Email opens only when you choose to send it.";
-    if (state === "error") return "Capture did not complete. You can still open the prepared email.";
+    if (state === "ready") return "Request captured. We review scoped workflows for fit before any follow-up.";
+    if (state === "error") return "Capture did not complete. Open the prepared email instead.";
     return "No files uploaded. No account access, device access, or external send starts from this form.";
   }, [state]);
 
@@ -89,6 +89,7 @@ export default function IntakeForm() {
           infrastructure: form.infrastructure,
           timeline: form.timeline,
           decisionRole: form.decisionRole,
+          deliveryStatus: payload.deliveryStatus,
         },
       });
     } catch (err) {
@@ -183,16 +184,16 @@ export default function IntakeForm() {
           placeholder="Example: a board-ready evidence workspace with source gaps, approval steps, and a deploy-or-don't recommendation."
         />
       </label>
-      <div className="intake__proof">
+      <div className="intake__proof" role="status" aria-live="polite">
         <span>⟡</span>
         <b>{proofLine}</b>
       </div>
       {error ? <div className="intake__error">{error}</div> : null}
       <div className="intake__actions">
         <button className="btn btn--primary btn--lg" data-analytics="intake_prepare_request" type="submit" disabled={state === "sending"}>
-          {state === "sending" ? "Preparing..." : "Prepare request"}
+          {state === "sending" ? "Submitting..." : "Submit workflow"}
         </button>
-        {mailto ? <a className="btn btn--ghost btn--lg" data-analytics="intake_open_email" href={mailto}>Open email</a> : null}
+        {mailto ? <a className="btn btn--ghost btn--lg" data-analytics="intake_open_email" href={mailto}>Open prepared email</a> : null}
       </div>
     </form>
   );
