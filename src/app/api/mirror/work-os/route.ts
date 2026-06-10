@@ -15,9 +15,9 @@ const artifactSchema = z.object({
   type: z.enum(["plan", "brief", "outline", "draft", "checklist", "note"]),
   summary: z.string().min(1),
   blocks: z.array(artifactBlockSchema).min(1).max(5),
-  assumptions: z.array(z.string()).default([]),
-  unknowns: z.array(z.string()).default([]),
-  nextAction: z.string().default(""),
+  assumptions: z.array(z.string()),
+  unknowns: z.array(z.string()),
+  nextAction: z.string(),
 });
 
 const turnSchema = z.object({
@@ -53,6 +53,7 @@ const SYSTEM_PROMPT = [
   "This is a short solution path of at most 10 exchanges. Deliver a first useful artifact as soon as you reasonably can. By the 10th exchange, deliver a real artifact and ask no more questions.",
   "Ask at most one or two clarifying questions total.",
   "Never invent specifics. Genuine gaps go in unknowns. Inferences go in assumptions.",
+  "Always include assumptions, unknowns, and nextAction in the artifact. Use empty arrays or an empty string when none apply.",
 ].join(" ");
 
 function isSensitive(prompt: string) {
