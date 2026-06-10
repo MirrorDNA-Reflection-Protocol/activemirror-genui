@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { trackSiteEvent } from "@/lib/siteAnalytics";
+import { buildLeadRequestMailto } from "@/lib/leadMailto";
 
 type IntakeState = "idle" | "sending" | "ready" | "error";
 type IntakeFocus = "general" | "pilot" | "challenge" | "deployment" | "private-context" | "review" | "platform" | "workspace-proof";
@@ -84,24 +85,7 @@ function normalizeFocus(value?: string): IntakeFocus {
 }
 
 function fallbackMailto(form: Record<string, string>) {
-  const subject = encodeURIComponent("Active Mirror 72-hour proof sprint request");
-  const body = encodeURIComponent([
-    `Name: ${form.name}`,
-    `Email: ${form.email}`,
-    `Company: ${form.company}`,
-    `Focus: ${form.focus}`,
-    `Sensitivity: ${form.sensitivity}`,
-    `Infrastructure: ${form.infrastructure}`,
-    `Timeline: ${form.timeline}`,
-    `Decision role: ${form.decisionRole}`,
-    `Current AI failure: ${form.failureMode}`,
-    `First 72-hour inputs: ${form.approvedInputs}`,
-    `First deliverable: ${form.desiredArtifact}`,
-    `Proof target: ${form.proofTarget}`,
-    "",
-    form.useCase,
-  ].join("\n"));
-  return `mailto:paul@activemirror.ai?subject=${subject}&body=${body}`;
+  return buildLeadRequestMailto(form);
 }
 
 export default function IntakeForm({ initialFocus = "general" }: { initialFocus?: string }) {
@@ -134,8 +118,8 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
   const focusCopy = FOCUS_COPY[form.focus] || FOCUS_COPY.general;
 
   const proofLine = useMemo(() => {
-    if (state === "ready") return "Request captured. We review scoped workflows for fit before any follow-up.";
-    if (state === "error") return "Capture did not complete. Open the prepared email instead.";
+    if (state === "ready") return "Request captured. A ready-to-send email is prepared below.";
+    if (state === "error") return "Capture did not complete. Use the ready-to-send email instead.";
     return "No files uploaded. No account access, device access, or external send starts from this form.";
   }, [state]);
 
@@ -362,8 +346,13 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
         <button className="btn btn--primary btn--lg" data-analytics="intake_prepare_request" type="submit" disabled={state === "sending"}>
           {state === "sending" ? "Submitting..." : "Submit workflow"}
         </button>
-        {mailto ? <a className="btn btn--ghost btn--lg" data-analytics="intake_open_email" href={mailto}>Open prepared email</a> : null}
+        {mailto ? <a className="btn btn--ghost btn--lg" data-analytics="intake_open_email" href={mailto}>Open ready-to-send email</a> : null}
       </div>
+      {mailto ? (
+        <p className="intake__email-note">
+          Opens an email to paul@activemirror.ai with the subject and workflow request already filled. Review it, then click Send.
+        </p>
+      ) : null}
     </form>
   );
 }

@@ -381,7 +381,7 @@ test.describe('Active Mirror work OS front door', () => {
             grade: 'priority',
             score: 92,
           },
-          mailto: 'mailto:paul@activemirror.ai?subject=Active%20Mirror%20test',
+          mailto: 'mailto:paul@activemirror.ai?subject=Active%20Mirror%20workflow%20request%20-%20Example%20Corp&body=Hi%20Paul%2C%0A%0AI%20want%20Active%20Mirror%20to%20look%20at%20this%20workflow.',
           followUp: {
             responseWindow: 'same_day',
             buyerStatus: 'Captured. We review the workflow and reply with the first scope question.',
@@ -411,7 +411,9 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByTestId('intake-followup')).toContainText('Can we confirm the first deliverable is Evidence workspace?');
     await expect(page.getByTestId('intake-followup')).toContainText('Reference: amlead_test_1234');
     await expect(page.getByTestId('intake-followup')).toContainText('No private files');
-    await expect(page.getByRole('link', { name: 'Open prepared email' })).toHaveAttribute('href', /mailto:paul@activemirror\.ai/);
+    await expect(page.getByRole('link', { name: 'Open ready-to-send email' })).toHaveAttribute('href', /mailto:paul@activemirror\.ai/);
+    await expect(page.getByRole('link', { name: 'Open ready-to-send email' })).toHaveAttribute('href', /body=/);
+    await expect(page.getByText('subject and workflow request already filled')).toBeVisible();
   });
 
   test('local ops funnel shows the conversion dashboard', async ({ page }) => {

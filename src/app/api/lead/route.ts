@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { qualifyLead } from "@/lib/leadQualification";
 import { buildLeadFollowUp, type LeadFollowUp } from "@/lib/leadFollowUp";
+import { LEAD_REQUEST_TO, buildLeadRequestMailto } from "@/lib/leadMailto";
 
-const LEAD_TO = "paul@activemirror.ai";
+const LEAD_TO = LEAD_REQUEST_TO;
 const LEAD_WEBHOOK_URL = process.env.MIRROR_LEAD_WEBHOOK_URL || "";
 const LEAD_WEBHOOK_TOKEN = process.env.MIRROR_LEAD_WEBHOOK_TOKEN || "";
 const MAX_BODY_BYTES = Number(process.env.MIRROR_LEAD_MAX_BODY_BYTES || 8_192);
@@ -28,29 +29,6 @@ type Lead = {
 
 function clean(value: unknown, max = 500) {
   return String(value || "").trim().slice(0, max);
-}
-
-function mailtoFromLead(lead: Lead) {
-  const subject = encodeURIComponent("Active Mirror 72-hour proof sprint request");
-  const body = encodeURIComponent(
-    [
-      `Name: ${lead.name}`,
-      `Email: ${lead.email}`,
-      `Company: ${lead.company}`,
-      lead.focus ? `Focus: ${lead.focus}` : "",
-      lead.sensitivity ? `Sensitivity: ${lead.sensitivity}` : "",
-      lead.infrastructure ? `Infrastructure: ${lead.infrastructure}` : "",
-      lead.timeline ? `Timeline: ${lead.timeline}` : "",
-      lead.decisionRole ? `Decision role: ${lead.decisionRole}` : "",
-      lead.failureMode ? `Current AI failure: ${lead.failureMode}` : "",
-      lead.approvedInputs ? `First 72-hour inputs: ${lead.approvedInputs}` : "",
-      lead.desiredArtifact ? `First deliverable: ${lead.desiredArtifact}` : "",
-      lead.proofTarget ? `Proof target: ${lead.proofTarget}` : "",
-      "",
-      `Use case: ${lead.useCase}`,
-    ].filter(Boolean).join("\n")
-  );
-  return `mailto:${LEAD_TO}?subject=${subject}&body=${body}`;
 }
 
 async function deliverLeadNotification(lead: Lead, qualification: ReturnType<typeof qualifyLead>, followUp: LeadFollowUp) {
@@ -189,7 +167,7 @@ export async function POST(request: NextRequest) {
         riskBoundary: followUp.riskBoundary,
         scopeQuestions: followUp.scopeQuestions,
       },
-      mailto: mailtoFromLead(lead),
+      mailto: buildLeadRequestMailto(lead),
     });
   } catch (error) {
     console.error("[Lead] capture failed:", error);

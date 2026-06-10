@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { qualifyLead } from '../src/lib/leadQualification';
 import { buildLeadFollowUp, followUpReplyMailto } from '../src/lib/leadFollowUp';
+import { buildLeadRequestMailto } from '../src/lib/leadMailto';
 
 test.describe('lead qualification', () => {
   test('prioritizes urgent owned workflows with a clear proof target', () => {
@@ -86,5 +87,33 @@ test.describe('lead qualification', () => {
     expect(mailto).toContain('mailto:asha%40examplecorp.com');
     expect(mailto).toContain('subject=Active%20Mirror%20scope');
     expect(decodeURIComponent(mailto)).toContain('Can we confirm the first deliverable is Evidence workspace?');
+  });
+
+  test('builds a ready-to-send buyer email to Active Mirror', () => {
+    const mailto = buildLeadRequestMailto({
+      name: 'Asha Rao',
+      email: 'asha@examplecorp.com',
+      company: 'Example Corp',
+      focus: 'workspace-proof',
+      sensitivity: 'regulated or confidential',
+      infrastructure: 'Active Mirror managed pilot',
+      timeline: 'this month',
+      decisionRole: 'I can sponsor or approve it',
+      failureMode: 'Sources and gaps are unclear',
+      approvedInputs: 'Public or sanitized inputs only',
+      desiredArtifact: 'Evidence workspace',
+      proofTarget: 'A decision-ready export with source gaps and approvals visible.',
+      useCase: 'We generated a vendor evidence workspace and need it adapted for a real procurement review.',
+    });
+
+    const decoded = decodeURIComponent(mailto);
+    expect(mailto).toContain('mailto:paul@activemirror.ai');
+    expect(decoded).toContain('subject=Active Mirror workflow request - Example Corp');
+    expect(decoded).toContain('Hi Paul,');
+    expect(decoded).toContain('Workflow request:');
+    expect(decoded).toContain('We generated a vendor evidence workspace');
+    expect(decoded).toContain('What would make a 72-hour proof useful:');
+    expect(decoded).toContain('A decision-ready export with source gaps and approvals visible.');
+    expect(decoded).toContain('Please reply with the fit/no-fit view');
   });
 });

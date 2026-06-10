@@ -500,6 +500,7 @@
 .intake__boundary { color: var(--text-tertiary) !important; }
 .intake__error { margin-top: 12px; color: var(--danger); font-size: 13px; }
 .intake__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.intake__email-note { margin: 10px 0 0; color: var(--text-tertiary); font-size: 12.5px; line-height: 1.5; }
 
 /* ============================================================ OPS FUNNEL */
 .ops-page { min-height: 100vh; background: var(--ink-950); color: var(--text-primary);

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Send, Building, Mail, User, FileText } from "lucide-react";
+import { buildLeadRequestMailto } from "@/lib/leadMailto";
 
 export default function LeadCaptureCard() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "fallback" | "error">("idle");
@@ -27,11 +28,7 @@ export default function LeadCaptureCard() {
       setMailto(result.mailto || "");
       setStatus(result.delivered ? "sent" : "fallback");
     } catch {
-      const subject = encodeURIComponent("Active Mirror access request");
-      const body = encodeURIComponent(
-        `Name: ${form.name}\nEmail: ${form.email}\nCompany: ${form.company}\nUse case: ${form.useCase}`
-      );
-      setMailto(`mailto:paul@activemirror.ai?subject=${subject}&body=${body}`);
+      setMailto(buildLeadRequestMailto(form));
       setStatus("error");
     }
   };
@@ -47,19 +44,19 @@ export default function LeadCaptureCard() {
           <Send className="w-5 h-5 text-green-600" />
         </div>
         <h4 className="text-sm font-semibold text-green-800">
-          {status === "sent" ? "Request sent" : "Brief generated"}
+          {status === "sent" ? "Request sent" : "Email draft ready"}
         </h4>
         <p className="text-xs text-green-600 mt-1">
           {status === "sent"
             ? "Your request was sent to paul@activemirror.ai."
-            : "Email delivery is not configured for this runtime. Open the generated email to send it to paul@activemirror.ai."}
+            : "Open the prepared email. Paul is already addressed and the workflow request is filled in."}
         </p>
         {mailto && (
           <a
             href={mailto}
             className="mt-4 inline-flex items-center justify-center rounded-lg bg-green-700 px-3 py-2 text-xs font-medium text-white hover:bg-green-800"
           >
-            Open email
+            Open ready-to-send email
           </a>
         )}
       </motion.div>
