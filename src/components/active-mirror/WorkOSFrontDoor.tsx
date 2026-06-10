@@ -874,6 +874,23 @@ function fallbackModelHealth(): ModelHealth {
 
 function routingSheet(modelHealth: ModelHealth | null) {
   const health = modelHealth || fallbackModelHealth();
+  const creativeLanes = [
+    {
+      id: "gemini-media",
+      label: "Gemini media",
+      status: "gated",
+      detail: "image/video prompts, storyboards, and approved render jobs only",
+      message: "Media generation is not a text-model fallback. It stays behind approval for brand, spend, safety, and proof.",
+    },
+    {
+      id: "figma-design",
+      label: "Figma design",
+      status: "available",
+      detail: "design-system source, implementation handoff, and visual review",
+      message: "Figma is treated as a design lane and source of truth for surfaces, not a hidden model route.",
+    },
+  ] as const;
+
   return {
     title: "Routing",
     binds: ["GET /api/mirror/model-health", health.schemaVersion] as [string, string],
@@ -893,6 +910,17 @@ function routingSheet(modelHealth: ModelHealth | null) {
               {provider.lastObservedAt ? ` · observed ${new Date(provider.lastObservedAt).toLocaleTimeString()}` : ""}
             </div>
             <p className="sheet-copy">{provider.publicMessage}</p>
+          </div>
+        ))}
+        <div className="sectlabel">media and design lanes</div>
+        {creativeLanes.map((lane) => (
+          <div key={lane.id} className="rt-row" data-testid={`media-lane-${lane.id}`}>
+            <div className="rt-row__top">
+              <span className="rt-row__nm">{lane.label}</span>
+              <span className={`rt-row__st st-${lane.status === "available" ? "ok" : "warn"}`}><span className="d" />{lane.status}</span>
+            </div>
+            <div className="rt-row__sub">{lane.detail}</div>
+            <p className="sheet-copy">{lane.message}</p>
           </div>
         ))}
         <div className="sectlabel">rule</div>

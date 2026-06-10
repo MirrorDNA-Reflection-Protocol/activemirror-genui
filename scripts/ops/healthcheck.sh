@@ -24,7 +24,8 @@ curl_code() {
 
 root_code="$(curl_code GET "$BASE_URL/")"
 [[ "$root_code" == "200" ]] || fail "root returned HTTP $root_code"
-grep -q "Bring one AI workflow. Leave with a reviewable workspace" "$TMP_DIR/body" || fail "root did not expose current buyer-facing headline"
+grep -q "Trust by Design" "$TMP_DIR/body" || fail "root did not expose Trust by Design hero claim"
+grep -q "Bring one AI workflow. Leave with a reviewable workspace" "$TMP_DIR/body" || fail "root did not expose current buyer-facing offer"
 grep -q 'data-testid="front-door-panel"' "$TMP_DIR/body" || fail "root did not expose public front door panel"
 grep -q "No pitch theatre" "$TMP_DIR/body" || fail "root did not expose sprint deliverables"
 

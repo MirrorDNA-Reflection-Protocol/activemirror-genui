@@ -114,7 +114,7 @@ const novelty = [
   },
   {
     title: "It can route work by sensitivity.",
-    body: "Public work can use hosted models. Sensitive work can move toward local or private routes when the job requires it.",
+    body: "Public text work, image/video briefs, design handoffs, and sensitive private routes stay separated so the right tool is approved for the right job.",
   },
   {
     title: "It creates a work surface, not just text.",
@@ -257,7 +257,9 @@ export default function ActiveMirrorSite() {
         <div className="wrap">
           <div className="hero__front">
             <div className="hero__copy">
-              <h1>Bring one AI workflow. Leave with a reviewable workspace.</h1>
+              <h1>Active Mirror</h1>
+              <p className="hero__claim">Trust by Design</p>
+              <p className="hero__promise">Bring one AI workflow. Leave with a reviewable workspace.</p>
               <p className="hero__lede">
                 We scope the workflow first. If it fits, Active Mirror builds a working proof that shows sources,
                 gaps, approvals, and the next deployment decision.

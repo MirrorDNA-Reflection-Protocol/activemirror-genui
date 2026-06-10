@@ -181,6 +181,12 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByTestId('model-provider-gemini')).toContainText('Gemini');
     await expect(page.getByTestId('model-provider-gemini')).toContainText(/disabled|not configured/);
     await expect(page.getByTestId('model-provider-local')).toContainText('Local gated route');
+    await expect(page.getByText('media and design lanes')).toBeVisible();
+    await expect(page.getByTestId('media-lane-gemini-media')).toContainText('Gemini media');
+    await expect(page.getByTestId('media-lane-gemini-media')).toContainText('gated');
+    await expect(page.getByTestId('media-lane-gemini-media')).toContainText('Media generation is not a text-model fallback');
+    await expect(page.getByTestId('media-lane-figma-design')).toContainText('Figma design');
+    await expect(page.getByTestId('media-lane-figma-design')).toContainText('available');
     await expect(page.getByText('Sensitive work stays on')).toBeVisible();
     await expect(page.getByText('Never claim')).toHaveCount(0);
   });
@@ -220,7 +226,9 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: /Bring one AI workflow. Leave with a reviewable workspace/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Active Mirror$/i })).toBeVisible();
+    await expect(page.locator('.hero__claim')).toHaveText('Trust by Design');
+    await expect(page.getByText('Bring one AI workflow. Leave with a reviewable workspace.')).toBeVisible();
     await expect(page.getByTestId('front-door-panel')).toContainText('What should happen first?');
     await expect(page.getByTestId('front-door-panel')).toContainText('Try the public workspace');
     await expect(page.getByTestId('front-door-panel')).toContainText('Scope a real workflow');
@@ -258,7 +266,9 @@ test.describe('Active Mirror work OS front door', () => {
     await page.setViewportSize({ width: 390, height: 820 });
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: /Bring one AI workflow. Leave with a reviewable workspace/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Active Mirror$/i })).toBeVisible();
+    await expect(page.locator('.hero__claim')).toHaveText('Trust by Design');
+    await expect(page.getByText('Bring one AI workflow. Leave with a reviewable workspace.')).toBeVisible();
     await expect(page.getByTestId('front-door-panel')).toBeVisible();
     await expect(page.locator('.frontdoor__route')).toHaveCount(2);
     await expect(page.getByRole('link', { name: /Apply with one workflow/i }).first()).toBeVisible();
@@ -421,7 +431,9 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.goto('/about');
 
-    await expect(page.getByRole('heading', { name: /Bring one AI workflow. Leave with a reviewable workspace/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Active Mirror$/i })).toBeVisible();
+    await expect(page.locator('.hero__claim')).toHaveText('Trust by Design');
+    await expect(page.getByText('Bring one AI workflow. Leave with a reviewable workspace.')).toBeVisible();
     await expect(page.getByTestId('front-door-panel')).toContainText('What should happen first?');
     await expect(page.getByRole('link', { name: /Try the public workspace/i }).first()).toHaveAttribute('href', '/mirror');
     await expect(page.locator('textarea, input')).toHaveCount(0);
