@@ -4,18 +4,18 @@ import SiteTelemetry from "./SiteTelemetry";
 
 const frontDoorRoutes = [
   {
-    title: "Try the public workspace",
-    body: "Generate a brief, source route, assumptions, gaps, and next move without sending private data.",
-    action: "Open workspace",
+    title: "Try the workspace",
+    body: "Open a public sample workspace with sources, assumptions, gaps, and next steps visible.",
+    action: "Try the workspace",
     href: `/mirror?prompt=${encodeURIComponent("Build a vendor evidence workspace with sources, assumptions, gaps, and next steps")}`,
-    analytics: "frontdoor_public_workspace",
+    analytics: "frontdoor_try_workspace",
   },
   {
-    title: "Scope a real workflow",
+    title: "Apply with one workflow",
     body: "Bring one workflow that must become a reviewed decision, plan, or repeatable process.",
     action: "Apply with one workflow",
     href: "/intake?focus=pilot",
-    analytics: "frontdoor_scope_workflow",
+    analytics: "frontdoor_apply_workflow",
   },
 ];
 
@@ -26,162 +26,93 @@ const trustChecks = [
   "Gives you the next move",
 ];
 
-const outcomes = [
-  {
-    number: "01",
-    title: "Get the thing, not a chat transcript.",
-    body: "Briefs, plans, review packets, checklists, and workflows are built as usable workspaces.",
-  },
-  {
-    number: "02",
-    title: "Know what to trust.",
-    body: "Sources, assumptions, and gaps are kept separate so your team can review the work quickly.",
-  },
-  {
-    number: "03",
-    title: "Move from answer to action.",
-    body: "The next approval, source check, export, or handoff is visible before anything sensitive runs.",
-  },
-];
-
-const challengeSteps = [
-  ["1", "Send one workflow your current AI cannot safely finish."],
-  ["2", "We scope it first. If it fits, we build a working proof in 72 hours."],
-  ["3", "You see what works, what is missing, and what it would take to deploy."],
-];
-
-const sprintDeliverables = [
+const sprintStages = [
   {
     label: "Scope",
-    title: "A no-nonsense fit decision",
-    body: "We name the business result, the data needed, the approval points, and the reason to proceed or stop.",
+    title: "Fit before build",
+    body: "We confirm the business result, owner, inputs, deadline, and decision maker before building.",
   },
   {
-    label: "Workspace",
-    title: "A working proof on your workflow",
-    body: "You get a usable surface for the task: brief, source desk, checklist, form, review lane, or workflow board.",
+    label: "Route",
+    title: "Evidence trail",
+    body: "Sources, assumptions, gaps, and approval points are separated so the work can be reviewed.",
   },
   {
-    label: "Evidence",
-    title: "A visible trail of assumptions and gaps",
-    body: "The proof separates what ran, what was assumed, what still needs a source, and what needs human approval.",
+    label: "Build",
+    title: "Working workspace",
+    body: "You get a usable brief, checklist, form, board, or handoff pack around the real workflow.",
   },
   {
-    label: "Next",
-    title: "A clear deploy-or-don't plan",
-    body: "You leave with the smallest real deployment path, the blockers, and the cost/risk boundary before more work starts.",
+    label: "Decide",
+    title: "Deploy or pause",
+    body: "The output names what worked, what is missing, and the smallest responsible deployment path.",
   },
+];
+
+const proofSources = [
+  "Vendor website or published documentation",
+  "Security, privacy, or compliance page",
+  "Approved public materials or sanitized contract notes",
+  "Independent reference or customer proof signal",
+];
+
+const proofAssumptions = [
+  "The first useful output is an evidence brief, not a final recommendation.",
+  "The team wants proof before promotion into a decision.",
+];
+
+const proofGaps = [
+  "Current pricing, SLA, or contractual terms need approved source lookup.",
+  "Private files and account data were not used in this public sample.",
 ];
 
 const useCases = [
   {
     label: "Teams",
-    title: "Finish the work without fighting the AI.",
-    body: "Decisions, research, documents, plans, and next actions in one workspace instead of a long chat thread.",
+    title: "Turn AI output into work people can review.",
+    body: "Decision briefs, plans, checklists, and handoffs stay attached to an evidence trail.",
   },
   {
     label: "Companies",
     title: "Move faster without losing control.",
-    body: "Repeatable workflows, review before action, private context only when approved, and outputs teams can reuse.",
+    body: "Sensitive context, model routes, approvals, and next actions stay visible before rollout.",
   },
   {
     label: "Public sector",
-    title: "Use AI with local trust and public accountability.",
-    body: "Language, data boundaries, review trails, and service workflows that can be inspected before they affect citizens.",
+    title: "Use AI with public accountability.",
+    body: "Service workflows can preserve sources, review boundaries, and local trust requirements.",
   },
   {
     label: "National programs",
-    title: "Build capacity instead of depending on one vendor.",
-    body: "A path to local models, local workflows, local records, and national-language use cases without pretending models are magic.",
+    title: "Build capacity beyond one vendor.",
+    body: "Local workflows, local records, and national-language work can be routed without pretending models are magic.",
   },
 ];
 
-const proofSteps = [
-  ["Ask for the result", "Say the business task, audience, and deadline."],
-  ["Review the route", "See sources needed, assumptions made, and questions still open."],
-  ["Approve sensitive steps", "Files, accounts, devices, and sends wait until the route is clear."],
-  ["Use the output", "Export the brief, hand off the workflow, or continue refining the workspace."],
-];
-
-const novelty = [
-  {
-    title: "It works on your actual task.",
-    body: "The 72-hour sprint is built around one qualified workflow you care about, not a canned prompt or a slide deck.",
-  },
-  {
-    title: "It admits what it cannot know.",
-    body: "Missing facts, blocked access, and unverified sources stay visible instead of being smoothed into a confident answer.",
-  },
-  {
-    title: "It can route work by sensitivity.",
-    body: "Public text work, image/video briefs, design handoffs, and sensitive private routes stay separated so the right tool is approved for the right job.",
-  },
-  {
-    title: "It creates a work surface, not just text.",
-    body: "The result can become a brief, checklist, board, review lane, source queue, export, or repeatable workflow.",
-  },
-];
-
-const startingPoints = [
-  {
-    term: "AI workflow proof sprint",
-    title: "For one workflow a chatbot cannot safely finish.",
-    body: "Bring a concrete process with a real owner, deadline, and review need. The sprint turns it into a working proof or a clear no.",
-  },
-  {
-    term: "Reviewable AI workspace",
-    title: "For work that needs to become usable output.",
-    body: "Briefs, plans, checklists, boards, source queues, and handoff packs stay in a workspace your team can inspect.",
-  },
-  {
-    term: "AI governance evidence trail",
-    title: "For teams that need proof before action.",
-    body: "Facts, assumptions, missing sources, approval points, and next steps are kept separate instead of hidden inside a chat answer.",
-  },
-  {
-    term: "Private-context AI workflow",
-    title: "For sensitive work that cannot silently run.",
-    body: "Files, accounts, private knowledge, device work, and external sends wait for a reviewed route before deeper execution.",
-  },
-];
-
-const engagements = [
+const starterRoutes = [
   {
     tag: "Best first step",
     title: "72-hour proof sprint",
-    body: "Send one serious workflow. We scope it first. If it fits, we build a working Active Mirror proof around that exact workflow within 72 hours.",
-    items: [
-      "Your workflow, not a canned example",
-      "Working workspace and review path",
-      "What is live, assumed, and still needed",
-    ],
-    action: "Start here",
+    body: "Send one serious workflow. If it fits, we build the workspace and evidence trail around that exact workflow.",
     href: "/intake?focus=pilot",
+    action: "Apply with one workflow",
     featured: true,
   },
   {
-    tag: "Sensitive work",
-    title: "Private-context workflow",
-    body: "For work that needs files, accounts, or team knowledge without silent access.",
-    items: [
-      "Approval path",
-      "Safe context plan",
-      "Export and review rules",
-    ],
-    action: "Plan the workflow",
-    href: "/intake?focus=pilot",
+    tag: "Self-serve preview",
+    title: "Public workspace",
+    body: "Try the generated workspace with public-safe sample input before sharing private context.",
+    href: "/mirror",
+    action: "Try the workspace",
+    featured: false,
   },
   {
-    tag: "Deployment",
-    title: "AI rollout control",
-    body: "For teams putting models into real workflows and needing review before action.",
-    items: [
-      "Local or cloud deployment",
-      "Model and tool routing",
-      "Operational handoff",
-    ],
-    action: "Scope the rollout",
+    tag: "Sensitive work",
+    title: "Private-context plan",
+    body: "Use this route when files, accounts, saved context, or external actions may be needed later.",
     href: "/intake?focus=pilot",
+    action: "Apply with one workflow",
+    featured: false,
   },
 ];
 
@@ -233,6 +164,43 @@ function FrontDoorPanel() {
   );
 }
 
+function ProofArtifact() {
+  return (
+    <article className="proof-artifact" data-testid="homepage-proof-artifact">
+      <div className="proof-artifact__head">
+        <span>Sanitized sample</span>
+        <b>Vendor evidence workspace</b>
+      </div>
+      <div className="proof-artifact__body">
+        <section>
+          <h3>Source targets</h3>
+          <ul>
+            {proofSources.map((source) => <li key={source}>{source}</li>)}
+          </ul>
+        </section>
+        <div className="proof-artifact__split">
+          <section>
+            <h3>Assumptions</h3>
+            <ul>
+              {proofAssumptions.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </section>
+          <section>
+            <h3>Gaps</h3>
+            <ul>
+              {proofGaps.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </section>
+        </div>
+        <div className="proof-artifact__gate">
+          <span>Approval gate</span>
+          <b>Live browser/source lookup · approval required</b>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export default function ActiveMirrorSite() {
   return (
     <main className="site" id="top">
@@ -241,13 +209,13 @@ export default function ActiveMirrorSite() {
         <div className="wrap">
           <BrandLink />
           <div className="nav__links">
-            <a href="#what-it-does">Results</a>
+            <a href="#how-it-works">How it works</a>
             <a href="#proof">Proof</a>
-            <a href="#work-with-us">Start</a>
+            <a href="#start">Start</a>
           </div>
           <div className="nav__r">
-            <span className="nav__status"><span className="dot"></span>review before action</span>
-            <Link className="btn btn--primary" data-analytics="nav_try_workspace" href="/mirror">Try workspace <span className="arr">→</span></Link>
+            <span className="nav__status"><span className="dot"></span>Review before action</span>
+            <Link className="btn btn--primary" data-analytics="nav_try_workspace" href="/mirror">Try the workspace <span className="arr">→</span></Link>
           </div>
         </div>
       </nav>
@@ -264,9 +232,10 @@ export default function ActiveMirrorSite() {
                 We scope the workflow first. If it fits, Active Mirror builds a working proof that shows sources,
                 gaps, approvals, and the next deployment decision.
               </p>
+              <p className="hero__trust">Made in India by N1 Intelligence (OPC) Pvt. Ltd. Public preview first; private access waits for approval.</p>
               <div className="hero__cta">
                 <Link className="btn btn--primary btn--lg" data-analytics="hero_apply_workflow" href="/intake?focus=pilot">Apply with one workflow <span className="arr">→</span></Link>
-                <Link className="btn btn--ghost btn--lg" data-analytics="hero_try_workspace" href="/mirror">Try the public workspace</Link>
+                <Link className="btn btn--ghost btn--lg" data-analytics="hero_try_workspace" href="/mirror">Try the workspace <span className="arr">→</span></Link>
               </div>
             </div>
             <FrontDoorPanel />
@@ -274,53 +243,17 @@ export default function ActiveMirrorSite() {
         </div>
       </header>
 
-      <section className="thesis" id="what-it-does">
-        <div className="wrap">
-          {outcomes.map((item) => (
-            <div className="col" key={item.number}>
-              <div className="n">{item.number}</div>
-              <div className="t">{item.title}</div>
-              <p className="d">{item.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="challenge" data-analytics-section="challenge">
-        <div className="wrap">
-          <div className="challenge__copy">
-            <Eyebrow>The fit test</Eyebrow>
-            <h2>Give us one workflow your current AI cannot safely finish.</h2>
-            <p>
-              We do not promise every workflow is a fit. We qualify it first. If we cannot make it clearer,
-              more usable, and safer to act on, we say that early instead of wasting your time.
-            </p>
-          </div>
-          <div className="challenge__steps">
-            {challengeSteps.map(([number, body]) => (
-              <div className="challenge__step" key={number}>
-                <span>{number}</span>
-                <b>{body}</b>
-              </div>
-            ))}
-          </div>
-          <Link className="challenge__cta" data-analytics="challenge_apply_workflow" href="/intake?focus=pilot">
-            Apply with one workflow →
-          </Link>
-        </div>
-      </section>
-
-      <section className="band sprint" data-analytics-section="sprint-deliverables">
+      <section className="band sprint" id="how-it-works" data-analytics-section="how-it-works">
         <div className="wrap">
           <div className="band__head">
-            <Eyebrow>What the sprint produces</Eyebrow>
-            <h2>No pitch theatre. A useful proof or a clear no.</h2>
+            <Eyebrow>How the sprint works</Eyebrow>
+            <h2>A useful proof or a responsible stop.</h2>
             <p className="band__sub">
-              For accepted workflows, the 72-hour sprint ends with a working artifact your team can inspect. No silent data access. No slide-only demo.
+              The proof sprint has four stages. Each stage leaves something your team can inspect: scope, route, workspace, and decision.
             </p>
           </div>
           <div className="sprint__grid">
-            {sprintDeliverables.map((item) => (
+            {sprintStages.map((item) => (
               <div className="sprint__item" key={item.title}>
                 <span>{item.label}</span>
                 <h3>{item.title}</h3>
@@ -331,13 +264,33 @@ export default function ActiveMirrorSite() {
         </div>
       </section>
 
-      <section className="band">
+      <section id="proof" className="band">
+        <div className="wrap">
+          <div className="proof-split">
+            <div className="band__head">
+              <Eyebrow>Proof on the page</Eyebrow>
+              <h2>The evidence trail is visible before you leave the homepage.</h2>
+              <p className="band__sub">
+                Evidence trail means source targets, assumptions, gaps, and approval gates stay attached to the output.
+              </p>
+              <div className="proof-links">
+                <Link className="btn btn--ghost" href="/proof-sprint">Proof sprint details</Link>
+                <Link className="btn btn--ghost" href="/trust">Trust boundary</Link>
+                <Link className="btn btn--ghost" href="/api/mirror/proof-ledger?format=markdown">Download sample</Link>
+              </div>
+            </div>
+            <ProofArtifact />
+          </div>
+        </div>
+      </section>
+
+      <section id="start" className="band" data-analytics-section="start">
         <div className="wrap">
           <div className="band__head">
-            <Eyebrow>Where it helps</Eyebrow>
-            <h2>Use it for the work people already bring to AI.</h2>
+            <Eyebrow>Who should start</Eyebrow>
+            <h2>Bring work that has to survive review.</h2>
             <p className="band__sub">
-              Active Mirror is for work that has to become a decision, document, workflow, or reviewed action.
+              Active Mirror is for decisions, briefs, plans, and workflows where the team needs useful output and a clear evidence trail.
             </p>
           </div>
           <div className="usecases">
@@ -349,105 +302,17 @@ export default function ActiveMirrorSite() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="band discovery" data-analytics-section="starting-points">
-        <div className="wrap discovery__wrap">
-          <div className="band__head">
-            <Eyebrow>Common starting points</Eyebrow>
-            <h2>Find the right route by the result you need.</h2>
-            <p className="band__sub">
-              Active Mirror is easiest to judge when the ask is concrete: prove one workflow, build one reviewable
-              workspace, preserve the evidence trail, or route private context with approval.
-            </p>
-          </div>
-          <div className="discovery__list">
-            {startingPoints.map((item) => (
-              <article className="discovery__item" key={item.term}>
-                <span>{item.term}</span>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="proof" className="band">
-        <div className="wrap">
-          <div className="proof-split">
-            <div className="band__head">
-              <Eyebrow>Built for review</Eyebrow>
-              <h2>It shows what happened so your team can use the result.</h2>
-              <p className="band__sub">
-                You should not have to guess what the AI used, skipped, assumed, or still needs from you.
-              </p>
-              <div className="proof-links">
-                <Link className="btn btn--ghost" href="/proof-sprint">See proof sprint sample</Link>
-                <Link className="btn btn--ghost" href="/trust">Review boundary</Link>
-                <Link className="btn btn--ghost" href="/glass">Public evidence examples</Link>
-                <Link className="btn btn--ghost" href="/compare">Compare</Link>
-              </div>
-            </div>
-            <div className="proof-steps">
-              {proofSteps.map(([step, detail], index) => (
-                <div className="proof-step" key={step}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <div>
-                    <b>{step}</b>
-                    <p>{detail}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="band">
-        <div className="wrap">
-          <div className="band__head">
-            <Eyebrow>Why it feels different</Eyebrow>
-            <h2>Not a smarter chat box. A way to make AI work usable.</h2>
-            <p className="band__sub">
-              The model can be powerful and still be wrong, blocked, or unsafe to act. Active Mirror makes that visible and turns the request into work anyway.
-            </p>
-          </div>
-          <div className="novelty">
-            {novelty.map((item) => (
-              <div className="novelty__item" key={item.title}>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="work-with-us" className="band">
-        <div className="wrap">
-          <div className="band__head">
-            <Eyebrow>Start</Eyebrow>
-            <h2>Pick the result you want first.</h2>
-            <p className="band__sub">
-              Start with one real workflow. The first deliverable should be useful even before a full deployment.
-            </p>
-          </div>
           <div className="engage">
-            {engagements.map((item) => (
+            {starterRoutes.map((item) => (
               <div className={item.featured ? "eng eng--feature" : "eng"} key={item.title}>
                 <span className="eng__tag">{item.tag}</span>
                 <h3>{item.title}</h3>
                 <p>{item.body}</p>
-                <ul className="eng__list">
-                  {item.items.map((line) => <li key={line}>{line}</li>)}
-                </ul>
                 <div className="eng__foot">
-                  <span className="eng__price">{item.featured ? "Recommended first" : "Scoped with you"}</span>
+                  <span className="eng__price">{item.featured ? "Recommended first" : "Available now"}</span>
                   <Link
                     className="eng__go"
-                    data-analytics={`engagement_${item.title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`}
+                    data-analytics={`start_${item.title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`}
                     href={item.href}
                   >
                     {item.action} →
@@ -455,50 +320,6 @@ export default function ActiveMirrorSite() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="band">
-        <div className="wrap">
-          <div className="founder">
-            <div className="founder__card">
-              <div className="founder__id">
-                <div className="founder__avatar">⟡</div>
-                <div className="nm">Active Mirror</div>
-                <div className="ro">by N1 Intelligence (OPC) Pvt. Ltd.</div>
-              </div>
-              <div className="founder__meta">
-                <div className="r"><span className="k">result</span><span className="vv">Usable AI work</span></div>
-                <div className="r"><span className="k">deployment</span><span className="vv">Local or cloud</span></div>
-                <div className="r"><span className="k">standard</span><span className="vv">Show the work</span></div>
-                <div className="r"><span className="k">origin</span><span className="vv">Made in India</span></div>
-              </div>
-            </div>
-            <div className="founder__body">
-              <Eyebrow>What you get</Eyebrow>
-              <p className="lead">A finished workspace your team can review, share, and keep improving.</p>
-              <p>
-                It can start from public information, pause for approval when private context is needed, and keep the output useful
-                even when some facts are still missing.
-              </p>
-              <p>
-                The point is not to admire the AI. The point is to get the decision, plan, review, or workflow finished with less risk.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="contact" className="cta">
-        <div className="cta__halo"></div>
-        <div className="wrap">
-          <Eyebrow>72-hour proof sprint</Eyebrow>
-          <h2>Bring the workflow you actually care about.</h2>
-          <p>We will scope the ask first. If it fits, we turn it into a working proof, then show what is live, what needs approval, and what it would take to deploy. If it is not a fit, we say so plainly.</p>
-          <div className="cta__cta">
-            <Link className="btn btn--primary btn--lg" data-analytics="footer_72h_sprint" href="/intake?focus=pilot">Apply for a 72-hour sprint <span className="arr">→</span></Link>
-            <Link className="btn btn--ghost btn--lg" data-analytics="footer_try_workspace" href="/mirror">Try the workspace</Link>
           </div>
         </div>
       </section>
@@ -511,23 +332,23 @@ export default function ActiveMirrorSite() {
           </div>
           <div className="foot__col">
             <h5>Product</h5>
-            <a href="#what-it-does">What it does</a>
+            <a href="#how-it-works">How it works</a>
             <Link href="/mirror">Workspace</Link>
-            <Link href="/trust">Review boundary</Link>
-            <Link href="/glass">Evidence examples</Link>
+            <Link href="/trust">Trust boundary</Link>
+            <Link href="/proof-sprint">Proof sprint</Link>
           </div>
           <div className="foot__col">
-            <h5>Engage</h5>
-            <Link href="/proof-sprint">72-hour proof sprint</Link>
-            <Link href="/intake?focus=pilot">Scoped pilot</Link>
-            <Link href="/intake?focus=workspace-proof">Workspace proof</Link>
-            <Link href="/intake">General intake</Link>
+            <h5>Start</h5>
+            <Link href="/intake?focus=pilot">Apply with one workflow</Link>
+            <Link href="/mirror">Try the workspace</Link>
+            <a href="#proof">Evidence trail</a>
+            <Link href="/compare">Compare</Link>
           </div>
           <div className="foot__col">
             <h5>Evidence</h5>
-            <Link href="/compare">Compare</Link>
-            <a href="#proof">Evidence path</a>
-            <Link href="/glass">Public examples</Link>
+            <Link href="/api/mirror/proof-ledger?format=markdown">Download sample</Link>
+            <Link href="/glass">Technical examples</Link>
+            <Link href="/intake">General intake</Link>
           </div>
         </div>
         <div className="wrap foot__legal">

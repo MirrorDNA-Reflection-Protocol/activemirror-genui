@@ -79,18 +79,24 @@ try {
   receipt.checks.root = page.url().startsWith(baseUrl);
 
   await page.waitForSelector("[data-testid=front-door-panel]", { timeout: 15_000 });
-  const landing = await page.evaluate(() => ({
-    frontDoor: document.body.innerText.includes("Bring one AI workflow. Leave with a reviewable workspace.") &&
-      document.body.innerText.includes("What should happen first?") &&
-      document.body.innerText.includes("Try the public workspace") &&
-      document.body.innerText.includes("Scope a real workflow") &&
-      Boolean(document.querySelector("[data-testid=front-door-panel]")),
-    hasInput: Boolean(document.querySelector("textarea, input")),
-    sprintHref: document.querySelector('a[href="/intake?focus=pilot"]')?.getAttribute("href") || "",
-    workspaceHref: document.querySelector('a[href="/mirror"]')?.getAttribute("href") || "",
-    privatePathLeak: document.body.innerText.includes("/Users/mirror-pro"),
-  }));
-  receipt.checks.landingFrontDoor = landing.frontDoor && landing.sprintHref === "/intake?focus=pilot" && landing.workspaceHref === "/mirror";
+  const landing = await page.evaluate(() => {
+    const bodyText = document.body.innerText;
+    const normalizedText = bodyText.toLowerCase();
+    return {
+      frontDoor: bodyText.includes("Bring one AI workflow. Leave with a reviewable workspace.") &&
+        bodyText.includes("What should happen first?") &&
+        bodyText.includes("Try the workspace") &&
+        bodyText.includes("Apply with one workflow") &&
+        normalizedText.includes("approval gate") &&
+        Boolean(document.querySelector("[data-testid=front-door-panel]")),
+      hasInput: Boolean(document.querySelector("textarea, input")),
+      sprintHref: document.querySelector('a[href="/intake?focus=pilot"]')?.getAttribute("href") || "",
+      workspaceHref: document.querySelector('a[href="/mirror"]')?.getAttribute("href") || "",
+      proofArtifact: Boolean(document.querySelector("[data-testid=homepage-proof-artifact]")),
+      privatePathLeak: bodyText.includes("/Users/mirror-pro"),
+    };
+  });
+  receipt.checks.landingFrontDoor = landing.frontDoor && landing.proofArtifact && landing.sprintHref === "/intake?focus=pilot" && landing.workspaceHref === "/mirror";
   receipt.checks.landingStatic = !landing.hasInput;
 
   await page.goto(`${baseUrl}/mirror?qa=canary`, { waitUntil: "domcontentloaded", timeout: 20_000 });
