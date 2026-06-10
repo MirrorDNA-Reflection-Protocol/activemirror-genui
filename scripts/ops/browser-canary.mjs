@@ -80,8 +80,10 @@ try {
 
   await page.waitForSelector("[data-testid=front-door-panel]", { timeout: 15_000 });
   const landing = await page.evaluate(() => ({
-    frontDoor: document.body.innerText.includes("Turn one important AI workflow into a reviewable workspace") &&
-      document.body.innerText.includes("72-hour proof sprint") &&
+    frontDoor: document.body.innerText.includes("Bring one AI workflow. Leave with a reviewable workspace.") &&
+      document.body.innerText.includes("What should happen first?") &&
+      document.body.innerText.includes("Try the public workspace") &&
+      document.body.innerText.includes("Scope a real workflow") &&
       Boolean(document.querySelector("[data-testid=front-door-panel]")),
     hasInput: Boolean(document.querySelector("textarea, input")),
     sprintHref: document.querySelector('a[href="/intake?focus=pilot"]')?.getAttribute("href") || "",
