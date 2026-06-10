@@ -73,6 +73,12 @@ operator_code="$(curl_code GET "$BASE_URL/api/mirror/local-operator")"
 grep -q "local-operator-compiler" "$TMP_DIR/body" || fail "local operator endpoint did not expose compiler version"
 grep -q "private_body_required" "$TMP_DIR/body" || fail "local operator endpoint did not expose private vault boundary"
 
+model_health_code="$(curl_code GET "$BASE_URL/api/mirror/model-health")"
+[[ "$model_health_code" == "200" ]] || fail "model health endpoint returned HTTP $model_health_code"
+grep -q "active_mirror.model_health.v1" "$TMP_DIR/body" || fail "model health endpoint did not expose schema version"
+grep -q "activePublicOrder" "$TMP_DIR/body" || fail "model health endpoint did not expose public route order"
+grep -q "sensitiveRoute" "$TMP_DIR/body" || fail "model health endpoint did not expose sensitive route"
+
 critique_code="$(curl_code GET "$BASE_URL/api/mirror/critique")"
 [[ "$critique_code" == "200" ]] || fail "critique endpoint returned HTTP $critique_code"
 grep -q "decision-critique" "$TMP_DIR/body" || fail "critique endpoint did not expose stream version"

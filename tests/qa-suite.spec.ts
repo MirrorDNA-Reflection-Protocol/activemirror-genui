@@ -70,6 +70,7 @@ test.describe('Active Mirror work OS front door', () => {
     await page.goto('/mirror?qa=1');
 
     await page.getByTestId('runtime-btn').click();
+    await expect(page.getByTestId('runtime-sheet')).toBeVisible();
     await page.getByTestId('local-operator-contract').click();
     await expect(page.getByTestId('operator-sheet')).toBeVisible();
     await expect(page.getByTestId('local-operator-proof')).toContainText('deterministic policy');
@@ -165,11 +166,27 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.getByTestId('route-btn').click();
     await expect(page.getByTestId('routing-sheet')).toBeVisible();
-    await expect(page.getByText('The model is routed to the best available lane for the job.')).toBeVisible();
-    await expect(page.getByText('gemini · flash')).toBeVisible();
-    await expect(page.getByText('claude · sonnet/opus')).toBeVisible();
-    await expect(page.getByText('local · ollama')).toBeVisible();
+    await expect(page.getByText('GET /api/mirror/model-health')).toBeVisible();
+    await expect(page.getByText('provider health')).toBeVisible();
+    await expect(page.getByTestId('model-provider-gemini')).toContainText('Gemini');
+    await expect(page.getByTestId('model-provider-openai')).toContainText('OpenAI');
+    await expect(page.getByTestId('model-provider-anthropic')).toContainText('Anthropic');
+    await expect(page.getByTestId('model-provider-local')).toContainText('Local gated route');
+    await expect(page.getByText('Sensitive work stays on')).toBeVisible();
     await expect(page.getByText('Never claim')).toHaveCount(0);
+  });
+
+  test('model health endpoint exposes provider status without secrets', async ({ request }) => {
+    const response = await request.get('/api/mirror/model-health');
+    expect(response.status()).toBe(200);
+
+    const body = await response.json();
+    expect(body.schemaVersion).toBe('active_mirror.model_health.v1');
+    expect(body.claimBoundary).toContain('No secrets');
+    expect(body.sensitiveRoute).toBe('local · gated');
+    expect(body.providers.map((provider: { id: string }) => provider.id)).toEqual(['gemini', 'openai', 'anthropic', 'local']);
+    expect(JSON.stringify(body)).not.toContain('API_KEY');
+    expect(JSON.stringify(body)).not.toContain('/Users/mirror-pro');
   });
 
   test('app route redirects to the canonical Work OS front door', async ({ page }) => {

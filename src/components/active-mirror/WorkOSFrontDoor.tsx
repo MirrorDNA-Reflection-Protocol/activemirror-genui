@@ -175,6 +175,28 @@ type LocalOperatorStatus = {
   samplePacket: LocalOperatorPacket | null;
 };
 
+type ModelProviderHealth = {
+  id: "gemini" | "openai" | "anthropic" | "local";
+  label: string;
+  role: string;
+  modelId: string | null;
+  status: "healthy" | "degraded" | "configured_unchecked" | "configured_not_wired" | "unconfigured" | "gated";
+  secretState: "present" | "missing" | "not_required";
+  routeUse: string;
+  lastObservedAt: string | null;
+  lastErrorClass: string | null;
+  publicMessage: string;
+};
+
+type ModelHealth = {
+  schemaVersion: "active_mirror.model_health.v1";
+  generatedAt: string;
+  claimBoundary: string;
+  activePublicOrder: string[];
+  sensitiveRoute: string;
+  providers: ModelProviderHealth[];
+};
+
 type RuntimeState = {
   registry: ContractRegistry | null;
   kernel: KernelStatus | null;
@@ -184,6 +206,7 @@ type RuntimeState = {
   continuity: ContinuityMeasure | null;
   critique: CritiqueStream | null;
   operator: LocalOperatorStatus | null;
+  modelHealth: ModelHealth | null;
 };
 
 type MemoryMode = "ephemeral" | "session" | "saved";
@@ -283,6 +306,7 @@ export default function WorkOSFrontDoor() {
     continuity: null,
     critique: null,
     operator: null,
+    modelHealth: null,
   });
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const logRef = useRef<HTMLDivElement | null>(null);
@@ -318,9 +342,10 @@ export default function WorkOSFrontDoor() {
       getJson<ContinuityMeasure>("/api/mirror/identity-continuity/measure"),
       getJson<CritiqueStream>("/api/mirror/critique"),
       getJson<LocalOperatorStatus>("/api/mirror/local-operator"),
-    ]).then(([registry, kernel, ratchet, ledger, revocation, continuity, critique, operator]) => {
+      getJson<ModelHealth>("/api/mirror/model-health"),
+    ]).then(([registry, kernel, ratchet, ledger, revocation, continuity, critique, operator, modelHealth]) => {
       if (cancelled) return;
-      setRuntime({ registry, kernel, ratchet, ledger, revocation, continuity, critique, operator });
+      setRuntime({ registry, kernel, ratchet, ledger, revocation, continuity, critique, operator, modelHealth });
     });
     return () => {
       cancelled = true;
@@ -715,7 +740,7 @@ function BindLine({ route, schema }: { route: string; schema: string }) {
 }
 
 function buildSheet(id: SheetId, runtime: RuntimeState, memoryMode: MemoryMode, seedState: "none" | "sample") {
-  if (id === "routing") return routingSheet();
+  if (id === "routing") return routingSheet(runtime.modelHealth);
   if (id === "memory") return memorySheet(memoryMode, seedState);
   if (id === "runtime") return runtimeSheet(runtime);
   if (id === "ledger") return ledgerSheet(runtime.ledger);
@@ -762,32 +787,109 @@ function memorySheet(memoryMode: MemoryMode, seedState: "none" | "sample") {
   };
 }
 
-function routingSheet() {
-  const rows = [
-    ["gemini · flash", "workhorse · fast", "ok", "high-volume turns, first drafts"],
-    ["claude · sonnet/opus", "workhorse · quality", "ok", "hard tasks, the real deliverable"],
-    ["openai", "workhorse · fallback", "ok", "failover and specific strengths"],
-    ["Indian-language route", "reserved", "warn", "Hindi, Tamil, Telugu, and other local-language work"],
-    ["local · ollama", "reserved", "warn", "sensitive data that must not leave the box"],
-  ];
+function modelHealthTone(status: ModelProviderHealth["status"]) {
+  if (status === "healthy") return "ok";
+  if (status === "degraded" || status === "configured_not_wired" || status === "configured_unchecked" || status === "gated") return "warn";
+  return "off";
+}
+
+function modelHealthLabel(provider: ModelProviderHealth) {
+  if (provider.status === "healthy") return "healthy";
+  if (provider.status === "degraded") return provider.lastErrorClass || "degraded";
+  if (provider.status === "configured_unchecked") return "configured";
+  if (provider.status === "configured_not_wired") return "not wired";
+  if (provider.status === "gated") return "gated";
+  return "not configured";
+}
+
+function fallbackModelHealth(): ModelHealth {
+  return {
+    schemaVersion: "active_mirror.model_health.v1",
+    generatedAt: "",
+    claimBoundary: "Model health is loading. This panel does not expose secrets or private prompts.",
+    activePublicOrder: [],
+    sensitiveRoute: "local · gated",
+    providers: [
+      {
+        id: "gemini",
+        label: "Gemini",
+        role: "primary fast workhorse",
+        modelId: "gemini-2.5-flash",
+        status: "configured_unchecked",
+        secretState: "present",
+        routeUse: "first hosted route for public Work OS turns",
+        lastObservedAt: null,
+        lastErrorClass: null,
+        publicMessage: "Provider health is loading.",
+      },
+      {
+        id: "openai",
+        label: "OpenAI",
+        role: "fallback workhorse",
+        modelId: "gpt-4.1-mini",
+        status: "configured_unchecked",
+        secretState: "present",
+        routeUse: "fallback hosted route for public Work OS turns",
+        lastObservedAt: null,
+        lastErrorClass: null,
+        publicMessage: "Provider health is loading.",
+      },
+      {
+        id: "anthropic",
+        label: "Anthropic",
+        role: "reserved quality lane",
+        modelId: null,
+        status: "configured_not_wired",
+        secretState: "present",
+        routeUse: "not used by /api/mirror/work-os yet",
+        lastObservedAt: null,
+        lastErrorClass: null,
+        publicMessage: "Credentials may exist, but this route is not wired to Anthropic yet.",
+      },
+      {
+        id: "local",
+        label: "Local gated route",
+        role: "sensitive/private boundary",
+        modelId: null,
+        status: "gated",
+        secretState: "not_required",
+        routeUse: "selected for private, device, vault, account, or local-only work",
+        lastObservedAt: null,
+        lastErrorClass: null,
+        publicMessage: "Private body execution is separate from the public site.",
+      },
+    ],
+  };
+}
+
+function routingSheet(modelHealth: ModelHealth | null) {
+  const health = modelHealth || fallbackModelHealth();
   return {
     title: "Routing",
-    binds: ["policy", "intelligence routed · identity local"] as [string, string],
-    claim: "The model is routed to the best available lane for the job. The approval checks, saved context, source trail, and evidence record stay with Active Mirror, whichever model answered.",
+    binds: ["GET /api/mirror/model-health", health.schemaVersion] as [string, string],
+    claim: health.claimBoundary,
     body: (
       <>
-        <div className="sectlabel">model lanes</div>
-        {rows.map(([name, status, tone, detail]) => (
-          <div key={name} className="rt-row">
+        <div className="sectlabel">provider health</div>
+        {health.providers.map((provider) => (
+          <div key={provider.id} className="rt-row" data-testid={`model-provider-${provider.id}`}>
             <div className="rt-row__top">
-              <span className="rt-row__nm">{name}</span>
-              <span className={`rt-row__st st-${tone}`}><span className="d" />{status}</span>
+              <span className="rt-row__nm">{provider.label}</span>
+              <span className={`rt-row__st st-${modelHealthTone(provider.status)}`}><span className="d" />{modelHealthLabel(provider)}</span>
             </div>
-            <div className="rt-row__sub">{detail}</div>
+            <div className="rt-row__sub">
+              {provider.role} · {provider.routeUse}
+              {provider.modelId ? ` · ${provider.modelId}` : ""}
+              {provider.lastObservedAt ? ` · observed ${new Date(provider.lastObservedAt).toLocaleTimeString()}` : ""}
+            </div>
+            <p className="sheet-copy">{provider.publicMessage}</p>
           </div>
         ))}
         <div className="sectlabel">rule</div>
-        <p className="sheet-copy">If the task touches private or sensitive data, use a local route when possible. Otherwise use the strongest hosted model available and keep the review trail attached.</p>
+        <p className="sheet-copy">
+          Public work tries the configured hosted route order: <b>{health.activePublicOrder.join(" → ") || "no hosted route configured"}</b>.
+          Sensitive work stays on <b>{health.sensitiveRoute}</b> until a private route is approved.
+        </p>
       </>
     ),
   };

@@ -1,8 +1,13 @@
 import { NextRequest } from "next/server";
 import { generateObject, streamText } from "ai";
-import { google } from "@ai-sdk/google";
-import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
+import {
+  configuredWorkOsModelRoutes,
+  isSensitiveModelPrompt,
+  recordModelRouteFailure,
+  recordModelRouteSuccess,
+  type ModelRouteCandidate,
+} from "@/lib/mirror/modelHealth";
 
 const artifactBlockSchema = z.object({
   heading: z.string().min(1),
@@ -56,39 +61,19 @@ const SYSTEM_PROMPT = [
   "Always include assumptions, unknowns, and nextAction in the artifact. Use empty arrays or an empty string when none apply.",
 ].join(" ");
 
-function isSensitive(prompt: string) {
-  return /\b(private|secret|credential|password|vault|local only|sovereign|sarvam|hindi|tamil|telugu|kannada|malayalam|marathi|bengali|pan|aadhaar|account|bank|device|files?|email inbox|calendar)\b/i.test(prompt);
-}
-
 function chooseRoute(prompt: string) {
-  if (isSensitive(prompt)) {
+  if (isSensitiveModelPrompt(prompt)) {
     return {
       label: "local · gated",
       model: null,
+      provider: null,
+      modelId: null,
       reason: "sensitive route held off hosted-model path",
-      fallbacks: [],
+      fallbacks: [] as ModelRouteCandidate[],
     };
   }
 
-  const configuredRoutes = [];
-  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    const id = process.env.ACTIVE_MIRROR_GEMINI_MODEL || "gemini-2.5-flash";
-    configuredRoutes.push({
-      label: `gemini · ${id.replace(/^gemini-/, "")}`,
-      model: google(id),
-      reason: "workhorse fast route",
-    });
-  }
-
-  if (process.env.OPENAI_API_KEY) {
-    const id = process.env.ACTIVE_MIRROR_OPENAI_MODEL || process.env.MIRROR_OPENAI_MODEL || "gpt-4.1-mini";
-    configuredRoutes.push({
-      label: `openai · ${id}`,
-      model: openai(id),
-      reason: configuredRoutes.length ? "fallback workhorse route" : "workhorse fast route",
-    });
-  }
-
+  const configuredRoutes = configuredWorkOsModelRoutes();
   const [primary, ...fallbacks] = configuredRoutes;
   if (primary) {
     return { ...primary, fallbacks };
@@ -97,8 +82,10 @@ function chooseRoute(prompt: string) {
   return {
     label: "local fallback",
     model: null,
+    provider: null,
+    modelId: null,
     reason: "no public model key configured",
-    fallbacks: [],
+    fallbacks: [] as ModelRouteCandidate[],
   };
 }
 
@@ -478,20 +465,35 @@ export async function POST(request: NextRequest) {
         let turn: WorkTurn | null = forcedTurn;
         if (!turn && route.model) {
           const candidates = [
-            { label: route.label, reason: route.reason, model: route.model },
+            route,
             ...route.fallbacks,
           ];
           for (const [index, candidate] of candidates.entries()) {
             if (index > 0) {
               enqueue(controller, { type: "route", route: candidate.label, reason: candidate.reason });
             }
+            const startedAt = performance.now();
             try {
               turn = await modelTurn(input, candidate.model);
+              recordModelRouteSuccess(candidate.provider, candidate.modelId);
+              enqueue(controller, {
+                type: "route_health",
+                route: candidate.label,
+                status: "healthy",
+                latencyMs: Math.round(performance.now() - startedAt),
+              });
               break;
             } catch (error) {
+              recordModelRouteFailure(candidate.provider, candidate.modelId, error);
               console.error("[ActiveMirror WorkOS] model route failed", {
                 route: candidate.label,
                 error: error instanceof Error ? error.message : String(error),
+              });
+              enqueue(controller, {
+                type: "route_health",
+                route: candidate.label,
+                status: "degraded",
+                errorClass: "provider_failed",
               });
             }
           }
