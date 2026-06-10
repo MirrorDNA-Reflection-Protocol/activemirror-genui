@@ -4,7 +4,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: "https://activemirror.ai",
-      lastModified: new Date("2026-06-06"),
+      lastModified: new Date("2026-06-10"),
       changeFrequency: "daily",
       priority: 1,
     },
@@ -25,6 +25,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date("2026-06-09"),
       changeFrequency: "weekly",
       priority: 0.7,
+    },
+    {
+      url: "https://activemirror.ai/proof-sprint",
+      lastModified: new Date("2026-06-10"),
+      changeFrequency: "weekly",
+      priority: 0.8,
     },
     {
       url: "https://activemirror.ai/glass",

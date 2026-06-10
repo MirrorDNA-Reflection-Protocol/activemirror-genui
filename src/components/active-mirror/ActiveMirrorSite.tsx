@@ -122,6 +122,29 @@ const novelty = [
   },
 ];
 
+const startingPoints = [
+  {
+    term: "AI workflow proof sprint",
+    title: "For one workflow a chatbot cannot safely finish.",
+    body: "Bring a concrete process with a real owner, deadline, and review need. The sprint turns it into a working proof or a clear no.",
+  },
+  {
+    term: "Reviewable AI workspace",
+    title: "For work that needs to become usable output.",
+    body: "Briefs, plans, checklists, boards, source queues, and handoff packs stay in a workspace your team can inspect.",
+  },
+  {
+    term: "AI governance evidence trail",
+    title: "For teams that need proof before action.",
+    body: "Facts, assumptions, missing sources, approval points, and next steps are kept separate instead of hidden inside a chat answer.",
+  },
+  {
+    term: "Private-context AI workflow",
+    title: "For sensitive work that cannot silently run.",
+    body: "Files, accounts, private knowledge, device work, and external sends wait for a reviewed route before deeper execution.",
+  },
+];
+
 const engagements = [
   {
     tag: "Best first step",
@@ -327,6 +350,28 @@ export default function ActiveMirrorSite() {
         </div>
       </section>
 
+      <section className="band discovery" data-analytics-section="starting-points">
+        <div className="wrap discovery__wrap">
+          <div className="band__head">
+            <Eyebrow>Common starting points</Eyebrow>
+            <h2>Find the right route by the result you need.</h2>
+            <p className="band__sub">
+              Active Mirror is easiest to judge when the ask is concrete: prove one workflow, build one reviewable
+              workspace, preserve the evidence trail, or route private context with approval.
+            </p>
+          </div>
+          <div className="discovery__list">
+            {startingPoints.map((item) => (
+              <article className="discovery__item" key={item.term}>
+                <span>{item.term}</span>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="proof" className="band">
         <div className="wrap">
           <div className="proof-split">
@@ -337,6 +382,7 @@ export default function ActiveMirrorSite() {
                 You should not have to guess what the AI used, skipped, assumed, or still needs from you.
               </p>
               <div className="proof-links">
+                <Link className="btn btn--ghost" href="/proof-sprint">See proof sprint sample</Link>
                 <Link className="btn btn--ghost" href="/trust">Review boundary</Link>
                 <Link className="btn btn--ghost" href="/glass">Public evidence examples</Link>
                 <Link className="btn btn--ghost" href="/compare">Compare</Link>
@@ -470,6 +516,7 @@ export default function ActiveMirrorSite() {
           </div>
           <div className="foot__col">
             <h5>Engage</h5>
+            <Link href="/proof-sprint">72-hour proof sprint</Link>
             <Link href="/intake?focus=pilot">Scoped pilot</Link>
             <Link href="/intake?focus=workspace-proof">Workspace proof</Link>
             <Link href="/intake">General intake</Link>

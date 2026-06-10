@@ -1,25 +1,71 @@
 import ActiveMirrorSite from "@/components/active-mirror/ActiveMirrorSite";
 
 export default function Page() {
-  const jsonLd = {
+  const description =
+    "Bring one workflow your current AI cannot safely finish. Active Mirror scopes it, builds a reviewable workspace, and keeps sources, approvals, and next actions visible.";
+
+  const structuredData = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "Active Mirror",
-    applicationCategory: "BusinessApplication",
-    operatingSystem: "Web, PWA",
-    url: "https://activemirror.ai",
-    creator: {
-      "@type": "Organization",
-      name: "N1 Intelligence (OPC) Pvt Ltd",
-    },
-    description:
-      "Bring one workflow your current AI cannot safely finish. Active Mirror scopes it, builds a reviewable workspace, and keeps sources, approvals, and next actions visible.",
-    featureList: [
-      "Reviewable business workspaces",
-      "Evidence and assumption separation",
-      "Sensitive-context approval boundaries",
-      "Exportable briefs and work records",
-      "Local or cloud deployment planning",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://activemirror.ai/#organization",
+        name: "N1 Intelligence (OPC) Pvt Ltd",
+        url: "https://activemirror.ai",
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://activemirror.ai/#app",
+        name: "Active Mirror",
+        applicationCategory: "BusinessApplication",
+        applicationSubCategory: "Reviewable AI workspace",
+        operatingSystem: "Web, PWA",
+        url: "https://activemirror.ai",
+        creator: { "@id": "https://activemirror.ai/#organization" },
+        description,
+        featureList: [
+          "Reviewable business workspaces",
+          "Evidence and assumption separation",
+          "Sensitive-context approval boundaries",
+          "Exportable briefs and work records",
+          "Local or cloud deployment planning",
+        ],
+        offers: {
+          "@type": "Offer",
+          category: "72-hour proof sprint",
+          url: "https://activemirror.ai/intake?focus=pilot",
+        },
+      },
+      {
+        "@type": "Service",
+        "@id": "https://activemirror.ai/#proof-sprint",
+        name: "Active Mirror 72-hour proof sprint",
+        provider: { "@id": "https://activemirror.ai/#organization" },
+        serviceType: "AI workflow proof sprint",
+        url: "https://activemirror.ai/intake?focus=pilot",
+        description:
+          "A scoped proof sprint that turns one qualified AI workflow into a reviewable workspace with sources, gaps, approvals, and a deploy-or-don't plan.",
+        audience: [
+          { "@type": "Audience", audienceType: "Teams that need reviewable AI work" },
+          { "@type": "Audience", audienceType: "Companies controlling AI workflows" },
+          { "@type": "Audience", audienceType: "Public-sector programs needing accountable AI work" },
+        ],
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://activemirror.ai/#starting-points",
+        name: "Active Mirror common starting points",
+        itemListElement: [
+          "AI workflow proof sprint",
+          "Reviewable AI workspace",
+          "AI governance evidence trail",
+          "Private-context AI workflow",
+        ].map((name, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name,
+        })),
+      },
     ],
   };
 
@@ -27,7 +73,7 @@ export default function Page() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
       />
       <ActiveMirrorSite />
     </>

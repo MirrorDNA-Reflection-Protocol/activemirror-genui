@@ -207,6 +207,7 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.locator('.usecase__label').filter({ hasText: /^Public sector$/ })).toBeVisible();
     await expect(page.locator('.usecase__label').filter({ hasText: /^National programs$/ })).toBeVisible();
     await expect(page.getByText('Not a smarter chat box. A way to make AI work usable.')).toBeVisible();
+    await expect(page.locator('#proof').getByRole('link', { name: /See proof sprint sample/i })).toHaveAttribute('href', '/proof-sprint');
     await expect(page.locator('#proof').getByRole('link', { name: /Review boundary/i })).toHaveAttribute('href', '/trust');
     await expect(page.locator('#proof').getByRole('link', { name: /Public evidence examples/i })).toHaveAttribute('href', '/glass');
     const aboveFoldActions = await page.locator('header a, header button, nav a, nav button').evaluateAll((elements) =>
@@ -274,11 +275,19 @@ test.describe('Active Mirror work OS front door', () => {
     expect(raw).not.toContain('saved-context plan');
   });
 
-  test('public trust, compare, glass, and intake routes expose review boundaries', async ({ page }) => {
+  test('public trust, proof sprint, compare, glass, and intake routes expose review boundaries', async ({ page }) => {
     await page.goto('/trust');
     await expect(page.getByRole('heading', { name: /Useful AI work without silent access/i })).toBeVisible();
     await expect(page.getByText('Private files', { exact: true })).toBeVisible();
     await expect(page.getByText('ask first', { exact: true }).first()).toBeVisible();
+
+    await page.goto('/proof-sprint');
+    await expect(page.getByRole('heading', { name: /See exactly what the proof sprint returns/i })).toBeVisible();
+    await expect(page.getByText('Fit check')).toBeVisible();
+    await expect(page.locator('.comparetable__row').filter({ hasText: 'Create the first working surface' })).toBeVisible();
+    await expect(page.getByText("deploy-or-don't decision")).toBeVisible();
+    await expect(page.getByText('public or sanitized inputs only')).toBeVisible();
+    await expect(page.getByRole('link', { name: /Submit workflow/i })).toHaveAttribute('href', '/intake?focus=pilot');
 
     await page.goto('/compare');
     await expect(page.getByRole('heading', { name: /A chatbot gives an answer/i })).toBeVisible();

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SiteTelemetry from "./SiteTelemetry";
 
-type PublicPageKind = "trust" | "compare" | "glass";
+type PublicPageKind = "trust" | "compare" | "glass" | "proof-sprint";
 
 const pages = {
   trust: {
@@ -27,6 +27,14 @@ const pages = {
       "These public-safe examples show the shape of evidence, approvals, and records. Private truth stays private until it has a real signed record.",
     primary: "Download evidence sample",
     primaryHref: "/api/mirror/proof-ledger?format=markdown",
+  },
+  "proof-sprint": {
+    eyebrow: "72-hour proof sprint",
+    title: "See exactly what the proof sprint returns.",
+    body:
+      "The sprint starts with one real workflow and ends with a working surface, visible evidence, and a deploy-or-don't decision. If the workflow is not a fit, the first useful output is a clear no.",
+    primary: "Apply with one workflow",
+    primaryHref: "/intake?focus=pilot",
   },
 } satisfies Record<PublicPageKind, { eyebrow: string; title: string; body: string; primary: string; primaryHref: string }>;
 
@@ -69,6 +77,31 @@ const glassCards = [
   },
 ];
 
+const proofSprintRows = [
+  ["Fit check", "Confirm the business result, owner, inputs, deadline, and decision maker", "start or stop"],
+  ["Route", "Separate public inputs, private-context needs, sources, assumptions, and approval points", "reviewable"],
+  ["Build", "Create the first working surface: brief, board, source desk, checklist, form, or handoff pack", "working proof"],
+  ["Decision", "Show what worked, what is missing, and the smallest safe deployment path", "deploy or don't"],
+];
+
+const proofSprintCards = [
+  {
+    k: "What you send",
+    v: "one real workflow",
+    body: "A concrete task your current AI cannot safely finish, plus public or sanitized inputs for the first pass.",
+  },
+  {
+    k: "What you receive",
+    v: "usable work",
+    body: "A working workspace with the result, source route, assumptions, gaps, approval needs, and next action visible.",
+  },
+  {
+    k: "What stays gated",
+    v: "sensitive access",
+    body: "Private files, account actions, device work, saved context, and external sends wait for explicit approval.",
+  },
+];
+
 function PublicNav() {
   return (
     <nav className="proofnav">
@@ -77,6 +110,7 @@ function PublicNav() {
         <b>Active Mirror</b>
       </Link>
       <div className="proofnav__links">
+        <Link href="/proof-sprint">Proof sprint</Link>
         <Link href="/trust">Review</Link>
         <Link href="/glass">Evidence</Link>
         <Link href="/compare">Compare</Link>
@@ -184,6 +218,48 @@ function GlassBody() {
   );
 }
 
+function ProofSprintBody() {
+  return (
+    <>
+      <section className="proofband">
+        <div className="proofband__head">
+          <h2>The sprint shape</h2>
+          <p>A buyer should be able to judge Active Mirror by the output, not by our claims. This is the exact working loop.</p>
+        </div>
+        <div className="comparetable">
+          {proofSprintRows.map(([lane, output, state]) => (
+            <div className="comparetable__row" key={lane}>
+              <span>{lane}</span>
+              <b>{output}</b>
+              <i>{state}</i>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="proofband proofband--split">
+        {proofSprintCards.map((card) => <ProofCard key={card.k} {...card} />)}
+      </section>
+      <section className="proofband">
+        <div className="glassline">
+          <span>Example first workflow</span>
+          <b>vendor review, policy review, research brief, workflow board</b>
+          <Link href="/mirror?prompt=Build%20a%20vendor%20evidence%20workspace%20with%20sources%2C%20assumptions%2C%20gaps%2C%20and%20next%20steps">Open sample</Link>
+        </div>
+        <div className="glassline">
+          <span>First-pass input boundary</span>
+          <b>public or sanitized inputs only</b>
+          <Link href="/intake?focus=pilot">Submit workflow</Link>
+        </div>
+        <div className="glassline">
+          <span>Buyer receipt</span>
+          <b>capture id, scope questions, risk boundary</b>
+          <Link href="/intake?focus=workspace-proof">Start from a workspace</Link>
+        </div>
+      </section>
+    </>
+  );
+}
+
 export default function PublicSystemPage({ kind }: { kind: PublicPageKind }) {
   const page = pages[kind];
   return (
@@ -202,6 +278,7 @@ export default function PublicSystemPage({ kind }: { kind: PublicPageKind }) {
       {kind === "trust" ? <TrustBody /> : null}
       {kind === "compare" ? <CompareBody /> : null}
       {kind === "glass" ? <GlassBody /> : null}
+      {kind === "proof-sprint" ? <ProofSprintBody /> : null}
     </main>
   );
 }

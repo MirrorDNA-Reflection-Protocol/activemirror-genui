@@ -17,12 +17,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://activemirror.ai"),
   title: {
-    default: "Active Mirror - AI Workspaces for Real Business Workflows",
+    default: "Active Mirror - Reviewable AI Workspaces for Real Business Workflows",
     template: "%s | Active Mirror",
   },
   description: "Bring one workflow your current AI cannot safely finish. Active Mirror scopes it, builds a reviewable workspace, and keeps sources, approvals, and next actions visible.",
   keywords: [
     "generative UI",
+    "AI workflow proof sprint",
+    "reviewable AI workspace",
+    "source-backed AI decision brief",
+    "AI governance evidence trail",
+    "private context AI workflow",
     "AI evidence workspace",
     "AI approval workflow",
     "AI workspace",
@@ -36,7 +41,7 @@ export const metadata: Metadata = {
     "N1 Intelligence",
   ],
   openGraph: {
-    title: "Active Mirror - AI Workspaces for Real Business Workflows",
+    title: "Active Mirror - Reviewable AI Workspaces for Real Business Workflows",
     description: "Bring one workflow your current AI cannot safely finish. Active Mirror scopes it, builds a reviewable workspace, and keeps sources, approvals, and next actions visible.",
     siteName: "Active Mirror",
     type: "website",
@@ -45,7 +50,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Active Mirror - AI Workspaces for Real Business Workflows",
+    title: "Active Mirror - Reviewable AI Workspaces for Real Business Workflows",
     description: "Bring one workflow your current AI cannot safely finish. Active Mirror scopes it, builds a reviewable workspace, and keeps sources, approvals, and next actions visible.",
     images: ["/mirror-icon-512.png"],
   },
