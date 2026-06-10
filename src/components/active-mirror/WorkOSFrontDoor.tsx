@@ -134,6 +134,47 @@ type CritiqueStream = {
   }[];
 };
 
+type LocalOperatorPacket = {
+  schemaVersion: "active_mirror.local_operator_packet.v1";
+  version: string;
+  state: string;
+  receiptState: string;
+  claimBoundary: string;
+  privateVaultIngest: { state: string; rule: string };
+  skillRails: { id: string; role: string; state: string }[];
+  task: { prompt: string; intentHash: string; sourceGaps: string[] };
+  records: {
+    supplied: number;
+    eligible: number;
+    selected: { id: string; kind: string; title: string; sourceHash: string; relevance: number; use: string }[];
+    rejected: { id: string; title: string; reason: string }[];
+  };
+  taskPacket: {
+    contextEnvelope: string;
+    modelVisibility: string;
+    selectedRecordIds: string[];
+    didNotRun: string[];
+    nextGate: string;
+  };
+  receipt: {
+    packetHash: string;
+    selectedRecordHashes: string[];
+    rejectedCount: number;
+    deterministic: boolean;
+  };
+};
+
+type LocalOperatorStatus = {
+  version: string;
+  responseSchemaVersion: "active_mirror.local_operator_packet.v1";
+  responseSchemaPath: string;
+  route: string;
+  mode: string;
+  claimBoundary: string;
+  privateVaultIngest: string;
+  samplePacket: LocalOperatorPacket | null;
+};
+
 type RuntimeState = {
   registry: ContractRegistry | null;
   kernel: KernelStatus | null;
@@ -142,6 +183,7 @@ type RuntimeState = {
   revocation: RevocationCascade | null;
   continuity: ContinuityMeasure | null;
   critique: CritiqueStream | null;
+  operator: LocalOperatorStatus | null;
 };
 
 type MemoryMode = "ephemeral" | "session" | "saved";
@@ -155,6 +197,7 @@ type SheetId =
   | "continuity"
   | "critique"
   | "ratchet"
+  | "operator"
   | "kernel";
 
 const STARTERS = [
@@ -192,7 +235,7 @@ async function getJson<T>(route: string): Promise<T | null> {
 
 function stateTone(state?: string) {
   if (!state) return "off";
-  if (/(ready|available|passing|proven|computed|signed|online|active|ok)/i.test(state)) return "ok";
+  if (/(ready|available|passing|proven|computed|signed|online|active|ok|compiled)/i.test(state)) return "ok";
   if (/(gated|required|queued|preview)/i.test(state)) return "warn";
   return "off";
 }
@@ -207,6 +250,7 @@ function contractSheetId(id: string): SheetId {
   if (id === "revocation_cascade") return "revocation";
   if (id === "identity_continuity_measure") return "continuity";
   if (id === "decision_critique_stream") return "critique";
+  if (id === "local_operator_packet") return "operator";
   return "runtime";
 }
 
@@ -215,6 +259,7 @@ function contractSurfaceLabel(contract: RuntimeContract) {
   if (contract.id === "proof_ledger_export") return "Evidence export";
   if (contract.id === "revocation_cascade") return "Removal effects";
   if (contract.id === "identity_continuity_measure") return "Continuity score";
+  if (contract.id === "local_operator_packet") return "Local operator";
   return contract.surface;
 }
 
@@ -237,6 +282,7 @@ export default function WorkOSFrontDoor() {
     revocation: null,
     continuity: null,
     critique: null,
+    operator: null,
   });
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const logRef = useRef<HTMLDivElement | null>(null);
@@ -271,9 +317,10 @@ export default function WorkOSFrontDoor() {
       getJson<RevocationCascade>("/api/mirror/revocation-cascade"),
       getJson<ContinuityMeasure>("/api/mirror/identity-continuity/measure"),
       getJson<CritiqueStream>("/api/mirror/critique"),
-    ]).then(([registry, kernel, ratchet, ledger, revocation, continuity, critique]) => {
+      getJson<LocalOperatorStatus>("/api/mirror/local-operator"),
+    ]).then(([registry, kernel, ratchet, ledger, revocation, continuity, critique, operator]) => {
       if (cancelled) return;
-      setRuntime({ registry, kernel, ratchet, ledger, revocation, continuity, critique });
+      setRuntime({ registry, kernel, ratchet, ledger, revocation, continuity, critique, operator });
     });
     return () => {
       cancelled = true;
@@ -676,6 +723,7 @@ function buildSheet(id: SheetId, runtime: RuntimeState, memoryMode: MemoryMode, 
   if (id === "continuity") return continuitySheet(runtime.continuity);
   if (id === "critique") return critiqueSheet(runtime.critique);
   if (id === "ratchet") return ratchetSheet(runtime.ratchet);
+  if (id === "operator") return localOperatorSheet(runtime.operator);
   return kernelSheet(runtime.kernel);
 }
 
@@ -767,7 +815,18 @@ function runtimeSheet(runtime: RuntimeState) {
           <div className="rt-row__sub">controlled truth, not a raw IQ claim</div>
         </button>
         {contracts.map((contract) => (
-          <button key={contract.id} className="rt-row" data-testid={contract.id === "proof_ledger_export" ? "mirror-sovereign-contracts" : undefined} onClick={() => document.dispatchEvent(new CustomEvent("am:open-sheet", { detail: contractSheetId(contract.id) }))}>
+          <button
+            key={contract.id}
+            className="rt-row"
+            data-testid={
+              contract.id === "proof_ledger_export"
+                ? "mirror-sovereign-contracts"
+                : contract.id === "local_operator_packet"
+                  ? "local-operator-contract"
+                  : undefined
+            }
+            onClick={() => document.dispatchEvent(new CustomEvent("am:open-sheet", { detail: contractSheetId(contract.id) }))}
+          >
             <div className="rt-row__top">
               <span className="rt-row__nm">{contractSurfaceLabel(contract)}</span>
               <span className={`rt-row__st st-${contract.status === "public_contract_ready" ? "ok" : "warn"}`}><span className="d" />{contract.status === "public_contract_ready" ? "ready" : "record required"}</span>
@@ -775,6 +834,65 @@ function runtimeSheet(runtime: RuntimeState) {
             <div className="rt-row__sub">{contract.route}</div>
           </button>
         ))}
+      </>
+    ),
+  };
+}
+
+function localOperatorSheet(operator: LocalOperatorStatus | null) {
+  const packet = operator?.samplePacket;
+  return {
+    title: "Local operator",
+    binds: ["GET/POST /api/mirror/local-operator", operator?.responseSchemaVersion || "active_mirror.local_operator_packet.v1"] as [string, string],
+    claim: operator?.claimBoundary || "Approved context compiles into scoped packets. Raw vault text stays off the public route.",
+    body: (
+      <>
+        <div className="operator-card" data-testid="local-operator-proof">
+          <div>
+            <span>operator</span>
+            <b>deterministic policy</b>
+            <p>Records become task packets only when approval, privacy, canon, and provenance checks pass.</p>
+          </div>
+          <div className={`pl__v ${stateTone(packet?.state)} sheet-state`}><span className="d" />{packet?.state || "offline"}</div>
+        </div>
+        <div className="pl__v warn sheet-state"><span className="d" />private vault ingest · {packet?.privateVaultIngest.state.replaceAll("_", " ") || "private body required"}</div>
+        <div className="operator-metrics">
+          <span>supplied <b>{packet?.records.supplied || 0}</b></span>
+          <span>eligible <b>{packet?.records.eligible || 0}</b></span>
+          <span>selected <b>{packet?.records.selected.length || 0}</b></span>
+          <span>rejected <b>{packet?.records.rejected.length || 0}</b></span>
+        </div>
+        <div className="sectlabel">selected records</div>
+        {(packet?.records.selected || []).map((record) => (
+          <div key={record.id} className="operator-record">
+            <div><span>{record.kind}</span><b>{record.title}</b><i>{record.use}</i></div>
+            <p>{record.id} · relevance {record.relevance.toFixed(2)}</p>
+            <code>{record.sourceHash}</code>
+          </div>
+        ))}
+        <div className="sectlabel">rejected records</div>
+        {(packet?.records.rejected || []).map((record) => (
+          <div key={record.id} className="pl__v off sheet-state"><span className="d" />{record.title} · {record.reason.replaceAll("_", " ")}</div>
+        ))}
+        <div className="sectlabel">skill rails</div>
+        {(packet?.skillRails || []).map((skill) => (
+          <div key={skill.id} className="operator-skill">
+            <span>{skill.id}</span>
+            <b>{skill.role}</b>
+            <i>{skill.state.replaceAll("_", " ")}</i>
+          </div>
+        ))}
+        <div className="sectlabel">task packet</div>
+        <div className="operator-receipt">
+          <span>context · {packet?.taskPacket.contextEnvelope || "selected record ids only"}</span>
+          <span>model · {packet?.taskPacket.modelVisibility || "scoped public safe records"}</span>
+          <span>next · {packet?.taskPacket?.nextGate.replaceAll("_", " ") || "approval required"}</span>
+          <span>packet · {packet?.receipt.packetHash || "queued"}</span>
+        </div>
+        {(packet?.task.sourceGaps || ["live_vault_ingest_not_run"]).map((gap) => (
+          <div key={gap} className="pl__v warn sheet-state"><span className="d" />source gap · {gap.replaceAll("_", " ")}</div>
+        ))}
+        <Shape label="LocalOperatorPacket" code={"{ records -> eligibility gate -> selectedRecordIds,\n  taskPacket, didNotRun, packetHash, nextGate }"} />
       </>
     ),
   };

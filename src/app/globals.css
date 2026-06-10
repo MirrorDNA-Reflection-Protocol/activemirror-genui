@@ -1401,6 +1401,146 @@ html {
   color: var(--text-faint);
 }
 
+.operator-card {
+  border: 1px solid color-mix(in srgb, var(--success) 24%, var(--hairline));
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(55, 210, 143, 0.08), rgba(255, 255, 255, 0.02));
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.operator-card > div:first-child {
+  min-width: 0;
+}
+
+.operator-card span,
+.operator-skill span,
+.operator-record span {
+  display: block;
+  font-family: var(--font-data);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.operator-card b {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-primary);
+  font-size: 18px;
+}
+
+.operator-card p {
+  margin: 7px 0 0;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.operator-card .pl__v {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.operator-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 14px;
+}
+
+.operator-metrics span {
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background: var(--ink-1000);
+  padding: 10px;
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+.operator-metrics b {
+  display: block;
+  margin-top: 4px;
+  font-size: 18px;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.operator-record,
+.operator-skill,
+.operator-receipt {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 10px 0;
+}
+
+.operator-record div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+
+.operator-record b,
+.operator-skill b {
+  font-size: 12.5px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.operator-record i,
+.operator-skill i {
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-style: normal;
+}
+
+.operator-record p {
+  margin: 5px 0 0;
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.operator-record code {
+  display: block;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+  font-family: var(--font-data);
+  font-size: 9.5px;
+  color: var(--text-faint);
+}
+
+.operator-skill {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.operator-skill span {
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-accent);
+}
+
+.operator-receipt {
+  display: grid;
+  gap: 6px;
+  font-family: var(--font-data);
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+
+.operator-receipt span {
+  overflow-wrap: anywhere;
+}
+
 .sheet-state {
   font-size: 11.5px;
   padding: 6px 0;
@@ -1792,6 +1932,22 @@ html {
 
   .sprint-handoff__cta {
     width: 100%;
+  }
+
+  .operator-card,
+  .operator-record div,
+  .operator-skill {
+    display: block;
+  }
+
+  .operator-card .pl__v,
+  .operator-record i,
+  .operator-skill i {
+    margin-top: 6px;
+  }
+
+  .operator-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .sheet {

@@ -4,22 +4,18 @@ import SiteTelemetry from "./SiteTelemetry";
 
 const frontDoorRoutes = [
   {
-    title: "I need to make a decision",
-    body: "Get the brief, sources, open questions, and next step in one place.",
-    action: "Start a decision brief",
-    href: `/mirror?prompt=${encodeURIComponent("Build a vendor evidence workspace")}`,
+    title: "Try the public workspace",
+    body: "Generate a brief, source route, assumptions, gaps, and next move without sending private data.",
+    action: "Open workspace",
+    href: `/mirror?prompt=${encodeURIComponent("Build a vendor evidence workspace with sources, assumptions, gaps, and next steps")}`,
+    analytics: "frontdoor_public_workspace",
   },
   {
-    title: "I need to repeat a workflow",
-    body: "Turn the task into a workspace your team can run again.",
-    action: "Map the workflow",
-    href: "/intake?focus=deployment",
-  },
-  {
-    title: "I need to use sensitive context",
-    body: "Use files, accounts, or saved context only when the next step is clear.",
-    action: "Plan safe data use",
-    href: "/intake?focus=private-context",
+    title: "Scope a real workflow",
+    body: "Bring one workflow that must become a reviewed decision, plan, or repeatable process.",
+    action: "Apply with one workflow",
+    href: "/intake?focus=pilot",
+    analytics: "frontdoor_scope_workflow",
   },
 ];
 
@@ -79,7 +75,7 @@ const sprintDeliverables = [
 
 const useCases = [
   {
-    label: "People",
+    label: "Teams",
     title: "Finish the work without fighting the AI.",
     body: "Decisions, research, documents, plans, and next actions in one workspace instead of a long chat thread.",
   },
@@ -89,24 +85,14 @@ const useCases = [
     body: "Repeatable workflows, review before action, private context only when approved, and outputs teams can reuse.",
   },
   {
-    label: "Governments",
+    label: "Public sector",
     title: "Use AI with local trust and public accountability.",
     body: "Language, data boundaries, review trails, and service workflows that can be inspected before they affect citizens.",
   },
   {
-    label: "Countries",
+    label: "National programs",
     title: "Build capacity instead of depending on one vendor.",
     body: "A path to local models, local workflows, local records, and national-language use cases without pretending models are magic.",
-  },
-  {
-    label: "Builders",
-    title: "Wrap model power in a product people can trust.",
-    body: "Give users the workspace, approval points, source trail, and recovery path around whatever model does the reasoning.",
-  },
-  {
-    label: "Leaders",
-    title: "Know what changed, what is blocked, and what happens next.",
-    body: "The system should make risk visible early: missing facts, sensitive data, unclear authority, and handoff gaps.",
   },
 ];
 
@@ -131,16 +117,8 @@ const novelty = [
     body: "Public work can use hosted models. Sensitive work can move toward local or private routes when the job requires it.",
   },
   {
-    title: "It keeps humans in the loop before it matters.",
-    body: "Approvals appear before sensitive reads, external sends, account actions, or deployment steps.",
-  },
-  {
     title: "It creates a work surface, not just text.",
     body: "The result can become a brief, checklist, board, review lane, source queue, export, or repeatable workflow.",
-  },
-  {
-    title: "It leaves a review trail.",
-    body: "The output keeps enough source, assumption, approval, and next-step context for another person to inspect it.",
   },
 ];
 
@@ -168,7 +146,7 @@ const engagements = [
       "Export and review rules",
     ],
     action: "Plan the workflow",
-    href: "/intake?focus=review",
+    href: "/intake?focus=pilot",
   },
   {
     tag: "Deployment",
@@ -180,7 +158,7 @@ const engagements = [
       "Operational handoff",
     ],
     action: "Scope the rollout",
-    href: "/intake?focus=platform",
+    href: "/intake?focus=pilot",
   },
 ];
 
@@ -206,14 +184,14 @@ function FrontDoorPanel() {
   return (
     <div className="frontdoor" data-testid="front-door-panel">
       <div className="frontdoor__head">
-        <span>Start here</span>
-        <b>What do you need to get done?</b>
+        <span>Choose a route</span>
+        <b>What should happen first?</b>
       </div>
       <div className="frontdoor__routes">
         {frontDoorRoutes.map((route) => (
           <Link
             className="frontdoor__route"
-            data-analytics={`frontdoor_${route.title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`}
+            data-analytics={route.analytics}
             href={route.href}
             key={route.title}
           >
@@ -241,12 +219,12 @@ export default function ActiveMirrorSite() {
           <BrandLink />
           <div className="nav__links">
             <a href="#what-it-does">Results</a>
-            <a href="#proof">How it stays safe</a>
+            <a href="#proof">Proof</a>
             <a href="#work-with-us">Start</a>
           </div>
           <div className="nav__r">
-            <span className="nav__status"><span className="dot"></span>evidence-first AI work</span>
-            <Link className="btn btn--primary" data-analytics="nav_build_workspace" href="/mirror">Build my first workspace <span className="arr">→</span></Link>
+            <span className="nav__status"><span className="dot"></span>review before action</span>
+            <Link className="btn btn--primary" data-analytics="nav_try_workspace" href="/mirror">Try workspace <span className="arr">→</span></Link>
           </div>
         </div>
       </nav>
@@ -256,15 +234,14 @@ export default function ActiveMirrorSite() {
         <div className="wrap">
           <div className="hero__front">
             <div className="hero__copy">
-              <Eyebrow>72-hour proof sprint</Eyebrow>
-              <h1>Turn one important AI workflow into a reviewable workspace.</h1>
+              <h1>Bring one AI workflow. Leave with a reviewable workspace.</h1>
               <p className="hero__lede">
-                It shows what it used, what it still needs, and what is safe to do next. Send one real workflow and
-                apply for a qualified proof sprint. More capable AI, with a human in the loop before it matters.
+                We scope the workflow first. If it fits, Active Mirror builds a working proof that shows sources,
+                gaps, approvals, and the next deployment decision.
               </p>
               <div className="hero__cta">
-                <Link className="btn btn--primary btn--lg" data-analytics="hero_72h_sprint" href="/intake?focus=pilot">Apply for a 72-hour sprint <span className="arr">→</span></Link>
-                <Link className="btn btn--ghost btn--lg" data-analytics="hero_try_workspace" href="/mirror">Try the workspace</Link>
+                <Link className="btn btn--primary btn--lg" data-analytics="hero_apply_workflow" href="/intake?focus=pilot">Apply with one workflow <span className="arr">→</span></Link>
+                <Link className="btn btn--ghost btn--lg" data-analytics="hero_try_workspace" href="/mirror">Try the public workspace</Link>
               </div>
             </div>
             <FrontDoorPanel />
@@ -287,7 +264,7 @@ export default function ActiveMirrorSite() {
       <section className="challenge" data-analytics-section="challenge">
         <div className="wrap">
           <div className="challenge__copy">
-            <Eyebrow>The Active Mirror Challenge</Eyebrow>
+            <Eyebrow>The fit test</Eyebrow>
             <h2>Give us one workflow your current AI cannot safely finish.</h2>
             <p>
               We do not promise every workflow is a fit. We qualify it first. If we cannot make it clearer,
@@ -302,8 +279,8 @@ export default function ActiveMirrorSite() {
               </div>
             ))}
           </div>
-          <Link className="challenge__cta" data-analytics="challenge_72h_sprint" href="/intake?focus=challenge">
-            Apply for the 72-hour sprint →
+          <Link className="challenge__cta" data-analytics="challenge_apply_workflow" href="/intake?focus=pilot">
+            Apply with one workflow →
           </Link>
         </div>
       </section>
@@ -494,8 +471,8 @@ export default function ActiveMirrorSite() {
           <div className="foot__col">
             <h5>Engage</h5>
             <Link href="/intake?focus=pilot">Scoped pilot</Link>
-            <Link href="/intake?focus=review">AI review</Link>
-            <Link href="/intake?focus=platform">Platform build</Link>
+            <Link href="/intake?focus=workspace-proof">Workspace proof</Link>
+            <Link href="/intake">General intake</Link>
           </div>
           <div className="foot__col">
             <h5>Evidence</h5>

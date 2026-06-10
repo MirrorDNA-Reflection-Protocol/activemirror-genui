@@ -1,9 +1,10 @@
 import decisionCritiqueStreamSchema from "../../../schemas/active-mirror-decision-critique-stream.schema.json";
 import identityContinuityMeasureSchema from "../../../schemas/active-mirror-identity-continuity-measure.schema.json";
+import localOperatorPacketSchema from "../../../schemas/active-mirror-local-operator-packet.schema.json";
 import proofLedgerExportSchema from "../../../schemas/active-mirror-proof-ledger-export.schema.json";
 import revocationCascadeSchema from "../../../schemas/active-mirror-revocation-cascade.schema.json";
 
-export const ACTIVE_MIRROR_CONTRACT_REGISTRY_VERSION = "2026.06.09-novelty-contract-registry-v1";
+export const ACTIVE_MIRROR_CONTRACT_REGISTRY_VERSION = "2026.06.10-local-operator-contract-registry-v2";
 
 type JsonSchema = Record<string, unknown>;
 
@@ -71,6 +72,17 @@ const contracts: Omit<MirrorRuntimeContract, "schemaId">[] = [
     claimBoundary:
       "The public stream admits blocked, gated, missing, and queued system states. Private decisions require approved body receipts before promotion.",
     schema: decisionCritiqueStreamSchema as JsonSchema,
+  },
+  {
+    id: "local_operator_packet",
+    surface: "Local operator packet",
+    route: "/api/mirror/local-operator",
+    schemaPath: "schemas/active-mirror-local-operator-packet.schema.json",
+    transport: "json_post",
+    status: "private_receipt_required",
+    claimBoundary:
+      "The public route compiles supplied public-safe records into a deterministic task packet. Real vault ingestion stays on the private body and requires approval, provenance, and receipts.",
+    schema: localOperatorPacketSchema as JsonSchema,
   },
 ];
 

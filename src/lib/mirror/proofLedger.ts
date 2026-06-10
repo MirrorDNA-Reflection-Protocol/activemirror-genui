@@ -19,6 +19,7 @@ export type ProofLedgerEntry = {
     | "critique"
     | "revocation"
     | "identity_continuity"
+    | "local_operator"
     | "approval_gate"
     | "export";
   statement: string;
@@ -128,6 +129,13 @@ export async function getProofLedger(): Promise<ProofLedger> {
     source: "/api/mirror/identity-continuity",
   });
   buildEntry(entries, {
+    id: "operator.public_packet_compiler",
+    kind: "local_operator",
+    statement: "Local Operator packet compiler is available for supplied public-safe records; private vault ingest remains gated.",
+    state: "available",
+    source: "/api/mirror/local-operator",
+  });
+  buildEntry(entries, {
     id: "approval.private_actions",
     kind: "approval_gate",
     statement: "Private files, vault, accounts, devices, sends, spend, and durable writes remain scoped-approval gated.",
@@ -158,6 +166,7 @@ export async function getProofLedger(): Promise<ProofLedger> {
       "private revocation enforcement receipts",
       "measured cross-model user identity continuity score",
       "signed private decision critique stream",
+      "approved private vault operator ingest",
     ],
     exportFormats: ["json", "markdown"],
   };

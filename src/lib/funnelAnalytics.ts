@@ -67,6 +67,16 @@ function sourceKey(event: AnalyticsRecord) {
   return utm.utm_source || utm.ref || event.referrer || "direct / unknown";
 }
 
+function storageUnavailableReason() {
+  return process.env.DATABASE_URL ? "" : "database_url_missing";
+}
+
+function knownStoreErrorReason(error: unknown) {
+  const code = typeof error === "object" && error && "code" in error ? String((error as { code?: string }).code || "") : "";
+  if (code === "P2021") return "audit_log_table_missing";
+  return "";
+}
+
 function nextAdjustment(input: {
   visitors: number;
   sprintClicks: number;
@@ -126,9 +136,67 @@ function nextAdjustment(input: {
   };
 }
 
+function unavailableSnapshot(input: {
+  days: number;
+  since: Date;
+  title: string;
+  body: string;
+  reason?: string;
+}) {
+  return {
+    ok: false,
+    storeUnavailable: true,
+    storeUnavailableReason: input.reason || storageUnavailableReason() || "query_failed",
+    summary: {
+      days: input.days,
+      since: input.since.toISOString(),
+      events: 0,
+      visitors: 0,
+      sessions: 0,
+      pageViews: 0,
+      sprintClicks: 0,
+      workspaceStarts: 0,
+      artifacts: 0,
+      intakeSubmits: 0,
+      intakeReady: 0,
+      intakeErrors: 0,
+      leads: 0,
+      priorityLeads: 0,
+      qualifiedLeads: 0,
+      avgLeadScore: 0,
+      workspaceHandoffClicks: 0,
+      workspaceHandoffLeads: 0,
+      clickRate: 0,
+      intakeRate: 0,
+      leadRate: 0,
+    },
+    nextAdjustment: {
+      title: input.title,
+      body: input.body,
+    },
+    funnel: [],
+    topPaths: [],
+    topSources: [],
+    topCtas: [],
+    topFocus: [],
+    devices: [],
+    recentLeads: [],
+    recentEvents: [],
+  };
+}
+
 export async function getFunnelSnapshot(days = 14) {
   const safeDays = Math.max(1, Math.min(Math.round(days), 90));
   const since = new Date(Date.now() - safeDays * 24 * 60 * 60 * 1000);
+  const unavailableReason = storageUnavailableReason();
+  if (unavailableReason) {
+    return unavailableSnapshot({
+      days: safeDays,
+      since,
+      title: "Analytics store is not configured.",
+      body: "The site can still run, but revenue decisions need DATABASE_URL configured before the funnel is treated as durable.",
+    });
+  }
 
   try {
     const rows = await prisma.auditLog.findMany({
@@ -255,45 +323,22 @@ export async function getFunnelSnapshot(days = 14) {
       recentEvents: events.slice(0, 20),
     };
   } catch (error) {
-    console.error("[Funnel] snapshot unavailable:", error);
-    return {
-      ok: false,
-      storeUnavailable: true,
-      summary: {
+    const knownReason = knownStoreErrorReason(error);
+    if (knownReason) {
+      return unavailableSnapshot({
         days: safeDays,
-        since: since.toISOString(),
-        events: 0,
-        visitors: 0,
-        sessions: 0,
-        pageViews: 0,
-        sprintClicks: 0,
-        workspaceStarts: 0,
-        artifacts: 0,
-        intakeSubmits: 0,
-        intakeReady: 0,
-        intakeErrors: 0,
-        leads: 0,
-        priorityLeads: 0,
-        qualifiedLeads: 0,
-        avgLeadScore: 0,
-        workspaceHandoffClicks: 0,
-        workspaceHandoffLeads: 0,
-        clickRate: 0,
-        intakeRate: 0,
-        leadRate: 0,
-      },
-      nextAdjustment: {
-        title: "Analytics store is unavailable.",
-        body: "The site can still run, but revenue decisions need the database connection fixed before we trust the funnel.",
-      },
-      funnel: [],
-      topPaths: [],
-      topSources: [],
-      topCtas: [],
-      topFocus: [],
-      devices: [],
-      recentLeads: [],
-      recentEvents: [],
-    };
+        since,
+        title: "Analytics store is not ready.",
+        body: "The site can still run, but the AuditLog table must exist before the funnel is treated as durable.",
+        reason: knownReason,
+      });
+    }
+    console.error("[Funnel] snapshot unavailable:", error);
+    return unavailableSnapshot({
+      days: safeDays,
+      since,
+      title: "Analytics store is unavailable.",
+      body: "The site can still run, but revenue decisions need the database connection fixed before we trust the funnel.",
+    });
   }
 }

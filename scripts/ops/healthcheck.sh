@@ -24,7 +24,7 @@ curl_code() {
 
 root_code="$(curl_code GET "$BASE_URL/")"
 [[ "$root_code" == "200" ]] || fail "root returned HTTP $root_code"
-grep -q "Turn one important AI workflow into a reviewable workspace" "$TMP_DIR/body" || fail "root did not expose current buyer-facing headline"
+grep -q "Bring one AI workflow. Leave with a reviewable workspace" "$TMP_DIR/body" || fail "root did not expose current buyer-facing headline"
 grep -q 'data-testid="front-door-panel"' "$TMP_DIR/body" || fail "root did not expose public front door panel"
 grep -q "No pitch theatre" "$TMP_DIR/body" || fail "root did not expose sprint deliverables"
 
@@ -63,9 +63,15 @@ grep -q "chainHead" "$TMP_DIR/body" || fail "proof ledger endpoint did not expos
 
 contracts_code="$(curl_code GET "$BASE_URL/api/mirror/contracts")"
 [[ "$contracts_code" == "200" ]] || fail "contracts endpoint returned HTTP $contracts_code"
-grep -q "novelty-contract-registry" "$TMP_DIR/body" || fail "contracts endpoint did not expose registry version"
+grep -Eq "novelty-contract-registry|local-operator-contract-registry" "$TMP_DIR/body" || fail "contracts endpoint did not expose registry version"
 grep -q "active-mirror-proof-ledger-export.schema.json" "$TMP_DIR/body" || fail "contracts endpoint did not expose proof ledger schema"
 grep -q "active-mirror-decision-critique-stream.schema.json" "$TMP_DIR/body" || fail "contracts endpoint did not expose critique stream schema"
+grep -q "active-mirror-local-operator-packet.schema.json" "$TMP_DIR/body" || fail "contracts endpoint did not expose local operator schema"
+
+operator_code="$(curl_code GET "$BASE_URL/api/mirror/local-operator")"
+[[ "$operator_code" == "200" ]] || fail "local operator endpoint returned HTTP $operator_code"
+grep -q "local-operator-compiler" "$TMP_DIR/body" || fail "local operator endpoint did not expose compiler version"
+grep -q "private_body_required" "$TMP_DIR/body" || fail "local operator endpoint did not expose private vault boundary"
 
 critique_code="$(curl_code GET "$BASE_URL/api/mirror/critique")"
 [[ "$critique_code" == "200" ]] || fail "critique endpoint returned HTTP $critique_code"

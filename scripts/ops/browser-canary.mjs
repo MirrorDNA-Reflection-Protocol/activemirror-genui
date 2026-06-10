@@ -67,6 +67,7 @@ const receipt = {
     mirrorRoute: false,
     identityControls: false,
     reliabilityChecks: false,
+    localOperatorControls: false,
     noPrivatePathLeak: false,
     serviceWorkerControlled: false,
   },
@@ -97,15 +98,19 @@ try {
   await page.click("[data-testid=runtime-btn]");
   await page.waitForSelector("[data-testid=mirrorkernel-proof]", { timeout: 15_000 });
   await page.waitForSelector("[data-testid=mirror-ratchet-proof]", { timeout: 15_000 });
+  await page.waitForSelector("[data-testid=local-operator-contract]", { timeout: 15_000 });
   await page.screenshot({ path: screenshotPath, fullPage: true, timeout: 60_000 });
 
   const rendered = await page.evaluate(() => ({
     identityControls: document.body.innerText.includes("Identity controls"),
     reliabilityChecks: document.body.innerText.includes("Reliability checks"),
+    localOperatorControls: document.body.innerText.includes("Local operator") &&
+      document.body.innerText.includes("/api/mirror/local-operator"),
     privatePathLeak: document.body.innerText.includes("/Users/mirror-pro"),
   }));
   receipt.checks.identityControls = rendered.identityControls;
   receipt.checks.reliabilityChecks = rendered.reliabilityChecks;
+  receipt.checks.localOperatorControls = rendered.localOperatorControls;
   receipt.checks.noPrivatePathLeak = !landing.privatePathLeak && !rendered.privatePathLeak;
 
   receipt.serviceWorker = await waitForServiceWorkerControl(page, serviceWorkerTimeoutMs);

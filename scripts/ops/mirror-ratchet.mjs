@@ -21,11 +21,13 @@ const files = {
   revocation: "src/lib/mirror/revocationCascade.ts",
   identity: "src/lib/mirror/identityContinuity.ts",
   identityMeasure: "src/lib/mirror/identityContinuityMeasure.ts",
+  localOperator: "src/lib/mirror/localOperator.ts",
   contractRegistry: "src/lib/mirror/runtimeContractRegistry.ts",
   proofLedgerSchema: "schemas/active-mirror-proof-ledger-export.schema.json",
   revocationSchema: "schemas/active-mirror-revocation-cascade.schema.json",
   identityMeasureSchema: "schemas/active-mirror-identity-continuity-measure.schema.json",
   critiqueSchema: "schemas/active-mirror-decision-critique-stream.schema.json",
+  localOperatorSchema: "schemas/active-mirror-local-operator-packet.schema.json",
   ui: "src/components/active-mirror/WorkOSFrontDoor.tsx",
   tests: "tests/qa-suite.spec.ts",
   bodyReceiptTests: "tests/body-receipt-signature.spec.ts",
@@ -117,9 +119,14 @@ const invariants = [
     pattern: /ACTIVE_MIRROR_IDENTITY_CONTINUITY_MEASURE_VERSION[\s\S]*continuityScore[\s\S]*signed_model_swap_identity_receipt/,
   },
   {
+    id: "local_operator_context_compiler",
+    file: "localOperator",
+    pattern: /ACTIVE_MIRROR_LOCAL_OPERATOR_VERSION[\s\S]*private_body_required[\s\S]*raw_vault_read[\s\S]*packetHash/,
+  },
+  {
     id: "novelty_contract_registry",
     file: "contractRegistry",
-    pattern: /proof_ledger_export[\s\S]*revocation_cascade[\s\S]*identity_continuity_measure[\s\S]*decision_critique_stream/,
+    pattern: /proof_ledger_export[\s\S]*revocation_cascade[\s\S]*identity_continuity_measure[\s\S]*decision_critique_stream[\s\S]*local_operator_packet/,
   },
   {
     id: "proof_ledger_export_schema",
@@ -142,14 +149,19 @@ const invariants = [
     pattern: /active_mirror\.decision_critique_stream\.v1[\s\S]*systemAdmission[\s\S]*nextSafeStep/,
   },
   {
+    id: "local_operator_packet_schema",
+    file: "localOperatorSchema",
+    pattern: /active_mirror\.local_operator_packet\.v1[\s\S]*privateVaultIngest[\s\S]*taskPacket[\s\S]*packetHash/,
+  },
+  {
     id: "ui_shows_kernel_receipt_and_ratchet",
     file: "ui",
-    pattern: /mirrorkernel-proof[\s\S]*mirror-ratchet-proof|mirror-ratchet-proof[\s\S]*mirrorkernel-proof/,
+    pattern: /mirrorkernel-proof[\s\S]*mirror-ratchet-proof[\s\S]*local-operator-contract|local-operator-contract[\s\S]*mirror-ratchet-proof[\s\S]*mirrorkernel-proof/,
   },
   {
     id: "qa_covers_runtime_contracts_and_ratchet",
     file: "tests",
-    pattern: /runtime sheet binds the live proof contracts[\s\S]*mirrorkernel-proof[\s\S]*mirror-ratchet-proof/,
+    pattern: /controls sheet binds the live review contracts[\s\S]*mirrorkernel-proof[\s\S]*mirror-ratchet-proof[\s\S]*local_operator_packet/,
   },
   {
     id: "qa_covers_body_receipt_signature",
@@ -159,12 +171,12 @@ const invariants = [
   {
     id: "healthcheck_covers_public_contracts",
     file: "healthcheck",
-    pattern: /api\/mirror\/ratchet[\s\S]*api\/mirror\/proof-ledger[\s\S]*api\/mirror\/contracts[\s\S]*api\/mirror\/critique[\s\S]*api\/mirror\/revocation-cascade[\s\S]*api\/mirror\/identity-continuity[\s\S]*api\/mirror\/identity-continuity\/measure/,
+    pattern: /api\/mirror\/ratchet[\s\S]*api\/mirror\/proof-ledger[\s\S]*api\/mirror\/contracts[\s\S]*api\/mirror\/local-operator[\s\S]*api\/mirror\/critique[\s\S]*api\/mirror\/revocation-cascade[\s\S]*api\/mirror\/identity-continuity[\s\S]*api\/mirror\/identity-continuity\/measure/,
   },
   {
     id: "browser_canary_covers_pwa_control",
     file: "browserCanary",
-    pattern: /mirrorkernel-proof[\s\S]*mirror-ratchet-proof[\s\S]*serviceWorkerControlled/,
+    pattern: /mirrorkernel-proof[\s\S]*mirror-ratchet-proof[\s\S]*local-operator-contract[\s\S]*serviceWorkerControlled/,
   },
 ];
 

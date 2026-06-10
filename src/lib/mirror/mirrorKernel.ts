@@ -243,6 +243,12 @@ export async function getMirrorKernelPublicStatus(): Promise<MirrorKernelPublicS
         keepsFromFrontiers: "model swap and personalization",
         control: "public doctrine vector is stable; private user continuity score requires a signed model-swap receipt",
       },
+      {
+        label: "Local operator",
+        state: "gated",
+        keepsFromFrontiers: "private vault continuity and user-specific doctrine",
+        control: "approved vault records compile into deterministic task packets; raw vault text is not handed to frontier models",
+      },
     ],
     doctrine: [
       "Probabilistic engines propose; canonical runtime verifies, gates, records, and promotes.",
@@ -253,6 +259,7 @@ export async function getMirrorKernelPublicStatus(): Promise<MirrorKernelPublicS
       "Accuracy without fabrication: blocked or unverified routes return facts, assumptions, unknowns, source gaps, and the next safe step.",
       "Frontier models are proposer-only.",
       "Private files, vaults, devices, sends, and account actions stay approval-gated.",
+      "Vault-backed local operator packets use record ids, hashes, and approvals instead of raw life dumps.",
       "No proof surface may expose private runtime paths or raw body topology.",
     ],
     capabilityKernel,

@@ -44,6 +44,7 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByText('Removal effects')).toBeVisible();
     await expect(page.getByText('Continuity score')).toBeVisible();
     await expect(page.getByText('Decision critique')).toBeVisible();
+    await expect(page.getByText('Local operator')).toBeVisible();
 
     const kernelResponse = await page.request.get('/api/mirror/kernel');
     expect(kernelResponse.ok()).toBeTruthy();
@@ -61,7 +62,64 @@ test.describe('Active Mirror work OS front door', () => {
       'revocation_cascade',
       'identity_continuity_measure',
       'decision_critique_stream',
+      'local_operator_packet',
     ]);
+  });
+
+  test('local operator compiles approved context and rejects private material', async ({ page }) => {
+    await page.goto('/mirror?qa=1');
+
+    await page.getByTestId('runtime-btn').click();
+    await page.getByTestId('local-operator-contract').click();
+    await expect(page.getByTestId('operator-sheet')).toBeVisible();
+    await expect(page.getByTestId('local-operator-proof')).toContainText('deterministic policy');
+    await expect(page.getByText('private vault ingest · private body required')).toBeVisible();
+    await expect(page.getByText('No source, no fact')).toBeVisible();
+    await expect(page.getByText('Unapproved private note · approval required')).toBeVisible();
+
+    const getResponse = await page.request.get('/api/mirror/local-operator');
+    expect(getResponse.ok()).toBeTruthy();
+    const status = await getResponse.json();
+    expect(status.privateVaultIngest).toBe('private_body_required');
+    expect(status.samplePacket.state).toBe('compiled_public_safe');
+    expect(status.samplePacket.taskPacket.didNotRun).toContain('raw_vault_read');
+    expect(status.samplePacket.records.selected.map((record: { id: string }) => record.id)).toContain('doctrine.no_source_no_fact');
+    expect(status.samplePacket.records.rejected.map((record: { id: string }) => record.id)).toContain('draft.private_note');
+
+    const payload = {
+      prompt: 'Build a vendor evidence workspace with proof before recommendation.',
+      records: [
+        {
+          id: 'rule.no_source',
+          kind: 'rule',
+          title: 'No source, no fact',
+          text: 'Unsupported claims stay assumptions until verified.',
+          source: 'public contract',
+          privacyClass: 'public_safe',
+          canonicalStatus: 'canonical',
+          trainEligibility: 'runtime_only',
+          approved: true,
+          tags: ['vendor', 'proof'],
+        },
+      ],
+    };
+    const first = await page.request.post('/api/mirror/local-operator', { data: payload });
+    const second = await page.request.post('/api/mirror/local-operator', { data: payload });
+    expect(first.ok()).toBeTruthy();
+    expect(second.ok()).toBeTruthy();
+    const firstPacket = await first.json();
+    const secondPacket = await second.json();
+    expect(firstPacket.receipt.packetHash).toBe(secondPacket.receipt.packetHash);
+    expect(firstPacket.receipt.deterministic).toBe(true);
+
+    const rejected = await page.request.post('/api/mirror/local-operator', {
+      data: {
+        prompt: 'Use this private file.',
+        records: [{ title: 'Private path', text: '/Users/mirror-pro/.env contains a token' }],
+      },
+    });
+    expect(rejected.status()).toBe(400);
+    await expect(page.getByText('/Users/mirror-pro')).toHaveCount(0);
   });
 
   test('starter prompt creates one evolving artifact on the stage with evidence and a gated next action', async ({ page }) => {
@@ -133,29 +191,59 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: /Turn one important AI workflow into a reviewable workspace/i })).toBeVisible();
-    await expect(page.locator('header').getByText('72-hour proof sprint')).toBeVisible();
-    await expect(page.getByTestId('front-door-panel')).toContainText('I need to make a decision');
-    await expect(page.getByTestId('front-door-panel')).toContainText('I need to use sensitive context');
-    await expect(page.getByRole('link', { name: /Start a decision brief/i })).toHaveAttribute('href', /\/mirror\?prompt=/);
-    await expect(page.getByRole('link', { name: /Apply for a 72-hour sprint/i }).first()).toHaveAttribute('href', '/intake?focus=pilot');
+    await expect(page.getByRole('heading', { name: /Bring one AI workflow. Leave with a reviewable workspace/i })).toBeVisible();
+    await expect(page.getByTestId('front-door-panel')).toContainText('What should happen first?');
+    await expect(page.getByTestId('front-door-panel')).toContainText('Try the public workspace');
+    await expect(page.getByTestId('front-door-panel')).toContainText('Scope a real workflow');
+    await expect(page.locator('.frontdoor__route')).toHaveCount(2);
+    await expect(page.getByRole('link', { name: /Open workspace/i })).toHaveAttribute('href', /\/mirror\?prompt=/);
+    await expect(page.getByRole('link', { name: /Apply with one workflow/i }).first()).toHaveAttribute('href', '/intake?focus=pilot');
     await expect(page.getByText('Give us one workflow your current AI cannot safely finish.')).toBeVisible();
     await expect(page.getByRole('heading', { name: /No pitch theatre/i })).toBeVisible();
     await expect(page.getByText('A working proof on your workflow')).toBeVisible();
     await expect(page.getByText("A clear deploy-or-don't plan")).toBeVisible();
-    await expect(page.locator('.usecase__label').filter({ hasText: /^People$/ })).toBeVisible();
+    await expect(page.locator('.usecase__label').filter({ hasText: /^Teams$/ })).toBeVisible();
     await expect(page.locator('.usecase__label').filter({ hasText: /^Companies$/ })).toBeVisible();
-    await expect(page.locator('.usecase__label').filter({ hasText: /^Governments$/ })).toBeVisible();
-    await expect(page.locator('.usecase__label').filter({ hasText: /^Countries$/ })).toBeVisible();
+    await expect(page.locator('.usecase__label').filter({ hasText: /^Public sector$/ })).toBeVisible();
+    await expect(page.locator('.usecase__label').filter({ hasText: /^National programs$/ })).toBeVisible();
     await expect(page.getByText('Not a smarter chat box. A way to make AI work usable.')).toBeVisible();
     await expect(page.locator('#proof').getByRole('link', { name: /Review boundary/i })).toHaveAttribute('href', '/trust');
     await expect(page.locator('#proof').getByRole('link', { name: /Public evidence examples/i })).toHaveAttribute('href', '/glass');
+    const aboveFoldActions = await page.locator('header a, header button, nav a, nav button').evaluateAll((elements) =>
+      elements.filter((element) => {
+        const rect = element.getBoundingClientRect();
+        return rect.top >= 0 && rect.top < window.innerHeight;
+      }).length
+    );
+    expect(aboveFoldActions).toBeLessThanOrEqual(9);
     await expect(page.getByText('MirrorGate')).toHaveCount(0);
     await expect(page.getByText('Chetana')).toHaveCount(0);
     await expect(page.getByText('MirrorProd')).toHaveCount(0);
     await expect(page.getByText('body_unavailable')).toHaveCount(0);
     await expect(page.locator('textarea, input')).toHaveCount(0);
     expect(modelCalls).toEqual([]);
+  });
+
+  test('public landing stays compressed on mobile without horizontal clipping', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 820 });
+    await page.goto('/');
+
+    await expect(page.getByRole('heading', { name: /Bring one AI workflow. Leave with a reviewable workspace/i })).toBeVisible();
+    await expect(page.getByTestId('front-door-panel')).toBeVisible();
+    await expect(page.locator('.frontdoor__route')).toHaveCount(2);
+    await expect(page.getByRole('link', { name: /Apply with one workflow/i }).first()).toBeVisible();
+
+    const mobileMetrics = await page.evaluate(() => {
+      const doc = document.documentElement;
+      const panel = document.querySelector('[data-testid="front-door-panel"]')?.getBoundingClientRect();
+      return {
+        scrollWidth: doc.scrollWidth,
+        clientWidth: doc.clientWidth,
+        panelWidth: panel?.width || 0,
+      };
+    });
+    expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.clientWidth + 1);
+    expect(mobileMetrics.panelWidth).toBeLessThanOrEqual(mobileMetrics.clientWidth);
   });
 
   test('public telemetry captures funnel events without private text', async ({ page }) => {
@@ -173,11 +261,11 @@ test.describe('Active Mirror work OS front door', () => {
       return record.event === 'page_view' && record.target === 'public_site';
     })).toBeTruthy();
 
-    await page.getByRole('link', { name: /Apply for a 72-hour sprint/i }).first().click();
+    await page.getByRole('link', { name: /Apply with one workflow/i }).first().click();
     await expect(page).toHaveURL(/\/intake\?focus=pilot/);
     await expect.poll(() => events.some((event) => {
       const record = event as { event?: string; target?: string };
-      return record.event === 'cta_click' && record.target === 'hero_72h_sprint';
+      return record.event === 'cta_click' && record.target === 'hero_apply_workflow';
     })).toBeTruthy();
 
     const raw = JSON.stringify(events);
@@ -282,9 +370,9 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.goto('/about');
 
-    await expect(page.getByRole('heading', { name: /Turn one important AI workflow into a reviewable workspace/i })).toBeVisible();
-    await expect(page.getByTestId('front-door-panel')).toContainText('What do you need to get done?');
-    await expect(page.getByRole('link', { name: /Try the workspace/i }).first()).toHaveAttribute('href', '/mirror');
+    await expect(page.getByRole('heading', { name: /Bring one AI workflow. Leave with a reviewable workspace/i })).toBeVisible();
+    await expect(page.getByTestId('front-door-panel')).toContainText('What should happen first?');
+    await expect(page.getByRole('link', { name: /Try the public workspace/i }).first()).toHaveAttribute('href', '/mirror');
     await expect(page.locator('textarea, input')).toHaveCount(0);
     expect(modelCalls).toEqual([]);
   });

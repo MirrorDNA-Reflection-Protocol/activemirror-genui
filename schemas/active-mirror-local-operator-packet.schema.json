@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "active_mirror.local_operator_packet.v1",
+  "title": "Active Mirror Local Operator Packet",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "version",
+    "state",
+    "receiptState",
+    "operator",
+    "claimBoundary",
+    "privateVaultIngest",
+    "skillRails",
+    "inputPolicy",
+    "task",
+    "records",
+    "taskPacket",
+    "receipt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "active_mirror.local_operator_packet.v1" },
+    "version": { "type": "string" },
+    "state": { "const": "compiled_public_safe" },
+    "receiptState": { "const": "unsigned_public_preview" },
+    "operator": {
+      "type": "object",
+      "required": ["name", "role", "authority", "localModelRole", "frontierModelRole"],
+      "properties": {
+        "name": { "const": "LocalOperator" },
+        "role": { "const": "governed_context_operator" },
+        "authority": { "const": "deterministic_policy" },
+        "localModelRole": { "const": "optional_classifier_only" },
+        "frontierModelRole": { "const": "scoped_proposer_only" }
+      },
+      "additionalProperties": false
+    },
+    "claimBoundary": { "type": "string" },
+    "privateVaultIngest": {
+      "type": "object",
+      "required": ["state", "rule"],
+      "properties": {
+        "state": { "const": "private_body_required" },
+        "rule": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "skillRails": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "role", "state"],
+        "properties": {
+          "id": { "type": "string" },
+          "role": { "type": "string" },
+          "state": { "enum": ["available_private_body", "public_contract"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "inputPolicy": {
+      "type": "object",
+      "required": ["allowedKinds", "allowedPrivacyClasses", "requiredMetadata", "exclusionRules"],
+      "properties": {
+        "allowedKinds": {
+          "type": "array",
+          "items": {
+            "enum": ["fact", "preference", "pattern", "project", "mistake", "rule", "source", "revocation"]
+          }
+        },
+        "allowedPrivacyClasses": {
+          "type": "array",
+          "items": { "enum": ["public_safe", "private", "secret", "regulated"] }
+        },
+        "requiredMetadata": { "type": "array", "items": { "type": "string" } },
+        "exclusionRules": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "task": {
+      "type": "object",
+      "required": ["prompt", "intentHash", "sourceGaps"],
+      "properties": {
+        "prompt": { "type": "string" },
+        "intentHash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "sourceGaps": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "records": {
+      "type": "object",
+      "required": ["supplied", "eligible", "selected", "rejected"],
+      "properties": {
+        "supplied": { "type": "integer", "minimum": 0 },
+        "eligible": { "type": "integer", "minimum": 0 },
+        "selected": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "title", "sourceHash", "relevance", "use"],
+            "properties": {
+              "id": { "type": "string" },
+              "kind": { "enum": ["fact", "preference", "pattern", "project", "mistake", "rule", "source", "revocation"] },
+              "title": { "type": "string" },
+              "sourceHash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+              "relevance": { "type": "number" },
+              "use": { "enum": ["route", "reflect", "answer_boundary", "memory_boundary"] }
+            },
+            "additionalProperties": false
+          }
+        },
+        "rejected": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "reason"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "reason": {
+                "enum": [
+                  "invalid_record",
+                  "approval_required",
+                  "private_material",
+                  "secret_or_regulated",
+                  "not_canonical",
+                  "stale_or_contradicted"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "taskPacket": {
+      "type": "object",
+      "required": ["contextEnvelope", "modelVisibility", "selectedRecordIds", "didNotRun", "nextGate"],
+      "properties": {
+        "contextEnvelope": { "const": "selected_record_ids_only" },
+        "modelVisibility": { "const": "scoped_public_safe_records" },
+        "selectedRecordIds": { "type": "array", "items": { "type": "string" } },
+        "didNotRun": { "type": "array", "items": { "type": "string" } },
+        "nextGate": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "receipt": {
+      "type": "object",
+      "required": ["compilerVersion", "packetHash", "selectedRecordHashes", "rejectedCount", "deterministic"],
+      "properties": {
+        "compilerVersion": { "type": "string" },
+        "packetHash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "selectedRecordHashes": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+        },
+        "rejectedCount": { "type": "integer", "minimum": 0 },
+        "deterministic": { "const": true }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

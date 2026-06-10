@@ -173,7 +173,7 @@
 .sprint__item p { font-size: 13.5px; line-height: 1.56; margin: 0; color: var(--text-secondary); }
 
 /* ============================================================ BUYER USE CASES */
-.usecases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 46px; }
+.usecases { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 46px; }
 .usecase { min-width: 0; background: var(--surface-card); border: 1px solid var(--border-default); border-radius: 14px;
   padding: 24px 22px; }
 .usecase__label { font-family: var(--font-data); font-size: 10.5px; letter-spacing: .13em; text-transform: uppercase;
@@ -195,7 +195,7 @@
 .proof-step p { margin: 6px 0 0; font-size: 14px; line-height: 1.5; color: var(--text-secondary); }
 
 /* ============================================================ NOVELTY / DIFFERENCE */
-.novelty { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 44px;
+.novelty { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; margin-top: 44px;
   border: 1px solid var(--hairline); border-radius: 14px; overflow: hidden; background: var(--hairline); }
 .novelty__item { min-width: 0; background: var(--ink-1000); padding: 24px 22px; }
 .novelty__item h3 { font-size: 17px; line-height: 1.28; font-weight: 600; color: var(--text-primary); margin: 0 0 10px; }

@@ -5,8 +5,9 @@ import {
   ACTIVE_MIRROR_RELEASE_EVALUATION,
   ACTIVE_MIRROR_STORAGE_CONTRACT,
 } from "./contracts/activeMirrorBootloader";
+import { localOperatorContract } from "./localOperator";
 
-export const ACTIVE_MIRROR_RATCHET_VERSION = "2026.06.09-mirror-ratchet-v5";
+export const ACTIVE_MIRROR_RATCHET_VERSION = "2026.06.10-mirror-ratchet-v6";
 
 type RatchetState = "passing" | "queued" | "blocked";
 
@@ -55,6 +56,7 @@ function check(
 }
 
 export function getMirrorRatchetStatus(): MirrorRatchetStatus {
+  const operator = localOperatorContract();
   const checks: MirrorRatchetCheck[] = [
     check(
       "accuracy-without-fabrication",
@@ -140,6 +142,13 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
       "Most assistants hide policy misses, stale assumptions, and tool failures behind polished prose.",
       "Public critique stream admits blocked, gated, missing, and queued system states.",
     ),
+    check(
+      "local-operator-context-compiler",
+      "Local operator context compiler",
+      operator.privateVaultIngest === "private_body_required" ? "passing" : "blocked",
+      "Broad private context is dumped into a hosted model or buried in an opaque memory profile.",
+      "Approved records compile into deterministic task packets; raw vault text and training stay off the public route.",
+    ),
   ];
 
   const passing = checks.filter((item) => item.state === "passing").length;
@@ -168,6 +177,7 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
         "revocation cascade opacity",
         "hidden system failure stream",
         "model-swap identity drift",
+        "raw private context dumping",
       ],
       queued: [],
     },
@@ -198,12 +208,18 @@ export function getMirrorRatchetStatus(): MirrorRatchetStatus {
         nakedFrontierModel: "Vendor-owned transcript or logs",
         activeMirror: "User-owned receipts and public-safe body sync path",
       },
+      {
+        axis: "Private context",
+        nakedFrontierModel: "More context is treated as better by default",
+        activeMirror: "Approved record ids, hashes, and scoped packets before any model sees context",
+      },
     ],
     nextQueue: [
       "Install production body receipt publisher and token.",
       "Install production body receipt public key and signed publisher.",
       "Run signed private identity-continuity measurements across approved model swaps.",
       "Connect revocation cascade and critique stream to signed private body events.",
+      "Connect the local operator compiler to signed private vault receipts.",
     ],
   };
 }

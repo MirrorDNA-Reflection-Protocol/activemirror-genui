@@ -72,6 +72,16 @@ function localOrToken(request: NextRequest) {
   return Boolean(ADMIN_TOKEN && auth === `Bearer ${ADMIN_TOKEN}`);
 }
 
+function storageUnavailableReason() {
+  return process.env.DATABASE_URL ? "" : "database_url_missing";
+}
+
+function knownStoreErrorReason(error: unknown) {
+  const code = typeof error === "object" && error && "code" in error ? String((error as { code?: string }).code || "") : "";
+  if (code === "P2021") return "audit_log_table_missing";
+  return "";
+}
+
 function normalizeEvent(body: AnalyticsEvent, request: NextRequest) {
   const url = request.nextUrl;
   const event = clean(body?.event || "event", 80).toLowerCase().replace(/[^a-z0-9_:-]/g, "_");
@@ -123,8 +133,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Request too large" }, { status: 413 });
     }
 
-    const body = await request.json();
+    let body: AnalyticsEvent;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ ok: true, stored: false, reason: "empty_or_invalid_body" }, { status: 202 });
+    }
     const event = normalizeEvent(body, request);
+    const unavailableReason = storageUnavailableReason();
+    if (unavailableReason) {
+      return NextResponse.json({ ok: true, stored: false, reason: unavailableReason }, { status: 202 });
+    }
 
     try {
       await prisma.auditLog.create({
@@ -137,6 +156,10 @@ export async function POST(request: NextRequest) {
       });
       return NextResponse.json({ ok: true, stored: true });
     } catch (error) {
+      const knownReason = knownStoreErrorReason(error);
+      if (knownReason) {
+        return NextResponse.json({ ok: true, stored: false, reason: knownReason }, { status: 202 });
+      }
       console.error("[Analytics] store unavailable:", error);
       return NextResponse.json({ ok: true, stored: false }, { status: 202 });
     }
@@ -149,6 +172,20 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   if (!localOrToken(request)) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const unavailableReason = storageUnavailableReason();
+  if (unavailableReason) {
+    return NextResponse.json({
+      ok: true,
+      stored: false,
+      reason: unavailableReason,
+      count: 0,
+      byEvent: [],
+      byPath: [],
+      byTarget: [],
+      recent: [],
+    });
   }
 
   const limit = Math.min(Number(request.nextUrl.searchParams.get("limit") || 1000), 5000);
