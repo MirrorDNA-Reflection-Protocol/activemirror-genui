@@ -65,23 +65,39 @@ function chooseRoute(prompt: string) {
       label: "local · gated",
       model: null,
       reason: "sensitive route held off hosted-model path",
+      fallbacks: [],
     };
   }
 
+  const configuredRoutes = [];
   if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     const id = process.env.ACTIVE_MIRROR_GEMINI_MODEL || "gemini-2.5-flash";
-    return { label: `gemini · ${id.replace(/^gemini-/, "")}`, model: google(id), reason: "workhorse fast route" };
+    configuredRoutes.push({
+      label: `gemini · ${id.replace(/^gemini-/, "")}`,
+      model: google(id),
+      reason: "workhorse fast route",
+    });
   }
 
   if (process.env.OPENAI_API_KEY) {
     const id = process.env.ACTIVE_MIRROR_OPENAI_MODEL || process.env.MIRROR_OPENAI_MODEL || "gpt-4.1-mini";
-    return { label: `openai · ${id}`, model: openai(id), reason: "fallback workhorse route" };
+    configuredRoutes.push({
+      label: `openai · ${id}`,
+      model: openai(id),
+      reason: configuredRoutes.length ? "fallback workhorse route" : "workhorse fast route",
+    });
+  }
+
+  const [primary, ...fallbacks] = configuredRoutes;
+  if (primary) {
+    return { ...primary, fallbacks };
   }
 
   return {
     label: "local fallback",
     model: null,
     reason: "no public model key configured",
+    fallbacks: [],
   };
 }
 
@@ -458,11 +474,28 @@ export async function POST(request: NextRequest) {
       enqueue(controller, { type: "route", route: route.label, reason: route.reason });
       try {
         const forcedTurn = deterministicTurn(input);
-        const turn = forcedTurn
-          ? forcedTurn
-          : route.model
-          ? await modelTurn(input, route.model)
-          : fallbackTurn(input, route.reason);
+        let turn: WorkTurn | null = forcedTurn;
+        if (!turn && route.model) {
+          const candidates = [
+            { label: route.label, reason: route.reason, model: route.model },
+            ...route.fallbacks,
+          ];
+          for (const [index, candidate] of candidates.entries()) {
+            if (index > 0) {
+              enqueue(controller, { type: "route", route: candidate.label, reason: candidate.reason });
+            }
+            try {
+              turn = await modelTurn(input, candidate.model);
+              break;
+            } catch (error) {
+              console.error("[ActiveMirror WorkOS] model route failed", {
+                route: candidate.label,
+                error: error instanceof Error ? error.message : String(error),
+              });
+            }
+          }
+        }
+        if (!turn) turn = fallbackTurn(input, route.reason);
         await emitModel(controller, turn);
       } catch {
         await emitFallback(controller, fallbackTurn(input, route.reason));
