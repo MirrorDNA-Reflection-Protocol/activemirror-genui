@@ -180,9 +180,11 @@ type ModelProviderHealth = {
   label: string;
   role: string;
   modelId: string | null;
-  status: "healthy" | "degraded" | "configured_unchecked" | "configured_not_wired" | "unconfigured" | "gated";
+  status: "healthy" | "degraded" | "configured_unchecked" | "configured_disabled" | "unconfigured" | "gated";
   secretState: "present" | "missing" | "not_required";
   routeUse: string;
+  enabled: boolean;
+  wired: boolean;
   lastObservedAt: string | null;
   lastErrorClass: string | null;
   publicMessage: string;
@@ -789,7 +791,7 @@ function memorySheet(memoryMode: MemoryMode, seedState: "none" | "sample") {
 
 function modelHealthTone(status: ModelProviderHealth["status"]) {
   if (status === "healthy") return "ok";
-  if (status === "degraded" || status === "configured_not_wired" || status === "configured_unchecked" || status === "gated") return "warn";
+  if (status === "degraded" || status === "configured_disabled" || status === "configured_unchecked" || status === "gated") return "warn";
   return "off";
 }
 
@@ -797,7 +799,7 @@ function modelHealthLabel(provider: ModelProviderHealth) {
   if (provider.status === "healthy") return "healthy";
   if (provider.status === "degraded") return provider.lastErrorClass || "degraded";
   if (provider.status === "configured_unchecked") return "configured";
-  if (provider.status === "configured_not_wired") return "not wired";
+  if (provider.status === "configured_disabled") return provider.wired ? "disabled" : "not wired";
   if (provider.status === "gated") return "gated";
   return "not configured";
 }
@@ -811,25 +813,15 @@ function fallbackModelHealth(): ModelHealth {
     sensitiveRoute: "local · gated",
     providers: [
       {
-        id: "gemini",
-        label: "Gemini",
-        role: "primary fast workhorse",
-        modelId: "gemini-2.5-flash",
-        status: "configured_unchecked",
-        secretState: "present",
-        routeUse: "first hosted route for public Work OS turns",
-        lastObservedAt: null,
-        lastErrorClass: null,
-        publicMessage: "Provider health is loading.",
-      },
-      {
         id: "openai",
         label: "OpenAI",
-        role: "fallback workhorse",
+        role: "primary public workhorse",
         modelId: "gpt-4.1-mini",
         status: "configured_unchecked",
         secretState: "present",
-        routeUse: "fallback hosted route for public Work OS turns",
+        routeUse: "first hosted route for public Work OS turns",
+        enabled: true,
+        wired: true,
         lastObservedAt: null,
         lastErrorClass: null,
         publicMessage: "Provider health is loading.",
@@ -837,14 +829,30 @@ function fallbackModelHealth(): ModelHealth {
       {
         id: "anthropic",
         label: "Anthropic",
-        role: "reserved quality lane",
-        modelId: null,
-        status: "configured_not_wired",
+        role: "wired quality lane",
+        modelId: "claude-sonnet-4-5",
+        status: "configured_disabled",
         secretState: "present",
-        routeUse: "not used by /api/mirror/work-os yet",
+        routeUse: "disabled until usage limit and key health are confirmed",
+        enabled: false,
+        wired: true,
         lastObservedAt: null,
         lastErrorClass: null,
-        publicMessage: "Credentials may exist, but this route is not wired to Anthropic yet.",
+        publicMessage: "This provider is wired, but disabled by route policy.",
+      },
+      {
+        id: "gemini",
+        label: "Gemini",
+        role: "wired but disabled lane",
+        modelId: "gemini-2.5-flash",
+        status: "configured_disabled",
+        secretState: "present",
+        routeUse: "disabled until key rotation and explicit re-admission",
+        enabled: false,
+        wired: true,
+        lastObservedAt: null,
+        lastErrorClass: null,
+        publicMessage: "This provider is wired, but disabled by route policy.",
       },
       {
         id: "local",
@@ -854,6 +862,8 @@ function fallbackModelHealth(): ModelHealth {
         status: "gated",
         secretState: "not_required",
         routeUse: "selected for private, device, vault, account, or local-only work",
+        enabled: true,
+        wired: true,
         lastObservedAt: null,
         lastErrorClass: null,
         publicMessage: "Private body execution is separate from the public site.",

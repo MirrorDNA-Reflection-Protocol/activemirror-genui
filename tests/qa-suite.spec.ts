@@ -1,4 +1,13 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+async function openSheet(page: Page, buttonTestId: string, sheetTestId: string) {
+  const button = page.getByTestId(buttonTestId);
+  await expect(button).toBeVisible();
+  await expect(async () => {
+    await button.click();
+    await expect(page.getByTestId(sheetTestId)).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+}
 
 test.describe('Active Mirror work OS front door', () => {
   test('front door is the margin-stage Work OS, not the old GenUI dashboard', async ({ page }) => {
@@ -26,8 +35,7 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByTestId('seed-import')).toContainText('Sample context loaded for this run');
     await expect.poll(() => page.evaluate(() => window.localStorage.getItem('active_mirror.mirrorseed.sample'))).toBeNull();
 
-    await page.getByTestId('memory-btn').click();
-    await expect(page.getByTestId('memory-sheet')).toBeVisible();
+    await openSheet(page, 'memory-btn', 'memory-sheet');
     await expect(page.getByText('Ephemeral scratch')).toBeVisible();
     await expect(page.getByText('The public sample is not written to localStorage or saved memory.')).toBeVisible();
   });
@@ -35,8 +43,7 @@ test.describe('Active Mirror work OS front door', () => {
   test('controls sheet binds the live review contracts behind one tap', async ({ page }) => {
     await page.goto('/mirror?qa=1');
 
-    await page.getByTestId('runtime-btn').click();
-    await expect(page.getByTestId('runtime-sheet')).toBeVisible();
+    await openSheet(page, 'runtime-btn', 'runtime-sheet');
     await expect(page.getByText('GET /api/mirror/contracts')).toBeVisible();
     await expect(page.getByTestId('mirrorkernel-proof')).toContainText('Identity controls');
     await expect(page.getByTestId('mirror-ratchet-proof')).toContainText('Reliability checks');
@@ -69,8 +76,7 @@ test.describe('Active Mirror work OS front door', () => {
   test('local operator compiles approved context and rejects private material', async ({ page }) => {
     await page.goto('/mirror?qa=1');
 
-    await page.getByTestId('runtime-btn').click();
-    await expect(page.getByTestId('runtime-sheet')).toBeVisible();
+    await openSheet(page, 'runtime-btn', 'runtime-sheet');
     await page.getByTestId('local-operator-contract').click();
     await expect(page.getByTestId('operator-sheet')).toBeVisible();
     await expect(page.getByTestId('local-operator-proof')).toContainText('deterministic policy');
@@ -164,13 +170,16 @@ test.describe('Active Mirror work OS front door', () => {
   test('route chip opens policy rather than pretending everything is local', async ({ page }) => {
     await page.goto('/mirror?qa=1');
 
-    await page.getByTestId('route-btn').click();
-    await expect(page.getByTestId('routing-sheet')).toBeVisible();
+    await openSheet(page, 'route-btn', 'routing-sheet');
     await expect(page.getByText('GET /api/mirror/model-health')).toBeVisible();
     await expect(page.getByText('provider health')).toBeVisible();
-    await expect(page.getByTestId('model-provider-gemini')).toContainText('Gemini');
     await expect(page.getByTestId('model-provider-openai')).toContainText('OpenAI');
+    await expect(page.getByTestId('model-provider-openai')).toContainText('primary public workhorse');
     await expect(page.getByTestId('model-provider-anthropic')).toContainText('Anthropic');
+    await expect(page.getByTestId('model-provider-anthropic')).toContainText('wired quality');
+    await expect(page.getByTestId('model-provider-anthropic')).toContainText(/disabled|not configured/);
+    await expect(page.getByTestId('model-provider-gemini')).toContainText('Gemini');
+    await expect(page.getByTestId('model-provider-gemini')).toContainText(/disabled|not configured/);
     await expect(page.getByTestId('model-provider-local')).toContainText('Local gated route');
     await expect(page.getByText('Sensitive work stays on')).toBeVisible();
     await expect(page.getByText('Never claim')).toHaveCount(0);
@@ -184,7 +193,10 @@ test.describe('Active Mirror work OS front door', () => {
     expect(body.schemaVersion).toBe('active_mirror.model_health.v1');
     expect(body.claimBoundary).toContain('No secrets');
     expect(body.sensitiveRoute).toBe('local · gated');
-    expect(body.providers.map((provider: { id: string }) => provider.id)).toEqual(['gemini', 'openai', 'anthropic', 'local']);
+    expect(body.providers.map((provider: { id: string }) => provider.id)).toEqual(['openai', 'anthropic', 'gemini', 'local']);
+    expect(body.providers.find((provider: { id: string }) => provider.id === 'anthropic').wired).toBe(true);
+    expect(body.providers.find((provider: { id: string }) => provider.id === 'anthropic').enabled).toBe(false);
+    expect(body.providers.find((provider: { id: string }) => provider.id === 'gemini').enabled).toBe(false);
     expect(JSON.stringify(body)).not.toContain('API_KEY');
     expect(JSON.stringify(body)).not.toContain('/Users/mirror-pro');
   });

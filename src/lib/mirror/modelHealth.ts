@@ -2,6 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
+import { anthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
 import { openai } from "@ai-sdk/openai";
 import type { LanguageModel } from "ai";
@@ -9,7 +10,7 @@ import type { LanguageModel } from "ai";
 export type ModelProviderId = "gemini" | "openai" | "anthropic";
 
 export type ModelRouteCandidate = {
-  provider: "gemini" | "openai";
+  provider: ModelProviderId;
   label: string;
   modelId: string;
   model: LanguageModel;
@@ -30,9 +31,11 @@ export type ModelProviderHealth = {
   label: string;
   role: string;
   modelId: string | null;
-  status: "healthy" | "degraded" | "configured_unchecked" | "configured_not_wired" | "unconfigured" | "gated";
+  status: "healthy" | "degraded" | "configured_unchecked" | "configured_disabled" | "unconfigured" | "gated";
   secretState: "present" | "missing" | "not_required";
   routeUse: string;
+  enabled: boolean;
+  wired: boolean;
   lastObservedAt: string | null;
   lastErrorClass: string | null;
   publicMessage: string;
@@ -53,6 +56,16 @@ const STATE_PATH =
     tmpdir(),
     `active-mirror-model-health-${createHash("sha1").update(process.cwd()).digest("hex").slice(0, 12)}.json`,
   );
+
+function envEnabled(name: string, defaultValue: boolean) {
+  const value = process.env[name];
+  if (value === undefined) return defaultValue;
+  return /^(1|true|yes|on)$/i.test(value);
+}
+
+function providerBlockedByHealth(observed?: ObservedProviderState) {
+  return observed?.status === "degraded" && ["credential_rejected", "usage_limited", "rate_limited"].includes(observed.errorClass || "");
+}
 
 function readState(): ObservedState {
   try {
@@ -79,6 +92,7 @@ export function classifyModelError(error: unknown) {
   }
   if (lower.includes("schema") || lower.includes("response_format")) return "schema_rejected";
   if (lower.includes("timeout") || lower.includes("timed out")) return "timeout";
+  if (lower.includes("usage limit") || lower.includes("usage limits") || lower.includes("quota")) return "usage_limited";
   if (lower.includes("rate") || lower.includes("429")) return "rate_limited";
   return "provider_error";
 }
@@ -89,26 +103,38 @@ export function isSensitiveModelPrompt(prompt: string) {
 
 export function configuredWorkOsModelRoutes() {
   const routes: ModelRouteCandidate[] = [];
+  const observed = readState();
 
-  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    const modelId = process.env.ACTIVE_MIRROR_GEMINI_MODEL || "gemini-2.5-flash";
-    routes.push({
-      provider: "gemini",
-      label: `gemini · ${modelId.replace(/^gemini-/, "")}`,
-      modelId,
-      model: google(modelId),
-      reason: "workhorse fast route",
-    });
-  }
-
-  if (process.env.OPENAI_API_KEY) {
+  if (process.env.OPENAI_API_KEY && envEnabled("ACTIVE_MIRROR_ENABLE_OPENAI", true) && !providerBlockedByHealth(observed.openai)) {
     const modelId = process.env.ACTIVE_MIRROR_OPENAI_MODEL || process.env.MIRROR_OPENAI_MODEL || "gpt-4.1-mini";
     routes.push({
       provider: "openai",
       label: `openai · ${modelId}`,
       modelId,
       model: openai(modelId),
-      reason: routes.length ? "fallback workhorse route" : "workhorse fast route",
+      reason: "primary public workhorse route",
+    });
+  }
+
+  if (process.env.ANTHROPIC_API_KEY && envEnabled("ACTIVE_MIRROR_ENABLE_ANTHROPIC", false) && !providerBlockedByHealth(observed.anthropic)) {
+    const modelId = process.env.ANTHROPIC_MODEL || process.env.ACTIVE_MIRROR_ANTHROPIC_MODEL || "claude-sonnet-4-5";
+    routes.push({
+      provider: "anthropic",
+      label: `anthropic · ${modelId.replace(/^claude-/, "")}`,
+      modelId,
+      model: anthropic(modelId),
+      reason: routes.length ? "quality fallback route" : "primary quality route",
+    });
+  }
+
+  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY && envEnabled("ACTIVE_MIRROR_ENABLE_GEMINI", false) && !providerBlockedByHealth(observed.gemini)) {
+    const modelId = process.env.ACTIVE_MIRROR_GEMINI_MODEL || "gemini-2.5-flash";
+    routes.push({
+      provider: "gemini",
+      label: `gemini · ${modelId.replace(/^gemini-/, "")}`,
+      modelId,
+      model: google(modelId),
+      reason: routes.length ? "re-enabled fallback route" : "re-enabled public route",
     });
   }
 
@@ -143,6 +169,7 @@ function configuredProviderStatus(input: {
   modelId: string | null;
   hasKey: boolean;
   wired: boolean;
+  enabled: boolean;
   routeUse: string;
   observed?: ObservedProviderState;
 }): ModelProviderHealth {
@@ -155,24 +182,34 @@ function configuredProviderStatus(input: {
       status: "unconfigured",
       secretState: "missing",
       routeUse: input.routeUse,
+      enabled: false,
+      wired: input.wired,
       lastObservedAt: null,
       lastErrorClass: null,
       publicMessage: "No provider key is configured for this lane.",
     };
   }
 
-  if (!input.wired) {
+  if (!input.wired || !input.enabled || providerBlockedByHealth(input.observed)) {
+    const errorClass = input.observed?.errorClass || null;
     return {
       id: input.id,
       label: input.label,
       role: input.role,
       modelId: input.modelId,
-      status: "configured_not_wired",
+      status: "configured_disabled",
       secretState: "present",
       routeUse: input.routeUse,
-      lastObservedAt: null,
-      lastErrorClass: null,
-      publicMessage: "Credentials exist, but this Work OS route does not call that provider yet.",
+      enabled: false,
+      wired: input.wired,
+      lastObservedAt: input.observed?.observedAt || null,
+      lastErrorClass: errorClass,
+      publicMessage:
+        errorClass === "credential_rejected"
+          ? "This provider is wired, but removed from active routing after credential rejection."
+          : input.wired
+            ? "This provider is wired, but disabled by route policy."
+            : "Credentials exist, but this Work OS route does not call that provider yet.",
     };
   }
 
@@ -185,6 +222,8 @@ function configuredProviderStatus(input: {
       status: input.observed.status,
       secretState: "present",
       routeUse: input.routeUse,
+      enabled: true,
+      wired: input.wired,
       lastObservedAt: input.observed.observedAt,
       lastErrorClass: input.observed.errorClass || null,
       publicMessage:
@@ -202,6 +241,8 @@ function configuredProviderStatus(input: {
     status: "configured_unchecked",
     secretState: "present",
     routeUse: input.routeUse,
+    enabled: true,
+    wired: input.wired,
     lastObservedAt: null,
     lastErrorClass: null,
     publicMessage: "Credentials are present, but no route success or failure has been observed in this process yet.",
@@ -212,38 +253,41 @@ export function getModelHealthSnapshot(): ModelHealthSnapshot {
   const observed = readState();
   const geminiModel = process.env.ACTIVE_MIRROR_GEMINI_MODEL || "gemini-2.5-flash";
   const openaiModel = process.env.ACTIVE_MIRROR_OPENAI_MODEL || process.env.MIRROR_OPENAI_MODEL || "gpt-4.1-mini";
-  const anthropicModel = process.env.ANTHROPIC_MODEL || process.env.ACTIVE_MIRROR_ANTHROPIC_MODEL || "not_wired";
+  const anthropicModel = process.env.ANTHROPIC_MODEL || process.env.ACTIVE_MIRROR_ANTHROPIC_MODEL || "claude-sonnet-4-5";
 
   const providers: ModelProviderHealth[] = [
     configuredProviderStatus({
-      id: "gemini",
-      label: "Gemini",
-      role: "primary fast workhorse",
-      modelId: geminiModel,
-      hasKey: Boolean(process.env.GOOGLE_GENERATIVE_AI_API_KEY),
-      wired: true,
-      routeUse: "first hosted route for public Work OS turns",
-      observed: observed.gemini,
-    }),
-    configuredProviderStatus({
       id: "openai",
       label: "OpenAI",
-      role: "fallback workhorse",
+      role: "primary public workhorse",
       modelId: openaiModel,
       hasKey: Boolean(process.env.OPENAI_API_KEY),
       wired: true,
-      routeUse: "fallback hosted route for public Work OS turns",
+      enabled: envEnabled("ACTIVE_MIRROR_ENABLE_OPENAI", true),
+      routeUse: "first hosted route for public Work OS turns",
       observed: observed.openai,
     }),
     configuredProviderStatus({
       id: "anthropic",
       label: "Anthropic",
-      role: "reserved quality lane",
+      role: "wired quality lane",
       modelId: process.env.ANTHROPIC_API_KEY ? anthropicModel : null,
       hasKey: Boolean(process.env.ANTHROPIC_API_KEY),
-      wired: false,
-      routeUse: "not used by /api/mirror/work-os yet",
+      wired: true,
+      enabled: envEnabled("ACTIVE_MIRROR_ENABLE_ANTHROPIC", false),
+      routeUse: "disabled until usage limit and key health are confirmed",
       observed: observed.anthropic,
+    }),
+    configuredProviderStatus({
+      id: "gemini",
+      label: "Gemini",
+      role: "wired but disabled lane",
+      modelId: geminiModel,
+      hasKey: Boolean(process.env.GOOGLE_GENERATIVE_AI_API_KEY),
+      wired: true,
+      enabled: envEnabled("ACTIVE_MIRROR_ENABLE_GEMINI", false),
+      routeUse: "disabled until key rotation and explicit re-admission",
+      observed: observed.gemini,
     }),
     {
       id: "local",
@@ -253,6 +297,8 @@ export function getModelHealthSnapshot(): ModelHealthSnapshot {
       status: "gated",
       secretState: "not_required",
       routeUse: "selected when the prompt asks for private, device, vault, account, or local-only work",
+      enabled: true,
+      wired: true,
       lastObservedAt: null,
       lastErrorClass: null,
       publicMessage: "The public site can hold the route and explain the approval boundary; private body execution is separate.",
