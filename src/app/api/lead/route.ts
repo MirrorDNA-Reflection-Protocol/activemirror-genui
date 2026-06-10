@@ -19,6 +19,9 @@ type Lead = {
   timeline: string;
   decisionRole: string;
   focus: string;
+  failureMode: string;
+  approvedInputs: string;
+  desiredArtifact: string;
   proofTarget: string;
   useCase: string;
 };
@@ -39,6 +42,9 @@ function mailtoFromLead(lead: Lead) {
       lead.infrastructure ? `Infrastructure: ${lead.infrastructure}` : "",
       lead.timeline ? `Timeline: ${lead.timeline}` : "",
       lead.decisionRole ? `Decision role: ${lead.decisionRole}` : "",
+      lead.failureMode ? `Current AI failure: ${lead.failureMode}` : "",
+      lead.approvedInputs ? `First 72-hour inputs: ${lead.approvedInputs}` : "",
+      lead.desiredArtifact ? `First deliverable: ${lead.desiredArtifact}` : "",
       lead.proofTarget ? `Proof target: ${lead.proofTarget}` : "",
       "",
       `Use case: ${lead.useCase}`,
@@ -131,6 +137,9 @@ export async function POST(request: NextRequest) {
       timeline: clean(body?.timeline, 120),
       decisionRole: clean(body?.decisionRole, 160),
       focus: clean(body?.focus, 80),
+      failureMode: clean(body?.failureMode, 180),
+      approvedInputs: clean(body?.approvedInputs, 180),
+      desiredArtifact: clean(body?.desiredArtifact, 180),
       proofTarget: clean(body?.proofTarget, 700),
       useCase: clean(body?.useCase, 1000),
     };
@@ -149,6 +158,7 @@ export async function POST(request: NextRequest) {
         action: "LEAD_CAPTURE",
         resource: `activemirror.ai:lead:${captureId}`,
         details: JSON.stringify({
+          schemaVersion: "active_mirror.lead_capture.v2",
           captureId,
           ...lead,
           destination: LEAD_TO,

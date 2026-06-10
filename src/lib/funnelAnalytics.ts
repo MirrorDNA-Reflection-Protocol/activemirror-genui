@@ -28,6 +28,9 @@ type LeadRecord = {
   timeline: string;
   decisionRole?: string;
   focus?: string;
+  failureMode?: string;
+  approvedInputs?: string;
+  desiredArtifact?: string;
   proofTarget?: string;
   useCase: string;
   qualification?: LeadQualification;
@@ -179,6 +182,9 @@ function unavailableSnapshot(input: {
     topSources: [],
     topCtas: [],
     topFocus: [],
+    topFailureModes: [],
+    topApprovedInputs: [],
+    topDesiredArtifacts: [],
     devices: [],
     recentLeads: [],
     recentEvents: [],
@@ -254,6 +260,9 @@ export async function getFunnelSnapshot(days = 14) {
     const byCta = new Map<string, number>();
     const byDevice = new Map<string, number>();
     const byFocus = new Map<string, number>();
+    const byFailureMode = new Map<string, number>();
+    const byApprovedInputs = new Map<string, number>();
+    const byDesiredArtifact = new Map<string, number>();
 
     for (const event of events) {
       if (event.path) byPath.set(event.path, (byPath.get(event.path) || 0) + 1);
@@ -264,6 +273,9 @@ export async function getFunnelSnapshot(days = 14) {
     }
     for (const lead of leadsWithQualification) {
       if (lead.focus) byFocus.set(`lead:${lead.focus}`, (byFocus.get(`lead:${lead.focus}`) || 0) + 1);
+      if (lead.failureMode) byFailureMode.set(lead.failureMode, (byFailureMode.get(lead.failureMode) || 0) + 1);
+      if (lead.approvedInputs) byApprovedInputs.set(lead.approvedInputs, (byApprovedInputs.get(lead.approvedInputs) || 0) + 1);
+      if (lead.desiredArtifact) byDesiredArtifact.set(lead.desiredArtifact, (byDesiredArtifact.get(lead.desiredArtifact) || 0) + 1);
     }
 
     const visitorBase = publicSessions.size || publicViews.length;
@@ -308,6 +320,9 @@ export async function getFunnelSnapshot(days = 14) {
       topSources: topMap(bySource),
       topCtas: topMap(byCta),
       topFocus: topMap(byFocus),
+      topFailureModes: topMap(byFailureMode),
+      topApprovedInputs: topMap(byApprovedInputs),
+      topDesiredArtifacts: topMap(byDesiredArtifact),
       devices: topMap(byDevice),
       recentLeads: leadsWithQualification.slice(0, 12).map((lead) => ({
         ...lead,
@@ -315,6 +330,9 @@ export async function getFunnelSnapshot(days = 14) {
         deliveryStatus: lead.deliveryStatus || (lead.delivered ? "delivered" : "capture_only"),
         emailDomain: emailDomain(lead.email),
         useCasePreview: lead.useCase.replace(/\s+/g, " ").slice(0, 260),
+        failureModePreview: (lead.failureMode || "").replace(/\s+/g, " ").slice(0, 180),
+        approvedInputsPreview: (lead.approvedInputs || "").replace(/\s+/g, " ").slice(0, 180),
+        desiredArtifactPreview: (lead.desiredArtifact || "").replace(/\s+/g, " ").slice(0, 180),
         proofTargetPreview: (lead.proofTarget || "").replace(/\s+/g, " ").slice(0, 220),
         followUpProofSurface: lead.followUp?.proofSurface || "",
         firstReplyPreview: (lead.followUp?.firstReplyBody || "").replace(/\s+/g, " ").slice(0, 260),

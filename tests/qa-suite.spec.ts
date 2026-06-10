@@ -295,6 +295,9 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByLabel('How sensitive is it?')).toBeVisible();
     await expect(page.getByLabel('Where should it run?')).toBeVisible();
     await expect(page.getByLabel('Who can move this forward?')).toBeVisible();
+    await expect(page.getByLabel('Where does current AI fail?')).toBeVisible();
+    await expect(page.getByLabel('What may we use first?')).toBeVisible();
+    await expect(page.getByLabel('First useful deliverable')).toBeVisible();
     await expect(page.getByLabel('What would make the 72-hour proof worth paying attention to?')).toBeVisible();
     await expect(page.getByText('No files uploaded.')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Submit workflow' })).toBeVisible();
@@ -315,16 +318,20 @@ test.describe('Active Mirror work OS front door', () => {
           captured: true,
           captureId: 'amlead_test_1234',
           deliveryStatus: 'capture_only',
+          qualification: {
+            grade: 'priority',
+            score: 92,
+          },
           mailto: 'mailto:paul@activemirror.ai?subject=Active%20Mirror%20test',
           followUp: {
             responseWindow: 'same_day',
             buyerStatus: 'Captured. We review the workflow and reply with the first scope question.',
             proofSurface: 'reviewable evidence workspace',
-            riskBoundary: 'No private files, account access, device access, or external sends before explicit approval.',
+            riskBoundary: 'No private files, account access, device access, or external sends before explicit approval. First-pass input boundary: Public or sanitized inputs only.',
             scopeQuestions: [
-              'Who owns approval for the first proof?',
-              'What source, file, or system boundary is allowed in the first 72 hours?',
-              'What result would make this worth deploying or rejecting?',
+              'Can we confirm the first deliverable is Evidence workspace?',
+              'What exactly may we use in the first 72 hours: Public or sanitized inputs only?',
+              'Who approves the result before it is reused, shared, or sent?',
             ],
           },
         }),
@@ -334,12 +341,15 @@ test.describe('Active Mirror work OS front door', () => {
     await page.goto('/intake?focus=workspace-proof');
     await page.getByLabel('Name').fill('Asha Rao');
     await page.getByLabel('Work email').fill('asha@examplecorp.com');
+    await page.getByLabel('Where does current AI fail?').selectOption('Sources and gaps are unclear');
+    await page.getByLabel('What may we use first?').selectOption('Public or sanitized inputs only');
+    await page.getByLabel('First useful deliverable').selectOption('Evidence workspace');
     await page.getByLabel('What business workflow should Active Mirror help with?').fill('We generated a vendor evidence workspace and need it adapted for a real procurement review.');
     await page.getByLabel('What would make the 72-hour proof worth paying attention to?').fill('A decision-ready export with source gaps and approvals visible.');
     await page.getByRole('button', { name: 'Submit workflow' }).click();
 
     await expect(page.getByTestId('intake-followup')).toContainText('reviewable evidence workspace');
-    await expect(page.getByTestId('intake-followup')).toContainText('Who owns approval for the first proof?');
+    await expect(page.getByTestId('intake-followup')).toContainText('Can we confirm the first deliverable is Evidence workspace?');
     await expect(page.getByTestId('intake-followup')).toContainText('Reference: amlead_test_1234');
     await expect(page.getByTestId('intake-followup')).toContainText('No private files');
     await expect(page.getByRole('link', { name: 'Open prepared email' })).toHaveAttribute('href', /mailto:paul@activemirror\.ai/);
@@ -356,6 +366,9 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByText('Qualified leads')).toBeVisible();
     await expect(page.getByText('Next adjustment')).toBeVisible();
     await expect(page.getByText('Intake focus')).toBeVisible();
+    await expect(page.getByText('Where current AI fails')).toBeVisible();
+    await expect(page.getByText('Allowed first inputs')).toBeVisible();
+    await expect(page.getByText('Requested deliverables')).toBeVisible();
     await expect(page.getByText('Recent leads')).toBeVisible();
   });
 

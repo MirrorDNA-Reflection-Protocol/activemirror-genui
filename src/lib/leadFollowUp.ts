@@ -29,8 +29,8 @@ function firstName(value = "") {
 }
 
 function proofSurfaceFor(input: LeadQualificationInput) {
-  const text = `${input.focus || ""} ${input.useCase || ""} ${input.proofTarget || ""}`.toLowerCase();
-  if (/vendor|procurement|board|source|evidence/.test(text)) return "reviewable evidence workspace";
+  const text = `${input.focus || ""} ${input.useCase || ""} ${input.proofTarget || ""} ${input.desiredArtifact || ""}`.toLowerCase();
+  if (/vendor|procurement|board|source|evidence|brief/.test(text)) return "reviewable evidence workspace";
   if (/private|file|confidential|local|on-prem/.test(text)) return "private-context review workspace";
   if (/automation|repeatable|workflow|handoff/.test(text)) return "repeatable workflow workspace";
   if (/platform|routing|memory|permission|control/.test(text)) return "controlled AI workspace layer";
@@ -49,12 +49,15 @@ export function buildLeadFollowUp(input: LeadQualificationInput, qualification: 
   const name = firstName(input.name);
   const companyOrWorkflow = compact(input.company || input.useCase, "your workflow");
   const workflow = compact(input.useCase);
+  const failureMode = compact(input.failureMode, "the current AI gap");
+  const approvedInputs = compact(input.approvedInputs, "the first approved input boundary");
+  const desiredArtifact = compact(input.desiredArtifact || proofSurface, proofSurface);
   const proofTarget = compact(input.proofTarget, "a proof target we can inspect");
-  const riskBoundary = "No private files, account access, device access, or external sends before explicit approval.";
+  const riskBoundary = `No private files, account access, device access, or external sends before explicit approval. First-pass input boundary: ${approvedInputs}.`;
   const scopeQuestions = [
-    "Who owns approval for the first proof?",
-    "What source, file, or system boundary is allowed in the first 72 hours?",
-    "What result would make this worth deploying or rejecting?",
+    `Can we confirm the first deliverable is ${desiredArtifact}?`,
+    `What exactly may we use in the first 72 hours: ${approvedInputs}?`,
+    "Who approves the result before it is reused, shared, or sent?",
   ];
   const greeting = name ? `Hi ${name},` : "Hi,";
 
@@ -70,6 +73,8 @@ export function buildLeadFollowUp(input: LeadQualificationInput, qualification: 
       greeting,
       "",
       `I saw the workflow you sent: ${workflow}`,
+      "",
+      `The current AI gap I have is: ${failureMode}.`,
       "",
       `The strongest first proof looks like a ${proofSurface}. The success target I have is: ${proofTarget}.`,
       "",

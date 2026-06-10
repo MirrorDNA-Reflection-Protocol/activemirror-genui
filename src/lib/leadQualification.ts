@@ -7,6 +7,9 @@ export type LeadQualificationInput = {
   timeline?: string;
   decisionRole?: string;
   focus?: string;
+  failureMode?: string;
+  approvedInputs?: string;
+  desiredArtifact?: string;
   proofTarget?: string;
   useCase?: string;
 };
@@ -45,18 +48,21 @@ function clampScore(score: number) {
 function rankReasons(reasons: string[]) {
   const priority = new Map([
     ["budget owner", 0],
-    ["urgent timeline", 1],
-    ["success proof named", 2],
-    ["specific workflow detail", 3],
-    ["matches proof-sprint shape", 4],
-    ["workspace handoff", 5],
-    ["control-sensitive workflow", 6],
-    ["internal champion", 7],
-    ["near-term timeline", 8],
-    ["work email", 9],
-    ["organization named", 10],
-    ["workflow too vague", 11],
-    ["research stage", 12],
+    ["workspace handoff", 1],
+    ["current AI failure named", 2],
+    ["input boundary named", 3],
+    ["first deliverable named", 4],
+    ["urgent timeline", 5],
+    ["success proof named", 6],
+    ["specific workflow detail", 7],
+    ["matches proof-sprint shape", 8],
+    ["control-sensitive workflow", 9],
+    ["internal champion", 10],
+    ["near-term timeline", 11],
+    ["work email", 12],
+    ["organization named", 13],
+    ["workflow too vague", 14],
+    ["research stage", 15],
   ]);
 
   return [...new Set(reasons)]
@@ -74,6 +80,9 @@ export function qualifyLead(input: LeadQualificationInput): LeadQualification {
   const sensitivity = (input.sensitivity || "").toLowerCase();
   const infrastructure = (input.infrastructure || "").toLowerCase();
   const focus = (input.focus || "").toLowerCase();
+  const failureMode = (input.failureMode || "").toLowerCase();
+  const approvedInputs = (input.approvedInputs || "").toLowerCase();
+  const desiredArtifact = (input.desiredArtifact || "").toLowerCase();
   let score = 20;
 
   if (input.company?.trim()) {
@@ -97,6 +106,21 @@ export function qualifyLead(input: LeadQualificationInput): LeadQualification {
   if (proofTarget.length >= 40) {
     score += 10;
     reasons.push("success proof named");
+  }
+
+  if (/source|evidence|assumption|approval|review|private|sensitive|context|handoff|workflow|repeatable|action/.test(failureMode)) {
+    score += 8;
+    reasons.push("current AI failure named");
+  }
+
+  if (/public|sanitized|sample|limited|approved|local|private|on-prem|no private/.test(approvedInputs)) {
+    score += 7;
+    reasons.push("input boundary named");
+  }
+
+  if (/evidence|brief|workspace|review|checklist|board|decision|deployment|source|workflow|export|packet/.test(desiredArtifact)) {
+    score += 8;
+    reasons.push("first deliverable named");
   }
 
   if (/urgent|production/.test(timeline)) {
@@ -146,6 +170,10 @@ export function qualifyLead(input: LeadQualificationInput): LeadQualification {
     reasons.push("workflow too vague");
   }
 
+  if (!desiredArtifact && proofTarget.length < 40) {
+    score -= 5;
+  }
+
   const finalScore = clampScore(score);
   const grade =
     finalScore >= 78 ? "priority" :
@@ -154,7 +182,7 @@ export function qualifyLead(input: LeadQualificationInput): LeadQualification {
     "low_fit";
 
   const nextAction =
-    grade === "priority" ? "Reply today with a scoped proof-sprint question." :
+    grade === "priority" ? "Reply today with fit, first deliverable, and allowed-input route." :
     grade === "qualified" ? "Reply with fit, scope, and the first proof surface." :
     grade === "nurture" ? "Ask for one sharper workflow, owner, and deadline." :
     "Do not sell yet; request a concrete workflow and business owner.";

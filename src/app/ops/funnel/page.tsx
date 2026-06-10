@@ -155,6 +155,9 @@ export default async function FunnelPage({ searchParams }: { searchParams: Searc
         <RankedList title="Top sources" rows={snapshot.topSources} />
         <RankedList title="Top paths" rows={snapshot.topPaths} />
         <RankedList title="Devices" rows={snapshot.devices} />
+        <RankedList title="Where current AI fails" rows={snapshot.topFailureModes} />
+        <RankedList title="Allowed first inputs" rows={snapshot.topApprovedInputs} />
+        <RankedList title="Requested deliverables" rows={snapshot.topDesiredArtifacts} />
       </section>
 
       <section className="ops-panel">
@@ -170,6 +173,11 @@ export default async function FunnelPage({ searchParams }: { searchParams: Searc
                 </span>
               </div>
               <p>{lead.useCasePreview || "No use case preview."}</p>
+              <div className="ops-lead__facts">
+                <span>Failure: {lead.failureModePreview || "not named"}</span>
+                <span>Inputs: {lead.approvedInputsPreview || "not named"}</span>
+                <span>Deliverable: {lead.desiredArtifactPreview || lead.followUpProofSurface || "not named"}</span>
+              </div>
               {lead.proofTargetPreview ? <p className="ops-lead__proof">Proof target: {lead.proofTargetPreview}</p> : null}
               {lead.followUpProofSurface ? <p className="ops-lead__proof">Proof surface: {lead.followUpProofSurface}</p> : null}
               {lead.firstReplyPreview ? <p className="ops-lead__reply">First reply: {lead.firstReplyPreview}</p> : null}

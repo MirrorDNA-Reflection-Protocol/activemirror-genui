@@ -94,6 +94,9 @@ function fallbackMailto(form: Record<string, string>) {
     `Infrastructure: ${form.infrastructure}`,
     `Timeline: ${form.timeline}`,
     `Decision role: ${form.decisionRole}`,
+    `Current AI failure: ${form.failureMode}`,
+    `First 72-hour inputs: ${form.approvedInputs}`,
+    `First deliverable: ${form.desiredArtifact}`,
     `Proof target: ${form.proofTarget}`,
     "",
     form.useCase,
@@ -116,6 +119,9 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
     infrastructure: "not sure yet",
     timeline: "this month",
     decisionRole: "I can sponsor or approve it",
+    failureMode: "Sources and gaps are unclear",
+    approvedInputs: "Public or sanitized inputs only",
+    desiredArtifact: "Evidence workspace",
     focus: intakeFocus,
     proofTarget: "",
     useCase: "",
@@ -147,6 +153,9 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
         infrastructure: form.infrastructure,
         timeline: form.timeline,
         decisionRole: form.decisionRole,
+        failureMode: form.failureMode,
+        approvedInputs: form.approvedInputs,
+        desiredArtifact: form.desiredArtifact,
         focus: form.focus,
         hasCompany: Boolean(form.company),
         hasProofTarget: Boolean(form.proofTarget.trim()),
@@ -160,6 +169,9 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
       `Infrastructure: ${form.infrastructure}`,
       `Timeline: ${form.timeline}`,
       `Decision role: ${form.decisionRole}`,
+      `Current AI failure: ${form.failureMode}`,
+      `First 72-hour inputs: ${form.approvedInputs}`,
+      `First deliverable: ${form.desiredArtifact}`,
       `Focus: ${form.focus}`,
       `Proof target: ${form.proofTarget}`,
     ].join("\n");
@@ -184,8 +196,14 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
           infrastructure: form.infrastructure,
           timeline: form.timeline,
           decisionRole: form.decisionRole,
+          failureMode: form.failureMode,
+          approvedInputs: form.approvedInputs,
+          desiredArtifact: form.desiredArtifact,
           focus: form.focus,
           deliveryStatus: payload.deliveryStatus,
+          leadGrade: payload.qualification?.grade || "unknown",
+          leadScore: payload.qualification?.score || 0,
+          captureId: payload.captureId || "",
         },
       });
     } catch (err) {
@@ -202,6 +220,9 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
           infrastructure: form.infrastructure,
           timeline: form.timeline,
           decisionRole: form.decisionRole,
+          failureMode: form.failureMode,
+          approvedInputs: form.approvedInputs,
+          desiredArtifact: form.desiredArtifact,
           focus: form.focus,
         },
       });
@@ -268,6 +289,36 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
             <option>I can recommend it internally</option>
             <option>I am researching options</option>
             <option>I need help defining the owner</option>
+          </select>
+        </label>
+        <label>
+          <span>Where does current AI fail?</span>
+          <select value={form.failureMode} onChange={update("failureMode")}>
+            <option>Sources and gaps are unclear</option>
+            <option>Context gets lost between steps</option>
+            <option>Sensitive data is unsafe</option>
+            <option>The workflow is not reusable</option>
+            <option>Human review is missing</option>
+          </select>
+        </label>
+        <label>
+          <span>What may we use first?</span>
+          <select value={form.approvedInputs} onChange={update("approvedInputs")}>
+            <option>Public or sanitized inputs only</option>
+            <option>Approved sample files</option>
+            <option>Limited files after approval</option>
+            <option>Local/private environment only</option>
+            <option>Help define the boundary</option>
+          </select>
+        </label>
+        <label>
+          <span>First useful deliverable</span>
+          <select value={form.desiredArtifact} onChange={update("desiredArtifact")}>
+            <option>Evidence workspace</option>
+            <option>Decision brief</option>
+            <option>Workflow board</option>
+            <option>Source checklist</option>
+            <option>Deployment plan</option>
           </select>
         </label>
       </div>

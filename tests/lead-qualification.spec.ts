@@ -11,6 +11,9 @@ test.describe('lead qualification', () => {
       infrastructure: 'Active Mirror managed pilot',
       timeline: 'urgent production issue',
       decisionRole: 'I can sponsor or approve it',
+      failureMode: 'Sources and gaps are unclear',
+      approvedInputs: 'Public or sanitized inputs only',
+      desiredArtifact: 'Evidence workspace',
       proofTarget: 'A board-ready evidence workspace with approval steps and a deploy-or-don\'t recommendation.',
       useCase: 'We need to prove a vendor decision before a board meeting, separate public sources from private file review, and show the approval path before anyone sends the memo.',
     });
@@ -18,7 +21,9 @@ test.describe('lead qualification', () => {
     expect(lead.grade).toBe('priority');
     expect(lead.score).toBeGreaterThanOrEqual(78);
     expect(lead.reasons).toContain('budget owner');
-    expect(lead.nextAction).toContain('Reply today');
+    expect(lead.reasons).toContain('input boundary named');
+    expect(lead.reasons).toContain('first deliverable named');
+    expect(lead.nextAction).toContain('allowed-input route');
   });
 
   test('downranks vague research-stage leads', () => {
@@ -41,6 +46,9 @@ test.describe('lead qualification', () => {
       focus: 'workspace-proof',
       timeline: 'this month',
       decisionRole: 'I can sponsor or approve it',
+      failureMode: 'Human review is missing',
+      approvedInputs: 'Approved sample files',
+      desiredArtifact: 'Decision brief',
       proofTarget: 'The generated workspace works on our real workflow with source gaps and approvals visible.',
       useCase: 'I generated a vendor evidence workspace and want to adapt it for our review process before the next leadership meeting.',
     });
@@ -57,6 +65,9 @@ test.describe('lead qualification', () => {
       focus: 'workspace-proof',
       timeline: 'this month',
       decisionRole: 'I can sponsor or approve it',
+      failureMode: 'Sources and gaps are unclear',
+      approvedInputs: 'Public or sanitized inputs only',
+      desiredArtifact: 'Evidence workspace',
       proofTarget: 'A decision-ready export with source gaps and approvals visible.',
       useCase: 'We generated a vendor evidence workspace and need it adapted for a real procurement review.',
     };
@@ -67,11 +78,13 @@ test.describe('lead qualification', () => {
     expect(followUp.proofSurface).toBe('reviewable evidence workspace');
     expect(followUp.firstReplySubject).toContain('Example Corp');
     expect(followUp.firstReplyBody).toContain('Before I call it a fit');
+    expect(followUp.firstReplyBody).toContain('The current AI gap I have is');
     expect(followUp.riskBoundary).toContain('No private files');
+    expect(followUp.riskBoundary).toContain('Public or sanitized inputs only');
 
     const mailto = followUpReplyMailto(input.email, followUp);
     expect(mailto).toContain('mailto:asha%40examplecorp.com');
     expect(mailto).toContain('subject=Active%20Mirror%20scope');
-    expect(decodeURIComponent(mailto)).toContain('Who owns approval for the first proof?');
+    expect(decodeURIComponent(mailto)).toContain('Can we confirm the first deliverable is Evidence workspace?');
   });
 });
