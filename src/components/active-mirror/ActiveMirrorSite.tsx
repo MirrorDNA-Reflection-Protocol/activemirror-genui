@@ -349,6 +349,8 @@ export default function ActiveMirrorSite() {
             <Link href="/api/mirror/proof-ledger?format=markdown">Download sample</Link>
             <Link href="/glass">Technical examples</Link>
             <Link href="/intake">General intake</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
           </div>
         </div>
         <div className="wrap foot__legal">
@@ -359,6 +361,10 @@ export default function ActiveMirrorSite() {
           <p className="foot__tm">
             Active Mirror™ and Trust by Design™ are trademarks of N1 Intelligence (OPC) Pvt. Ltd.
             Technical details live behind the public evidence examples.
+            {" "}
+            <Link href="/privacy">Privacy</Link>
+            {" "}
+            <Link href="/terms">Terms</Link>
           </p>
         </div>
       </footer>

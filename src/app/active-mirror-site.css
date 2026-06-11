@@ -418,6 +418,36 @@
   display: flex; align-items: center; gap: 7px; }
 .foot__bottom .sov .gl { color: var(--signal); }
 .foot__tm { margin: 16px 0 0; font-size: 11px; line-height: 1.5; color: var(--text-faint); max-width: 78ch; }
+.foot__tm a { color: var(--text-tertiary); text-decoration: none; }
+.foot__tm a:hover { color: var(--text-primary); }
+
+/* ============================================================ LEGAL ROUTES */
+.legal-page { min-height: 100dvh; }
+.legal-hero { position: relative; padding: 112px 0 58px; border-bottom: 1px solid var(--hairline);
+  background: linear-gradient(105deg, var(--reflect-tint), transparent 64%), var(--ink-950); }
+.legal-hero h1 { font-family: var(--font-display); font-size: clamp(38px, 6vw, 68px); line-height: 1.04;
+  letter-spacing: -0.03em; font-weight: 600; margin: 22px 0 0; color: var(--text-primary); }
+.legal-hero p { max-width: 62ch; margin: 22px 0 0; font-size: 17px; line-height: 1.62; color: var(--text-secondary); }
+.legal-hero time { display: inline-block; margin-top: 22px; font-family: var(--font-data); font-size: 11px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--text-faint); }
+.legal-body { padding: 70px 0 86px; }
+.legal-body__grid { display: grid; grid-template-columns: minmax(220px, .35fr) minmax(0, 1fr); gap: 44px; align-items: start; }
+.legal-card { position: sticky; top: 88px; min-width: 0; border: 1px solid var(--border-default); border-radius: 14px;
+  background: var(--ink-1000); padding: 22px; }
+.legal-card h2 { font-size: 16px; line-height: 1.3; margin: 0 0 10px; color: var(--text-primary); }
+.legal-card p { font-size: 13.5px; line-height: 1.55; color: var(--text-secondary); margin: 0 0 14px; }
+.legal-card a { font-family: var(--font-data); font-size: 12px; color: var(--text-accent); text-decoration: none; overflow-wrap: anywhere; }
+.legal-copy { min-width: 0; display: grid; gap: 18px; }
+.legal-section { border: 1px solid var(--hairline); border-radius: 14px; background: var(--ink-1000); padding: 24px; }
+.legal-section h2 { font-family: var(--font-display); font-size: clamp(21px, 2.4vw, 28px); line-height: 1.18;
+  letter-spacing: -0.018em; margin: 0 0 14px; color: var(--text-primary); }
+.legal-section p { margin: 12px 0 0; font-size: 15px; line-height: 1.68; color: var(--text-secondary); }
+.legal-section ul { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 10px; }
+.legal-section li { position: relative; padding-left: 18px; font-size: 15px; line-height: 1.62; color: var(--text-secondary); }
+.legal-section li::before { content: ""; position: absolute; left: 0; top: .68em; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--signal); box-shadow: 0 0 8px var(--gold-glow); }
+.legal-foot .foot__legal { display: block; }
+.legal-foot .foot__bottom { margin-top: 0; }
 
 /* ============================================================ PUBLIC PROOF ROUTES */
 .proofpage { min-height: 100dvh; background: var(--ink-950); color: var(--text-primary);
@@ -615,6 +645,8 @@
   .axioms, .gbmini { grid-template-columns: 1fr; }
   .wedge, .founder { grid-template-columns: 1fr; gap: 32px; }
   .foot .wrap { grid-template-columns: 1fr 1fr; }
+  .legal-body__grid { grid-template-columns: 1fr; }
+  .legal-card { position: static; }
   .proofgrid, .proofband--split { grid-template-columns: 1fr 1fr; }
   .boundary__row, .comparetable__row { grid-template-columns: 1fr; }
   .intake__grid { grid-template-columns: 1fr 1fr; }
@@ -636,6 +668,11 @@
   .challenge__cta { justify-self: stretch; white-space: normal; text-align: center; }
   .trust-strip { grid-template-columns: 1fr; }
   .thesis .wrap, .engage, .sysmap, .wedge__stats, .foot .wrap, .usecases, .novelty, .sprint__grid { grid-template-columns: 1fr; }
+  .legal-hero { padding: 78px 0 46px; }
+  .legal-body { padding: 46px 0 64px; }
+  .legal-section { padding: 20px; }
+  .foot__bottom { align-items: flex-start; flex-direction: column; }
+  .foot__bottom .sov { margin-left: 0; }
   .converge { grid-template-columns: 1fr; }
   .seed-bridge { grid-template-columns: 1fr; }
   .seed-bridge__go { grid-column: auto; justify-self: start; }

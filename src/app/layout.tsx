@@ -1,18 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "./active-mirror-site.css";
 import "./active-mirror-genui.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://activemirror.ai"),
@@ -41,18 +30,18 @@ export const metadata: Metadata = {
     "N1 Intelligence",
   ],
   openGraph: {
-    title: "Active Mirror - Reviewable AI Workspaces for Real Business Workflows",
+    title: "Active Mirror — Show the work.",
     description: "Bring one workflow your current AI cannot safely finish. Active Mirror scopes it, builds a reviewable workspace, and keeps sources, approvals, and next actions visible.",
     siteName: "Active Mirror",
     type: "website",
     url: "https://activemirror.ai",
-    images: [{ url: "/mirror-icon-512.png", width: 512, height: 512, alt: "Active Mirror" }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Active Mirror - Show the work" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Active Mirror - Reviewable AI Workspaces for Real Business Workflows",
+    title: "Active Mirror — Show the work.",
     description: "Bring one workflow your current AI cannot safely finish. Active Mirror scopes it, builds a reviewable workspace, and keeps sources, approvals, and next actions visible.",
-    images: ["/mirror-icon-512.png"],
+    images: ["/og.png"],
   },
   manifest: "/manifest.json",
   appleWebApp: {
@@ -80,7 +69,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      className="dark h-full antialiased"
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

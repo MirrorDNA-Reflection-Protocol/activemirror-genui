@@ -50,5 +50,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.7,
     },
+    {
+      url: "https://activemirror.ai/privacy",
+      lastModified: new Date("2026-06-11"),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: "https://activemirror.ai/terms",
+      lastModified: new Date("2026-06-11"),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
   ];
 }
