@@ -29,8 +29,16 @@ grep -q "Show" "$TMP_DIR/body" || fail "root did not expose Show the work headli
 grep -q "Bring one AI workflow. Leave with a reviewable workspace" "$TMP_DIR/body" || fail "root did not expose current buyer-facing offer"
 grep -q "Get the thing, not a chat transcript" "$TMP_DIR/body" || fail "root did not expose results section"
 grep -q "Send data-sharing request to Vendor A" "$TMP_DIR/body" || fail "root did not expose approval gate demo"
+grep -q "20-second walkthrough" "$TMP_DIR/body" || fail "root did not expose walkthrough video section"
+grep -q "/media/show-the-work.mp4" "$TMP_DIR/body" || fail "root did not reference self-hosted walkthrough video"
+grep -q "/media/show-the-work-poster.jpg" "$TMP_DIR/body" || fail "root did not reference self-hosted walkthrough poster"
 grep -q "72-hour proof sprint" "$TMP_DIR/body" || fail "root did not expose proof sprint section"
 grep -q "Pick the result you want first" "$TMP_DIR/body" || fail "root did not expose start section"
+
+video_code="$(curl_code GET "$BASE_URL/media/show-the-work.mp4")"
+[[ "$video_code" == "200" ]] || fail "walkthrough video returned HTTP $video_code"
+poster_code="$(curl_code GET "$BASE_URL/media/show-the-work-poster.jpg")"
+[[ "$poster_code" == "200" ]] || fail "walkthrough video poster returned HTTP $poster_code"
 
 mirror_code="$(curl_code GET "$BASE_URL/mirror")"
 [[ "$mirror_code" == "200" ]] || fail "mirror route returned HTTP $mirror_code"
