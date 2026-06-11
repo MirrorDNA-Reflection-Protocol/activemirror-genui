@@ -3,6 +3,22 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async headers() {
+    const htmlRoutes = [
+      "/",
+      "/about",
+      "/about/roadmap",
+      "/app",
+      "/compare",
+      "/glass",
+      "/intake",
+      "/mirror",
+      "/ops/funnel",
+      "/privacy",
+      "/proof-sprint",
+      "/terms",
+      "/trust",
+    ];
+    const htmlNoTransformCache = { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate, no-transform" };
     const globalSecurityHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "X-Frame-Options", value: "DENY" },
@@ -29,6 +45,13 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: globalSecurityHeaders,
       },
+      ...htmlRoutes.map((source) => ({
+        source,
+        headers: [
+          ...globalSecurityHeaders,
+          htmlNoTransformCache,
+        ],
+      })),
       {
         source: "/sw.js",
         headers: [
@@ -46,13 +69,6 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/api/:path*",
-        headers: [
-          ...globalSecurityHeaders,
-          { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
-        ],
-      },
-      {
-        source: "/",
         headers: [
           ...globalSecurityHeaders,
           { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
