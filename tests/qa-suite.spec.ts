@@ -232,6 +232,8 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByText(/Made in India/).first()).toBeVisible();
     await expect(page.locator('#brief')).toContainText('Send data-sharing request to Vendor A');
     await expect(page.locator('#brief')).toContainText('nothing runs yet');
+    await expect(page.locator('#walkthrough')).toContainText('32-second walkthrough');
+    await expect(page.locator('video.proof-video source')).toHaveAttribute('src', '/media/show-the-work.mp4');
     await expect(page.getByRole('link', { name: /Try the public workspace/i }).first()).toHaveAttribute('href', '/mirror');
     await expect(page.getByRole('link', { name: /Bring one workflow/i }).first()).toHaveAttribute('href', '/intake?focus=pilot');
     await expect(page.getByRole('heading', { name: /No pitch theatre\. A useful proof or a clear no\./i })).toBeVisible();
@@ -245,7 +247,7 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.locator('#route').getByRole('link', { name: /See proof sprint sample/i })).toHaveAttribute('href', '/proof-sprint');
     await expect(page.locator('#route').getByRole('link', { name: /Review boundary/i })).toHaveAttribute('href', '/trust');
     await expect(page.locator('#route').getByRole('link', { name: /Public evidence examples/i })).toHaveAttribute('href', '/glass');
-    await expect(page.locator('main.amr > section')).toHaveCount(8);
+    await expect(page.locator('main.amr > section')).toHaveCount(9);
     const aboveFoldActions = await page.locator('header a, header button, nav a, nav button').evaluateAll((elements) =>
       elements.filter((element) => {
         const rect = element.getBoundingClientRect();
@@ -269,6 +271,7 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.locator('.eyebrow').first()).toContainText('Trust by Design');
     await expect(page.getByText(/Bring one AI workflow\. Leave with a reviewable workspace/)).toBeVisible();
     await expect(page.locator('#brief')).toBeVisible();
+    await expect(page.locator('#walkthrough video')).toBeVisible();
     await expect(page.getByRole('link', { name: /Bring one workflow/i }).first()).toBeVisible();
     await expect(page.locator('#work-with-us')).toContainText('72-hour proof sprint');
 
