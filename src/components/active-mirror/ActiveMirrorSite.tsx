@@ -369,7 +369,7 @@ export default function ActiveMirrorSite() {
       <section id="walkthrough" className="video-band" data-rail-section="results">
         <div className="wrap video-grid">
           <div className="video-copy">
-            <Eyebrow>32-second walkthrough</Eyebrow>
+            <Eyebrow>20-second walkthrough</Eyebrow>
             <h2 className="h-section rv">See the request become a workspace.</h2>
             <p className="lede rv">A short product walkthrough of the public front door: the request, evidence trail, review gate, and next action stay visible instead of disappearing into a chat transcript.</p>
           </div>
@@ -378,9 +378,9 @@ export default function ActiveMirrorSite() {
               className="proof-video"
               controls
               playsInline
-              preload="metadata"
-              poster="/og.png"
-              aria-label="Active Mirror 32-second product walkthrough"
+              preload="none"
+              poster="/media/show-the-work-poster.jpg"
+              aria-label="Active Mirror 20-second product walkthrough"
             >
               <source src="/media/show-the-work.mp4" type="video/mp4" />
               <a href="/media/show-the-work.mp4">Download the Active Mirror walkthrough video.</a>
@@ -388,7 +388,7 @@ export default function ActiveMirrorSite() {
             <div className="video-meta">
               <span>self-hosted MP4</span>
               <span>no third-party embed</span>
-              <span>31.9 sec</span>
+              <span>20.4 sec</span>
             </div>
           </div>
         </div>

@@ -232,7 +232,8 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByText(/Made in India/).first()).toBeVisible();
     await expect(page.locator('#brief')).toContainText('Send data-sharing request to Vendor A');
     await expect(page.locator('#brief')).toContainText('nothing runs yet');
-    await expect(page.locator('#walkthrough')).toContainText('32-second walkthrough');
+    await expect(page.locator('#walkthrough')).toContainText('20-second walkthrough');
+    await expect(page.locator('video.proof-video')).toHaveAttribute('poster', '/media/show-the-work-poster.jpg');
     await expect(page.locator('video.proof-video source')).toHaveAttribute('src', '/media/show-the-work.mp4');
     await expect(page.getByRole('link', { name: /Try the public workspace/i }).first()).toHaveAttribute('href', '/mirror');
     await expect(page.getByRole('link', { name: /Bring one workflow/i }).first()).toHaveAttribute('href', '/intake?focus=pilot');

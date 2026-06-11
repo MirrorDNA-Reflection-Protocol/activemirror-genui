@@ -88,11 +88,12 @@ try {
         compactText.includes("Bring one AI workflow. Leave with a reviewable workspace") &&
         compactText.includes("Try the public workspace") &&
         compactText.includes("Bring one workflow") &&
-        normalizedText.includes("32-second walkthrough") &&
+        normalizedText.includes("20-second walkthrough") &&
         compactText.includes("Get the thing, not a chat transcript.") &&
         compactText.includes("Pick the result you want first.") &&
         normalizedText.includes("send data-sharing request to vendor a") &&
         Boolean(document.querySelector('video source[src="/media/show-the-work.mp4"]')) &&
+        document.querySelector("video.proof-video")?.getAttribute("poster") === "/media/show-the-work-poster.jpg" &&
         Boolean(document.querySelector(".amr #brief")),
       hasInput: Boolean(document.querySelector("textarea, input")),
       sprintHref: document.querySelector('a[href="/intake?focus=pilot"]')?.getAttribute("href") || "",
