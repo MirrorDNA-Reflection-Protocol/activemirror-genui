@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./active-mirror-site.css";
+import "./active-mirror-redesign.css";
 import "./active-mirror-genui.css";
 
 export const metadata: Metadata = {
