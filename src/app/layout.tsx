@@ -1,30 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Libre_Caslon_Text, Public_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import "./active-mirror-site.css";
+import "./active-mirror-redesign.css";
 import "./active-mirror-genui.css";
-
-const libreCaslonText = Libre_Caslon_Text({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-libre-caslon-text",
-  display: "swap",
-});
-
-const publicSans = Public_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-public-sans",
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-ibm-plex-mono",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://activemirror.ai"),
@@ -92,7 +70,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`dark h-full antialiased ${libreCaslonText.variable} ${publicSans.variable} ${ibmPlexMono.variable}`}
+      className="dark h-full antialiased"
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
