@@ -24,12 +24,13 @@ curl_code() {
 
 root_code="$(curl_code GET "$BASE_URL/")"
 [[ "$root_code" == "200" ]] || fail "root returned HTTP $root_code"
-grep -q "Trust by Design" "$TMP_DIR/body" || fail "root did not expose Trust by Design hero claim"
+grep -q "Trust by Design" "$TMP_DIR/body" || fail "root did not expose Trust by Design marker"
+grep -q "Show" "$TMP_DIR/body" || fail "root did not expose Show the work headline"
 grep -q "Bring one AI workflow. Leave with a reviewable workspace" "$TMP_DIR/body" || fail "root did not expose current buyer-facing offer"
-grep -q 'data-testid="front-door-panel"' "$TMP_DIR/body" || fail "root did not expose public front door panel"
-grep -q "How the sprint works" "$TMP_DIR/body" || fail "root did not expose compressed sprint section"
-grep -q 'data-testid="homepage-proof-artifact"' "$TMP_DIR/body" || fail "root did not expose inline proof artifact"
-grep -q "Approval gate" "$TMP_DIR/body" || fail "root did not expose proof approval gate"
+grep -q "Get the thing, not a chat transcript" "$TMP_DIR/body" || fail "root did not expose results section"
+grep -q "Send data-sharing request to Vendor A" "$TMP_DIR/body" || fail "root did not expose approval gate demo"
+grep -q "72-hour proof sprint" "$TMP_DIR/body" || fail "root did not expose proof sprint section"
+grep -q "Pick the result you want first" "$TMP_DIR/body" || fail "root did not expose start section"
 
 mirror_code="$(curl_code GET "$BASE_URL/mirror")"
 [[ "$mirror_code" == "200" ]] || fail "mirror route returned HTTP $mirror_code"

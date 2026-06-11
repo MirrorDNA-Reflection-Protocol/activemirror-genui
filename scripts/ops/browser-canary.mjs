@@ -78,21 +78,24 @@ try {
   await page.goto(`${baseUrl}/?qa=canary`, { waitUntil: "domcontentloaded", timeout: 20_000 });
   receipt.checks.root = page.url().startsWith(baseUrl);
 
-  await page.waitForSelector("[data-testid=front-door-panel]", { timeout: 15_000 });
+  await page.waitForSelector(".amr .h-display", { timeout: 15_000 });
   const landing = await page.evaluate(() => {
     const bodyText = document.body.innerText;
+    const compactText = bodyText.replace(/\s+/g, " ");
     const normalizedText = bodyText.toLowerCase();
     return {
-      frontDoor: bodyText.includes("Bring one AI workflow. Leave with a reviewable workspace.") &&
-        bodyText.includes("What should happen first?") &&
-        bodyText.includes("Try the workspace") &&
-        bodyText.includes("Apply with one workflow") &&
-        normalizedText.includes("approval gate") &&
-        Boolean(document.querySelector("[data-testid=front-door-panel]")),
+      frontDoor: compactText.includes("Show the work.") &&
+        compactText.includes("Bring one AI workflow. Leave with a reviewable workspace") &&
+        compactText.includes("Try the public workspace") &&
+        compactText.includes("Bring one workflow") &&
+        compactText.includes("Get the thing, not a chat transcript.") &&
+        compactText.includes("Pick the result you want first.") &&
+        normalizedText.includes("send data-sharing request to vendor a") &&
+        Boolean(document.querySelector(".amr #brief")),
       hasInput: Boolean(document.querySelector("textarea, input")),
       sprintHref: document.querySelector('a[href="/intake?focus=pilot"]')?.getAttribute("href") || "",
       workspaceHref: document.querySelector('a[href="/mirror"]')?.getAttribute("href") || "",
-      proofArtifact: Boolean(document.querySelector("[data-testid=homepage-proof-artifact]")),
+      proofArtifact: Boolean(document.querySelector(".amr #brief")),
       privatePathLeak: bodyText.includes("/Users/mirror-pro"),
     };
   });

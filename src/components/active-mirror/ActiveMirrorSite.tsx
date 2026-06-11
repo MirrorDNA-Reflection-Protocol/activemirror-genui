@@ -334,7 +334,7 @@ export default function ActiveMirrorSite() {
           </div>
           <div className="nav-cta">
             <span className="nav-note">review before action</span>
-            <Link className="btn btn-ghost btn-sm" href="/mirror">Try workspace <span className="arr">→</span></Link>
+            <Link className="btn btn-ghost btn-sm" href="/mirror" data-analytics="nav_try_workspace">Try workspace <span className="arr">→</span></Link>
           </div>
         </div>
       </header>
@@ -350,8 +350,8 @@ export default function ActiveMirrorSite() {
             </h1>
             <p className="lede hero-sub">Bring one AI workflow. Leave with a reviewable workspace — sources, assumptions, gaps, and approvals kept visible, so your team can act on the result.</p>
             <div className="hero-ctas">
-              <Link className="btn btn-primary" href="/intake?focus=pilot">Bring one workflow <span className="arr">→</span></Link>
-              <Link className="btn btn-ghost" href="/mirror">Try the public workspace</Link>
+              <Link className="btn btn-primary" href="/intake?focus=pilot" data-analytics="hero_bring_workflow">Bring one workflow <span className="arr">→</span></Link>
+              <Link className="btn btn-ghost" href="/mirror" data-analytics="hero_try_workspace">Try the public workspace</Link>
             </div>
             <p className="hero-fine">We scope it first. If it fits, <b>a working proof in 72 hours.</b> If not, a clear no.</p>
           </div>
@@ -388,7 +388,7 @@ export default function ActiveMirrorSite() {
             <Eyebrow>The fit test</Eyebrow>
             <h2 className="h-section rv">Give us one workflow your current AI cannot safely finish.</h2>
             <p className="lede rv fit-lede">We do not promise every workflow is a fit. We qualify it first. If we cannot make it clearer, more usable, and safer to act on, we say that early instead of wasting your time.</p>
-            <div className="rv fit-cta"><Link className="btn btn-primary" href="/intake?focus=pilot">Bring one workflow <span className="arr">→</span></Link></div>
+            <div className="rv fit-cta"><Link className="btn btn-primary" href="/intake?focus=pilot" data-analytics="fit_bring_workflow">Bring one workflow <span className="arr">→</span></Link></div>
           </div>
           <div className="fit-steps">
             {fitSteps.map(([number, title, sub]) => (
@@ -437,10 +437,10 @@ export default function ActiveMirrorSite() {
             </div>
           </div>
           <div className="route-links rv">
-            <Link href="/proof-sprint">See proof sprint sample</Link>
-            <Link href="/trust">Review boundary</Link>
-            <Link href="/glass">Public evidence examples</Link>
-            <Link href="/compare">Compare</Link>
+            <Link href="/proof-sprint" data-analytics="route_proof_sprint">See proof sprint sample</Link>
+            <Link href="/trust" data-analytics="route_review_boundary">Review boundary</Link>
+            <Link href="/glass" data-analytics="route_evidence_examples">Public evidence examples</Link>
+            <Link href="/compare" data-analytics="route_compare">Compare</Link>
           </div>
         </div>
       </section>
@@ -492,7 +492,13 @@ export default function ActiveMirrorSite() {
                 <ul className="start-list">
                   {card.items.map((item) => <li key={item}>{item}</li>)}
                 </ul>
-                <Link className={card.featured ? "btn btn-primary" : "btn btn-ghost"} href={card.href}>{card.action} <span className="arr">→</span></Link>
+                <Link
+                  className={card.featured ? "btn btn-primary" : "btn btn-ghost"}
+                  href={card.href}
+                  data-analytics={`start_${card.title.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "")}`}
+                >
+                  {card.action} <span className="arr">→</span>
+                </Link>
               </div>
             ))}
           </div>
