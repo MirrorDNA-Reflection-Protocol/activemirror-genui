@@ -33,6 +33,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: "https://activemirror.ai/mirrorprod-india",
+      lastModified: new Date("2026-06-12"),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
       url: "https://activemirror.ai/glass",
       lastModified: new Date("2026-06-09"),
       changeFrequency: "weekly",
