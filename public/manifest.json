@@ -1,7 +1,7 @@
 {
   "name": "Active Mirror",
   "short_name": "Active Mirror",
-  "description": "AI workspaces for real business workflows, with sources, approvals, sensitive-context boundaries, and exportable evidence.",
+  "description": "Reviewable AI workspaces and control maps for real business work, with sources, approvals, local/cloud boundaries, and exportable evidence.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#090d12",

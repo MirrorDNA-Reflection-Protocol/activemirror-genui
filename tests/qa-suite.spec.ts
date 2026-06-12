@@ -228,7 +228,7 @@ test.describe('Active Mirror work OS front door', () => {
 
     await expect(page.getByRole('heading', { name: /Show\s+the work\./i })).toBeVisible();
     await expect(page.locator('.eyebrow').first()).toContainText('Trust by Design');
-    await expect(page.getByText(/Bring one AI workflow\. Leave with a reviewable workspace/)).toBeVisible();
+    await expect(page.getByText(/Bring one important piece of work\. Leave with a reviewable AI workspace/)).toBeVisible();
     await expect(page.getByText(/Made in India/).first()).toBeVisible();
     await expect(page.locator('#brief')).toContainText('Send data-sharing request to Vendor A');
     await expect(page.locator('#brief')).toContainText('nothing runs yet');
@@ -240,6 +240,10 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByRole('heading', { name: /No pitch theatre\. A useful proof or a clear no\./i })).toBeVisible();
     await expect(page.getByText('A no-nonsense fit decision')).toBeVisible();
     await expect(page.getByText('Working workspace')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /The proof tells you what architecture the work deserves\./i })).toBeVisible();
+    await expect(page.locator('#control-map')).toContainText('Active Mirror Control Map');
+    await expect(page.locator('#control-map')).toContainText(/local runtime, cloud AI, human review, and proof record/i);
+    await expect(page.locator('#control-map').getByRole('link', { name: /Map my AI architecture/i })).toHaveAttribute('href', '/intake?focus=architecture');
     await expect(page.locator('.wk').filter({ hasText: /^Teams$/ })).toBeVisible();
     await expect(page.locator('.wk').filter({ hasText: /^Companies$/ })).toBeVisible();
     await expect(page.locator('.wk').filter({ hasText: /^Public sector$/ })).toBeVisible();
@@ -248,7 +252,7 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.locator('#route').getByRole('link', { name: /See proof sprint sample/i })).toHaveAttribute('href', '/proof-sprint');
     await expect(page.locator('#route').getByRole('link', { name: /Review boundary/i })).toHaveAttribute('href', '/trust');
     await expect(page.locator('#route').getByRole('link', { name: /Public evidence examples/i })).toHaveAttribute('href', '/glass');
-    await expect(page.locator('main.amr > section')).toHaveCount(9);
+    await expect(page.locator('main.amr > section')).toHaveCount(10);
     const aboveFoldActions = await page.locator('header a, header button, nav a, nav button').evaluateAll((elements) =>
       elements.filter((element) => {
         const rect = element.getBoundingClientRect();
@@ -270,9 +274,10 @@ test.describe('Active Mirror work OS front door', () => {
 
     await expect(page.getByRole('heading', { name: /Show\s+the work\./i })).toBeVisible();
     await expect(page.locator('.eyebrow').first()).toContainText('Trust by Design');
-    await expect(page.getByText(/Bring one AI workflow\. Leave with a reviewable workspace/)).toBeVisible();
+    await expect(page.getByText(/Bring one important piece of work\. Leave with a reviewable AI workspace/)).toBeVisible();
     await expect(page.locator('#brief')).toBeVisible();
     await expect(page.locator('#walkthrough video')).toBeVisible();
+    await expect(page.locator('#control-map')).toContainText('Active Mirror Control Map');
     await expect(page.getByRole('link', { name: /Bring one workflow/i }).first()).toBeVisible();
     await expect(page.locator('#work-with-us')).toContainText('72-hour proof sprint');
 
@@ -352,6 +357,12 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByLabel('What would make the 72-hour proof worth paying attention to?')).toBeVisible();
     await expect(page.getByText('No files uploaded.')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Submit workflow' })).toBeVisible();
+
+    await page.goto('/intake?focus=architecture');
+    await expect(page.getByRole('heading', { name: /local, cloud, and human-review boundary/i })).toBeVisible();
+    await expect(page.getByTestId('intake-focus')).toContainText('Hybrid AI architecture review');
+    await expect(page.getByTestId('intake-focus')).toContainText('which data must stay local');
+    await expect(page.getByLabel('First useful deliverable')).toContainText('AI control map');
 
     await page.goto('/intake?focus=workspace-proof');
     await expect(page.getByTestId('intake-focus')).toContainText('From the workspace preview');
@@ -438,7 +449,7 @@ test.describe('Active Mirror work OS front door', () => {
 
     await expect(page.getByRole('heading', { name: /Show\s+the work\./i })).toBeVisible();
     await expect(page.locator('.eyebrow').first()).toContainText('Trust by Design');
-    await expect(page.getByText(/Bring one AI workflow\. Leave with a reviewable workspace/)).toBeVisible();
+    await expect(page.getByText(/Bring one important piece of work\. Leave with a reviewable AI workspace/)).toBeVisible();
     await expect(page.locator('#brief')).toContainText('Send data-sharing request to Vendor A');
     await expect(page.getByRole('link', { name: /Try workspace/i }).first()).toHaveAttribute('href', '/mirror');
     await expect(page.locator('textarea, input')).toHaveCount(0);
@@ -455,12 +466,10 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByTestId('mobile-control-strip')).toContainText('ephemeral');
     await expect(page.getByText('What are we making?')).toBeVisible();
 
-    const textarea = page.locator('#cap-input');
-    await textarea.fill('Create an automation checklist for watching my website.');
-    await textarea.press('Enter');
+    await page.getByRole('button', { name: 'Build a vendor evidence workspace' }).click();
 
-    await expect(page.getByTestId('workpiece').getByText('Working plan')).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByTestId('workpiece')).toBeVisible();
+    await expect(page.getByTestId('workpiece')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('workpiece-title')).toHaveText('Vendor evidence workspace');
     await page.getByTestId('workpiece').getByRole('button', { name: /evidence/i }).click();
     await expect(page.getByTestId('ledger-sheet')).toBeVisible();
   });

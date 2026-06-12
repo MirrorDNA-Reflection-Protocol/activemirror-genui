@@ -5,7 +5,7 @@ import { trackSiteEvent } from "@/lib/siteAnalytics";
 import { buildLeadRequestMailto } from "@/lib/leadMailto";
 
 type IntakeState = "idle" | "sending" | "ready" | "error";
-type IntakeFocus = "general" | "pilot" | "challenge" | "deployment" | "private-context" | "review" | "platform" | "workspace-proof";
+type IntakeFocus = "general" | "pilot" | "architecture" | "challenge" | "deployment" | "private-context" | "review" | "platform" | "workspace-proof";
 type PublicFollowUp = {
   responseWindow: "same_day" | "next_business_day" | "fit_review";
   buyerStatus: string;
@@ -34,6 +34,13 @@ const FOCUS_COPY: Record<IntakeFocus, {
     body: "We qualify the workflow first. If it fits, the sprint produces a working proof, not a slide-only demo.",
     useCasePlaceholder: "Example: We need a reviewable vendor selection workspace for our team, with source gaps, approvals, and a final recommendation.",
     proofPlaceholder: "Example: a working workspace our team can inspect, run through one real decision, and decide whether to deploy.",
+  },
+  architecture: {
+    eyebrow: "Hybrid AI architecture review",
+    title: "Map what should run local, cloud, or under review.",
+    body: "Use this when the main question is architecture: which parts can use frontier models, which data must stay local, and what needs approval or records.",
+    useCasePlaceholder: "Example: We need to decide which parts of our client onboarding workflow can use cloud AI, which files must stay local, and where human approval is required.",
+    proofPlaceholder: "Example: an Active Mirror Control Map with local/cloud routing, private-data boundaries, approval gates, and the first workflow worth proving.",
   },
   challenge: {
     eyebrow: "Challenge workflow",
@@ -299,6 +306,7 @@ export default function IntakeForm({ initialFocus = "general" }: { initialFocus?
           <span>First useful deliverable</span>
           <select value={form.desiredArtifact} onChange={update("desiredArtifact")}>
             <option>Evidence workspace</option>
+            <option>AI control map</option>
             <option>Decision brief</option>
             <option>Workflow board</option>
             <option>Source checklist</option>

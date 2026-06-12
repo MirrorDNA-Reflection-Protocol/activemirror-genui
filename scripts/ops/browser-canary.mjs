@@ -85,11 +85,13 @@ try {
     const normalizedText = bodyText.toLowerCase();
     return {
       frontDoor: compactText.includes("Show the work.") &&
-        compactText.includes("Bring one AI workflow. Leave with a reviewable workspace") &&
+        compactText.includes("Bring one important piece of work. Leave with a reviewable AI workspace") &&
         compactText.includes("Try the public workspace") &&
         compactText.includes("Bring one workflow") &&
         normalizedText.includes("20-second walkthrough") &&
         compactText.includes("Get the thing, not a chat transcript.") &&
+        normalizedText.includes("active mirror control map") &&
+        compactText.includes("Hybrid AI architecture review") &&
         compactText.includes("Pick the result you want first.") &&
         normalizedText.includes("send data-sharing request to vendor a") &&
         Boolean(document.querySelector('video source[src="/media/show-the-work.mp4"]')) &&

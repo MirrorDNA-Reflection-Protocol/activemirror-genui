@@ -5,9 +5,9 @@ import Link from "next/link";
 import SiteTelemetry from "./SiteTelemetry";
 
 const outcomes = [
-  ["WORKSPACE", "Built to be used.", "Briefs, plans, review packets, checklists, and workflows are built as usable workspaces."],
-  ["EVIDENCE", "Know what to trust.", "Sources, assumptions, and gaps are kept separate so your team can review the work quickly."],
-  ["NEXT", "Move from answer to action.", "The next approval, source check, export, or handoff is visible before anything sensitive runs."],
+  ["WORKSPACE", "Built to be used.", "Briefs, plans, review packets, checklists, and work boards are built as usable surfaces."],
+  ["CONTROL MAP", "Know where the AI belongs.", "Local, cloud, human review, and logging boundaries are mapped before deployment is discussed."],
+  ["EVIDENCE", "Know what to trust.", "Sources, assumptions, and gaps stay separate so your team can review the work quickly."],
 ];
 
 const fitSteps = [
@@ -18,9 +18,16 @@ const fitSteps = [
 
 const sprintLedger = [
   ["Scope", "A no-nonsense fit decision", "We name the business result, the data needed, the approval points, and the reason to proceed or stop."],
-  ["Workspace", "A working proof on your workflow", "A usable surface for the task: brief, source desk, checklist, form, review lane, or workflow board."],
+  ["Workspace", "A working proof on the actual work", "A usable surface for the task: brief, source desk, checklist, form, review lane, or workflow board."],
   ["Evidence", "A visible trail of assumptions and gaps", "What ran, what was assumed, what still needs a source, and what needs human approval — kept separate."],
-  ["Next", "A clear deploy-or-don't plan", "The smallest real deployment path, the blockers, and the cost and risk boundary before more work starts."],
+  ["Control", "A clear deploy-or-don't map", "What should run locally, what can use cloud AI, what requires review, and what must be logged."],
+];
+
+const controlMap = [
+  ["LOCAL", "Private context stays close.", "Files, saved memory, sensitive records, and deterministic checks can stay on owned machines or controlled infrastructure."],
+  ["CLOUD", "Frontier models are routed with limits.", "OpenAI, Anthropic, Gemini, or other providers can be used only for the parts that fit the data boundary."],
+  ["HUMAN", "Approval points are explicit.", "Customer-facing sends, account actions, regulated decisions, and irreversible changes wait for review."],
+  ["PROOF", "Every useful step leaves a record.", "Sources, assumptions, blocked access, receipts, and next actions stay visible enough to inspect or export."],
 ];
 
 const routeSteps = [
@@ -40,7 +47,7 @@ const whereItHelps = [
 const differenceRows = [
   ["It works on your actual task.", "The 72-hour sprint is built around one qualified workflow you care about, not a canned prompt or a slide deck."],
   ["It admits what it cannot know.", "Missing facts, blocked access, and unverified sources stay visible instead of being smoothed into a confident answer."],
-  ["It routes work by sensitivity.", "Public text work, image and video briefs, design handoffs, and sensitive private routes stay separated, so the right tool is approved for the right job."],
+  ["It routes work by sensitivity.", "Public text work, image and video briefs, design handoffs, local context, and sensitive private routes stay separated."],
   ["It creates a work surface, not just text.", "The result can become a brief, checklist, board, review lane, source queue, export, or repeatable workflow."],
 ];
 
@@ -55,20 +62,20 @@ const startCards = [
     featured: true,
   },
   {
-    tag: "Sensitive work",
-    title: "Private-context workflow",
-    body: "For work that needs files, accounts, or team knowledge without silent access.",
-    items: ["Approval path", "Safe context plan", "Export and review rules"],
-    action: "Plan the workflow",
-    href: "/intake?focus=pilot",
+    tag: "Architecture",
+    title: "Hybrid AI architecture review",
+    body: "For teams deciding what should run locally, what can use cloud AI, and where human review belongs.",
+    items: ["Local vs cloud route", "Sensitive-data boundaries", "Approval and logging map"],
+    action: "Map the architecture",
+    href: "/intake?focus=architecture",
   },
   {
     tag: "Deployment",
-    title: "AI rollout control",
-    body: "For teams putting models into real workflows and needing review before action.",
-    items: ["Local or cloud deployment", "Model and tool routing", "Operational handoff"],
-    action: "Scope the rollout",
-    href: "/intake?focus=pilot",
+    title: "Governed workflow deployment",
+    body: "For teams turning a working proof into a repeatable business system with review before action.",
+    items: ["Repeatable workspace", "Model and tool routing", "Operational handoff"],
+    action: "Scope deployment",
+    href: "/intake?focus=deployment",
   },
 ];
 
@@ -319,6 +326,7 @@ export default function ActiveMirrorSite() {
         <a href="#what-it-does" data-rail="results"><span className="dot"></span><span className="lbl">RESULTS</span></a>
         <a href="#fit" data-rail="fit"><span className="dot"></span><span className="lbl">FIT</span></a>
         <a href="#proof" data-rail="proof"><span className="dot"></span><span className="lbl">PROOF</span></a>
+        <a href="#control-map" data-rail="control"><span className="dot"></span><span className="lbl">CONTROL</span></a>
         <a href="#route" data-rail="route"><span className="dot"></span><span className="lbl">ROUTE</span></a>
         <a href="#where" data-rail="where"><span className="dot"></span><span className="lbl">WHERE</span></a>
         <a href="#work-with-us" data-rail="start"><span className="dot"></span><span className="lbl">START</span></a>
@@ -348,7 +356,7 @@ export default function ActiveMirrorSite() {
               <span className="mask-line"><span className="mi">Show</span></span>
               <span className="mask-line"><span className="mi">the <em>work.</em></span></span>
             </h1>
-            <p className="lede hero-sub">Bring one AI workflow. Leave with a reviewable workspace — sources, assumptions, gaps, and approvals kept visible, so your team can act on the result.</p>
+            <p className="lede hero-sub">Bring one important piece of work. Leave with a reviewable AI workspace and a control map for local, cloud, human review, and proof.</p>
             <div className="hero-ctas">
               <Link className="btn btn-primary" href="/intake?focus=pilot" data-analytics="hero_bring_workflow">Bring one workflow <span className="arr">→</span></Link>
               <Link className="btn btn-ghost" href="/mirror" data-analytics="hero_try_workspace">Try the public workspace</Link>
@@ -434,7 +442,7 @@ export default function ActiveMirrorSite() {
         <div className="wrap">
           <Eyebrow>What the sprint produces</Eyebrow>
           <h2 className="h-section rv">No pitch theatre. A useful proof or a clear no.</h2>
-          <p className="lede rv section-lede">For accepted workflows, the 72-hour sprint ends with a working artifact your team can inspect.</p>
+          <p className="lede rv section-lede">For accepted work, the 72-hour sprint ends with a working artifact your team can inspect and an architecture recommendation you can use.</p>
           <div className="ledger">
             {sprintLedger.map(([label, title, body]) => (
               <div className="ledger-card rv" key={label}>
@@ -443,6 +451,35 @@ export default function ActiveMirrorSite() {
                 <p>{body}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="control-map" className="band control-band" data-rail-section="control">
+        <div className="wrap control-grid">
+          <div className="control-copy">
+            <Eyebrow>Hybrid AI architecture</Eyebrow>
+            <h2 className="h-section rv">The proof tells you what architecture the work deserves.</h2>
+            <p className="lede rv section-lede">We do not start by selling a stack. We start with the work, then map the right mix of local runtime, cloud AI, human review, and proof record.</p>
+            <div className="rv control-cta">
+              <Link className="btn btn-primary" href="/intake?focus=architecture" data-analytics="control_map_architecture_review">Map my AI architecture <span className="arr">→</span></Link>
+            </div>
+          </div>
+          <div className="control-panel rv" aria-label="Active Mirror AI Control Map">
+            <div className="control-panel__head">
+              <span>Active Mirror Control Map</span>
+              <b>proof → architecture</b>
+            </div>
+            <div className="control-quads">
+              {controlMap.map(([label, title, body]) => (
+                <div className="control-quad" key={label}>
+                  <span>{label}</span>
+                  <h3>{title}</h3>
+                  <p>{body}</p>
+                </div>
+              ))}
+            </div>
+            <p className="control-note">This is the consulting deliverable: not a generic AI strategy deck, a deployable boundary map for the work your team actually needs done.</p>
           </div>
         </div>
       </section>
@@ -510,7 +547,7 @@ export default function ActiveMirrorSite() {
         <div className="wrap">
           <Eyebrow>Start</Eyebrow>
           <h2 className="h-section rv">Pick the result you want first.</h2>
-          <p className="lede rv section-lede">Start with one real workflow. The first deliverable should be useful even before a full deployment.</p>
+          <p className="lede rv section-lede">Start with one real piece of work. The first deliverable should be useful even before a full deployment.</p>
           <div className="start-grid">
             {startCards.map((card) => (
               <div className={card.featured ? "start-card featured rv" : "start-card rv"} key={card.title}>
@@ -537,14 +574,14 @@ export default function ActiveMirrorSite() {
         <div className="wrap">
           <div className="f-ledger rv">
             <div className="f-fact"><span className="k">Result</span><span className="v">Usable AI work</span></div>
-            <div className="f-fact"><span className="k">Deployment</span><span className="v">Local or cloud</span></div>
+            <div className="f-fact"><span className="k">Architecture</span><span className="v">Local, cloud, hybrid</span></div>
             <div className="f-fact"><span className="k">Standard</span><span className="v">Show the work</span></div>
             <div className="f-fact"><span className="k">Origin</span><span className="v">Made in India</span></div>
           </div>
           <div className="f-cols">
             <div className="f-brand">
               <a className="brand" href="#hero"><span className="glyph">⟡</span>Active Mirror</a>
-              <p>AI workspaces for decisions, briefs, plans, and workflows that need review before action.</p>
+              <p>AI workspaces and control maps for serious work that needs review before action.</p>
             </div>
             <div className="f-col">
               <h4>Product</h4>
@@ -556,8 +593,8 @@ export default function ActiveMirrorSite() {
             <div className="f-col">
               <h4>Engage</h4>
               <Link href="/proof-sprint">72-hour proof sprint</Link>
+              <Link href="/intake?focus=architecture">Architecture review</Link>
               <Link href="/intake?focus=pilot">Scoped pilot</Link>
-              <Link href="/intake?focus=workspace-proof">Workspace proof</Link>
               <Link href="/intake">General intake</Link>
             </div>
             <div className="f-col">

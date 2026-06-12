@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Scope a Pilot",
-  description: "Tell Active Mirror the business workflow, sensitivity, deployment preference, and timeline.",
+  description: "Tell Active Mirror the business work, sensitivity, deployment preference, and local/cloud review boundary.",
   alternates: { canonical: "https://activemirror.ai/intake" },
 };
 
@@ -21,17 +21,24 @@ export default async function IntakePage({ searchParams }: IntakePageProps) {
   const params = await searchParams;
   const focus = firstParam(params.focus) || "general";
   const fromWorkspace = focus === "workspace-proof";
+  const fromArchitecture = focus === "architecture";
   const hero = fromWorkspace
     ? {
         eyebrow: "⟡ Workspace proof sprint",
         title: "Turn this workspace into something your team can inspect.",
         body: "Send the workflow, owner, proof target, and deployment boundary. The generated prompt and artifact are not forwarded unless you choose to paste them.",
       }
-    : {
-        eyebrow: "⟡ Scoped pilot",
-        title: "Tell us the workflow that needs better AI control.",
-        body: "We start with the business outcome, sensitivity, where it should run, and how quickly you need it. No private access is requested from this form.",
-      };
+    : fromArchitecture
+      ? {
+          eyebrow: "⟡ Hybrid AI architecture",
+          title: "Map the right local, cloud, and human-review boundary.",
+          body: "Send the work, sensitivity, current failure mode, and where it may run. The first output is a control map before any private access is requested.",
+        }
+      : {
+          eyebrow: "⟡ Scoped pilot",
+          title: "Tell us the workflow that needs better AI control.",
+          body: "We start with the business outcome, sensitivity, where it should run, and how quickly you need it. No private access is requested from this form.",
+        };
 
   return (
     <main className="proofpage">

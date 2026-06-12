@@ -930,6 +930,113 @@
   font-size: 0.88rem;
 }
 
+.amr .control-band {
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(79, 182, 165, 0.06), transparent 42%),
+    linear-gradient(180deg, var(--vault) 0%, var(--vault-2) 48%, var(--vault) 100%);
+}
+
+.amr .control-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.76fr) minmax(0, 1.24fr);
+  align-items: center;
+  gap: clamp(36px, 5vw, 78px);
+}
+
+.amr .control-copy .h-section {
+  max-width: 24ch;
+}
+
+.amr .control-cta {
+  margin-top: 36px;
+}
+
+.amr .control-panel {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: rgba(13, 19, 28, 0.9);
+  box-shadow: 0 30px 80px -34px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(233, 227, 213, 0.05);
+}
+
+.amr .control-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--vault-3);
+  font-family: var(--font-data);
+}
+
+.amr .control-panel__head span {
+  color: var(--bone-dim);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.amr .control-panel__head b {
+  color: var(--teal);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.amr .control-quads {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line-soft);
+}
+
+.amr .control-quad {
+  min-height: 210px;
+  padding: 30px 28px 34px;
+  background: var(--vault);
+  transition: background 0.3s, transform 0.3s;
+}
+
+.amr .control-quad:hover {
+  background: var(--vault-2);
+}
+
+.amr .control-quad span {
+  display: block;
+  margin-bottom: 18px;
+  color: var(--slate);
+  font-family: var(--font-data);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+}
+
+.amr .control-quad h3 {
+  margin-bottom: 10px;
+  color: var(--bone);
+  font-family: var(--font-reflective);
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: 1.28;
+  letter-spacing: 0;
+}
+
+.amr .control-quad p {
+  color: var(--bone-dim);
+  font-size: 0.9rem;
+}
+
+.amr .control-note {
+  padding: 18px 20px 20px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--slate);
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
 .amr .route-wrap {
   position: relative;
   margin-top: 70px;
@@ -1364,6 +1471,10 @@
     grid-template-columns: 1fr;
   }
 
+  .amr .control-grid {
+    grid-template-columns: 1fr;
+  }
+
   .amr #hero .glyph-bg {
     right: -30vw;
     font-size: 90vw;
@@ -1371,7 +1482,8 @@
   }
 
   .amr .out-grid,
-  .amr .ledger {
+  .amr .ledger,
+  .amr .control-quads {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -1489,9 +1601,15 @@
 
   .amr .out-grid,
   .amr .ledger,
+  .amr .control-quads,
   .amr .where-grid,
   .amr .route-steps {
     grid-template-columns: 1fr;
+  }
+
+  .amr .control-quad {
+    min-height: auto;
+    padding: 28px 24px 30px;
   }
 
   .amr .where-cell:nth-child(odd) {

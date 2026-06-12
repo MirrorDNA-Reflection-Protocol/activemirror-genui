@@ -2,7 +2,7 @@ import ActiveMirrorSite from "@/components/active-mirror/ActiveMirrorSite";
 
 export default function Page() {
   const description =
-    "Bring one workflow your current AI cannot safely finish. Active Mirror scopes it, builds a reviewable workspace, and keeps sources, approvals, and next actions visible.";
+    "Bring one important piece of work. Active Mirror builds a reviewable AI workspace and maps what should run locally, in cloud AI, under human review, and on the record.";
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -25,10 +25,12 @@ export default function Page() {
         description,
         featureList: [
           "Reviewable business workspaces",
+          "Hybrid AI architecture control maps",
+          "Local and cloud model routing plans",
           "Evidence and assumption separation",
           "Sensitive-context approval boundaries",
           "Exportable briefs and work records",
-          "Local or cloud deployment planning",
+          "Governed deployment planning",
         ],
         offers: {
           "@type": "Offer",
@@ -57,6 +59,8 @@ export default function Page() {
         name: "Active Mirror common starting points",
         itemListElement: [
           "AI workflow proof sprint",
+          "Hybrid AI architecture review",
+          "AI control map",
           "Reviewable AI workspace",
           "AI governance evidence trail",
           "Private-context AI workflow",
