@@ -30,11 +30,11 @@ const pages = {
   },
   "proof-sprint": {
     eyebrow: "72-hour proof sprint",
-    title: "See exactly what the proof sprint returns.",
+    title: "Send one messy AI workflow. Get a working proof in 72 hours.",
     body:
-      "The sprint starts with one real workflow and ends with a working surface, visible evidence, and a deploy-or-don't decision. If the workflow is not a fit, the first useful output is a clear no.",
-    primary: "Apply with one workflow",
-    primaryHref: "/intake?focus=pilot",
+      "We scope the workflow first. If it fits, we build a working surface with the evidence, assumptions, approvals, and next action visible. If it does not fit, you get a clear no before deeper work starts.",
+    primary: "Send your workflow",
+    primaryHref: "/intake?focus=pilot&utm_source=proof_sprint&utm_medium=site&utm_campaign=working_demo_72h",
   },
 } satisfies Record<PublicPageKind, { eyebrow: string; title: string; body: string; primary: string; primaryHref: string }>;
 
@@ -99,6 +99,24 @@ const proofSprintCards = [
     k: "What stays gated",
     v: "sensitive access",
     body: "Private files, account actions, device work, saved context, and external sends wait for explicit approval.",
+  },
+];
+
+const proofSprintExamples = [
+  {
+    title: "Board memo",
+    prompt: "Prepare a board memo from messy notes, cite what is known, flag what is missing, and make the approval path visible.",
+    output: "Memo workspace, evidence checklist, decision log, missing-input list, and send-ready follow-up.",
+  },
+  {
+    title: "Vendor review",
+    prompt: "Compare AI vendors for one department without hiding assumptions, source gaps, legal concerns, or cost questions.",
+    output: "Vendor evidence desk, comparison table, risk register, approval queue, and procurement handoff.",
+  },
+  {
+    title: "Internal AI workflow",
+    prompt: "Turn a repeated analyst workflow into a governed AI workspace with human review and exportable proof.",
+    output: "Working interface, control map, data boundary, review steps, and deploy-or-don't recommendation.",
   },
 ];
 
@@ -223,6 +241,22 @@ function ProofSprintBody() {
     <>
       <section className="proofband">
         <div className="proofband__head">
+          <h2>Use this when normal AI gets stuck.</h2>
+          <p>Good workflows are important, repeated, messy, and risky enough that an answer alone is not useful.</p>
+        </div>
+        <div className="proofgrid">
+          {proofSprintExamples.map((example) => (
+            <div className="proofcard" key={example.title}>
+              <div className="proofcard__k">{example.title}</div>
+              <div className="proofcard__v">example request</div>
+              <p>{example.prompt}</p>
+              <p><b>Proof returned:</b> {example.output}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="proofband">
+        <div className="proofband__head">
           <h2>The sprint shape</h2>
           <p>A buyer should be able to judge Active Mirror by the output, not by our claims. This is the exact working loop.</p>
         </div>
@@ -243,17 +277,17 @@ function ProofSprintBody() {
         <div className="glassline">
           <span>Example first workflow</span>
           <b>vendor review, policy review, research brief, workflow board</b>
-          <Link href="/mirror?prompt=Build%20a%20vendor%20evidence%20workspace%20with%20sources%2C%20assumptions%2C%20gaps%2C%20and%20next%20steps">Open sample</Link>
+          <Link data-analytics="proof_sprint_open_sample" href="/mirror?prompt=Build%20a%20vendor%20evidence%20workspace%20with%20sources%2C%20assumptions%2C%20gaps%2C%20and%20next%20steps">Open sample</Link>
         </div>
         <div className="glassline">
           <span>First-pass input boundary</span>
           <b>public or sanitized inputs only</b>
-          <Link href="/intake?focus=pilot">Submit workflow</Link>
+          <Link data-analytics="proof_sprint_submit_workflow" href="/intake?focus=pilot&utm_source=proof_sprint&utm_medium=site&utm_campaign=working_demo_72h">Submit workflow</Link>
         </div>
         <div className="glassline">
           <span>Buyer receipt</span>
           <b>capture id, scope questions, risk boundary</b>
-          <Link href="/intake?focus=workspace-proof">Start from a workspace</Link>
+          <Link data-analytics="proof_sprint_workspace_handoff" href="/intake?focus=workspace-proof&utm_source=proof_sprint&utm_medium=site&utm_campaign=working_demo_72h">Start from a workspace</Link>
         </div>
       </section>
     </>

@@ -13,6 +13,7 @@
     "audit:prod": "npm audit --omit=dev",
     "ops:health": "bash scripts/ops/healthcheck.sh",
     "ops:browser-canary": "node scripts/ops/browser-canary.mjs",
+    "ops:cf-analytics": "node scripts/ops/cloudflare-edge-analytics.mjs",
     "ops:deploy:hetzner": "bash scripts/ops/deploy-hetzner.sh",
     "body-receipt:sign": "node scripts/ops/sign-body-receipt.mjs",
     "ratchet:100": "node scripts/ops/mirror-ratchet.mjs --passes=100",

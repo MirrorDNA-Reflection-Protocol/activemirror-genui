@@ -2,6 +2,27 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  async redirects() {
+    return [
+      { source: "/start", destination: "/intake?focus=pilot", permanent: false },
+      { source: "/confessions", destination: "/glass", permanent: false },
+      { source: "/hub", destination: "/", permanent: false },
+      { source: "/pricing", destination: "/proof-sprint", permanent: false },
+      { source: "/scan", destination: "/mirror", permanent: false },
+      { source: "/demo", destination: "/mirror", permanent: false },
+      { source: "/products", destination: "/", permanent: false },
+      { source: "/docs/architecture", destination: "/intake?focus=architecture", permanent: false },
+      { source: "/skills", destination: "/mirror", permanent: false },
+      { source: "/brief", destination: "/mirror", permanent: false },
+      { source: "/legal", destination: "/terms", permanent: false },
+      { source: "/proof", destination: "/proof-sprint", permanent: false },
+      { source: "/products/mirrorgate", destination: "/trust", permanent: false },
+      { source: "/cast", destination: "/mirror", permanent: false },
+      { source: "/preview", destination: "/mirror", permanent: false },
+      { source: "/products/agentdna", destination: "/compare", permanent: false },
+      { source: "/mirror-beta", destination: "/mirror", permanent: false },
+    ];
+  },
   async headers() {
     const htmlRoutes = [
       "/",

@@ -35,11 +35,13 @@ export default function SiteTelemetry({ surface }: { surface: "public_site" | "m
     function onClick(event: MouseEvent) {
       const target = event.target instanceof Element ? event.target.closest("a, button") : null;
       if (!target) return;
+      const analyticsTarget = target.getAttribute("data-analytics");
+      if (!analyticsTarget) return;
       const href = target instanceof HTMLAnchorElement ? target.getAttribute("href") || "" : "";
       trackSiteEvent({
         event: "cta_click",
         pageId,
-        target: target.getAttribute("data-analytics") || target.getAttribute("data-testid") || target.id || target.tagName.toLowerCase(),
+        target: analyticsTarget,
         label: readableLabel(target),
         href,
         section: sectionName(target),
