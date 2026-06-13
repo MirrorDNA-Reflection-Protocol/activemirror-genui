@@ -28,6 +28,15 @@ const nextConfig: NextConfig = {
       "/",
       "/about",
       "/about/roadmap",
+      "/aindia",
+      "/api/aindia/claim-guard",
+      "/api/aindia/contracts",
+      "/api/aindia/determinism",
+      "/api/aindia/founder-relay",
+      "/api/aindia/manifest",
+      "/api/aindia/recursion",
+      "/api/aindia/sovereignty",
+      "/api/aindia/wrappers",
       "/app",
       "/compare",
       "/glass",
@@ -40,11 +49,20 @@ const nextConfig: NextConfig = {
       "/trust",
     ];
     const htmlNoTransformCache = { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate, no-transform" };
+    const apiSecurityHeaders = [
+      { key: "X-Robots-Tag", value: "noindex, nofollow" },
+      { key: "Content-Security-Policy", value: "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" },
+    ];
     const globalSecurityHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "X-Frame-Options", value: "DENY" },
+      { key: "X-DNS-Prefetch-Control", value: "off" },
+      { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-      { key: "Permissions-Policy", value: "camera=(), geolocation=(), payment=(), usb=(), browsing-topics=()" },
+      { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+      { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+      { key: "Origin-Agent-Cluster", value: "?1" },
+      { key: "Permissions-Policy", value: "camera=(), geolocation=(), payment=(), usb=(), browsing-topics=(), accelerometer=(), gyroscope=(), magnetometer=()" },
       {
         key: "Content-Security-Policy-Report-Only",
         value: [
@@ -54,6 +72,9 @@ const nextConfig: NextConfig = {
           "img-src 'self' data: blob:",
           "font-src 'self' data:",
           "connect-src 'self' https:",
+          "worker-src 'self' blob:",
+          "manifest-src 'self'",
+          "object-src 'none'",
           "frame-ancestors 'none'",
           "base-uri 'self'",
           "form-action 'self' mailto:",
@@ -92,6 +113,7 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         headers: [
           ...globalSecurityHeaders,
+          ...apiSecurityHeaders,
           { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
         ],
       },

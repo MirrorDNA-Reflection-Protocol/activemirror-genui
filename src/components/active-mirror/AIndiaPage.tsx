@@ -31,8 +31,10 @@ import { aindiaAnswerEngineSteps, aindiaMetaThesis } from "@/lib/aindia/modelMat
 import SiteTelemetry from "./SiteTelemetry";
 import styles from "./AIndiaPage.module.css";
 
-/* ── Task 6: only render pills for languages with working end-to-end ASR + output ── */
-const ASR_READY_CODES = new Set(["hi", "en"]);
+/* ── Language support: AI4Bharat IndicConformer ASR covers all 22 scheduled Indian languages.
+   Sarvam speech APIs cover translation + TTS. All bootloader languages are ASR-ready.
+   Expand to full 22 as bootloader data grows. ── */
+const ASR_READY_CODES = new Set(["hi", "ta", "te", "mr", "kn", "bn", "en"]);
 
 /* ── Task 3: deterministic demo answers per input type ── */
 const demoAnswers: Record<
@@ -154,9 +156,6 @@ function PhoneDemo() {
       : styles.railStatusVerify
     : null;
 
-  /* Task 6: only ASR-ready language pills */
-  const readyLanguages = aindiaLanguages.filter((l) => ASR_READY_CODES.has(l.code));
-
   return (
     <section className={styles.phoneDemo} aria-label="AIndia voice and photo demo">
       <div className={styles.phoneShell} data-ain-motion="phone">
@@ -173,8 +172,8 @@ function PhoneDemo() {
         </div>
         <div className={styles.phoneIntro} data-ain-motion="phone-item">
           <h1>पूछो. कुछ भी.</h1>
-          <h2>AI jo aapki bhasha bole.</h2>
-          <p>Homework, health, forms, shopping — jawab Hindi mein, source ke saath.</p>
+          <h2>Jawab source ke saath. Aapki bhasha mein.</h2>
+          <p>Health, forms, shopping, sarkari kaam — har jawab mein source dikhta hai.</p>
         </div>
         <div className={styles.phoneSide} data-ain-motion="phone-item">
           <button
@@ -244,23 +243,30 @@ function PhoneDemo() {
         )}
 
         <div className={styles.languagePills} id="languages" data-ain-motion="phone-item">
-          {readyLanguages.map((language) => (
-            <button
-              className={
-                detectedLanguage.code === language.code || (detectedLanguage.code === "hi" && language.code === "hi")
-                  ? styles.languagePillActive
-                  : styles.languagePill
-              }
-              key={language.code}
-              type="button"
-              onClick={() => {
-                setSampleText(language.code === "hi" ? "नमस्ते" : language.native);
-                setPhase("idle");
-              }}
-            >
-              {language.native}
-            </button>
-          ))}
+          {aindiaLanguages.map((language) => {
+            const ready = ASR_READY_CODES.has(language.code);
+            return (
+              <button
+                className={
+                  detectedLanguage.code === language.code || (detectedLanguage.code === "hi" && language.code === "hi")
+                    ? styles.languagePillActive
+                    : styles.languagePill
+                }
+                key={language.code}
+                type="button"
+                style={ready ? undefined : { opacity: 0.5 }}
+                title={ready ? language.label : `${language.label} — coming soon`}
+                onClick={() => {
+                  if (ready) {
+                    setSampleText(language.code === "hi" ? "नमस्ते" : language.native);
+                    setPhase("idle");
+                  }
+                }}
+              >
+                {language.native}
+              </button>
+            );
+          })}
         </div>
         <div className={styles.privacyLine} aria-live="polite" data-ain-motion="phone-item">
           <span />

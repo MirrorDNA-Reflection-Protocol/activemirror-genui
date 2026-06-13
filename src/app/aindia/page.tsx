@@ -3,24 +3,24 @@ import AIndiaPage from "@/components/active-mirror/AIndiaPage";
 import { aindiaBootloader } from "@/lib/aindia/bootloader";
 
 const description =
-  "AIndia is a sovereign AI harness for India: ask by voice, photo, or text in your language. Get an answer, a source, and one safe next step — with a receipt.";
+  "AIndia — poocho kuch bhi, jawab source ke saath. Voice, photo, ya text mein — Hindi aur sabhi Indian languages mein.";
 
 export const metadata: Metadata = {
-  title: "AIndia - Sovereign AI for India",
+  title: "AIndia — Jawab Source Ke Saath",
   description,
   manifest: "/api/aindia/manifest",
   alternates: { canonical: "https://activemirror.ai/aindia" },
   openGraph: {
-    title: "AIndia - Sovereign AI for India",
+    title: "AIndia — Jawab Source Ke Saath",
     description,
     url: "https://activemirror.ai/aindia",
     siteName: "Active Mirror",
     type: "website",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "AIndia — sovereign AI harness for India" }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "AIndia — jawab source ke saath, aapki bhasha mein" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AIndia - Sovereign AI for India",
+    title: "AIndia — Jawab Source Ke Saath",
     description,
     images: ["/og.png"],
   },
@@ -43,17 +43,14 @@ export default function AIndiaRoute() {
     areaServed: "India",
     description,
     featureList: [
-      "Voice-first Indian-language input",
-      "Photo and screenshot input",
-      "Answer engine with source citations",
-      "Sarvam local language rail",
-      "Chetana safety rail for risk detection",
+      "Ask by voice, photo, or text in any Indian language",
+      "Answer engine with source citations for every response",
+      "All 22 scheduled Indian languages via AI4Bharat and Sarvam",
+      "Safety rail flags risky payments, links, and scams before action",
+      "Data stays on device — cloud only with explicit consent",
+      "Works offline after first use",
       "Two-tier proof: plain check line + expandable technical receipt",
-      "Consent gates for cloud and frontier-model fallback",
-      "Deterministic harness where the LLM proposes and AIndia decides",
-      "Local receipts and optional smart-contract notarization adapter",
-      "One next-step output",
-      "SME, household, field-work, and learning modes",
+      "DPDP Act compliant — consent gates, local receipts, erasure support",
     ],
     softwareHelp: {
       "@type": "CreativeWork",
