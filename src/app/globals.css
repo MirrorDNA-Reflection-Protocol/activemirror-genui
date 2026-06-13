@@ -192,6 +192,20 @@
   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.32), 0 18px 44px rgba(0, 0, 0, 0.48);
   --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.36), 0 32px 72px rgba(0, 0, 0, 0.56);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* AIndia brand */
+  --ain-ink: #1a1305;
+  --ain-paper: #f4efe4;
+  --ain-paper-2: #ffffff;
+  --ain-gold: #c79a3a;
+  --ain-gold-deep: #9a7320;
+  --ain-muted: #6b6354;
+  --ain-line: #e0d7c4;
+  --ain-safe: #2f7d4f;
+  --ain-risky: #b3402b;
+  --ain-verify: #b07d1a;
+  --ain-display: "Instrument Serif", Georgia, serif;
+  --ain-body: var(--font-body);
+  --ain-mono: "Geist Mono", ui-monospace, monospace;
 }
 
 @theme inline {
