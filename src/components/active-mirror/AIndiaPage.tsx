@@ -4,14 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  Bot,
   BrainCircuit,
   Camera,
   Check,
   CircleHelp,
   Cpu,
-  DatabaseZap,
-  FileSearch,
   Globe2,
   ImagePlus,
   Languages,
@@ -19,7 +16,6 @@ import {
   Mic,
   SearchCheck,
   ShieldCheck,
-  Smartphone,
   Volume2,
 } from "lucide-react";
 import {
@@ -31,7 +27,7 @@ import {
   type AIndiaInputId,
   type AIndiaModeId,
 } from "@/lib/aindia/bootloader";
-import { aindiaAnswerEngineSteps, aindiaMetaThesis, aindiaModelLayers, type AIndiaModelLayerId } from "@/lib/aindia/modelMatrix";
+import { aindiaAnswerEngineSteps, aindiaMetaThesis } from "@/lib/aindia/modelMatrix";
 import SiteTelemetry from "./SiteTelemetry";
 import styles from "./AIndiaPage.module.css";
 
@@ -51,40 +47,29 @@ const demoAnswers: Record<
   }
 > = {
   voice: {
-    asking: "पूछ रहा हूं...",
-    answer: "Aapka sawaal samajh gaya.",
-    answerHindi: "नज़दीकी राशन की दुकान सोमवार से शनिवार, सुबह 9 से शाम 7 बजे तक खुली रहती है।",
-    source: "Google Maps local data",
+    asking: "सुन रहा हूं...",
+    answer: "Jawab mil gaya.",
+    answerHindi: "Vitamin D ke liye subah 10-11 baje 15-20 minute dhoop mein baithein. Supplements doctor se poocho.",
+    source: "WHO guidelines + ICMR",
     chetana: null,
-    nextStep: "Map directions bhejein?",
+    nextStep: "Nearest lab mein test book karein?",
   },
   photo: {
-    asking: "फोटो देख रहा हूं...",
-    answer: "Screenshot check kiya.",
-    answerHindi: "यह UPI request एक unknown sender से है। Amount ₹12,000 है।",
-    source: "On-device OCR",
-    chetana: { status: "risky", reason: "Unknown sender + high-value UPI request. Do not pay yet." },
-    nextStep: "Sender ka phone number bank app mein verify karein.",
+    asking: "फोटो पढ़ रहा हूं...",
+    answer: "Form samajh gaya.",
+    answerHindi: "Yeh Aadhaar update form hai. Section 2 mein apna naya address bharein. Proof mein bijli ka bill chalega.",
+    source: "UIDAI form guide",
+    chetana: null,
+    nextStep: "Nearest Aadhaar centre ka address bhejein?",
   },
   message: {
     asking: "मैसेज पढ़ रहा हूं...",
-    answer: "Message scan kiya.",
+    answer: "Message padh liya.",
     answerHindi: "यह link एक job offer claim कर रहा है। Domain 3 दिन पहले register हुआ है।",
     source: "Link analysis + WHOIS",
-    chetana: { status: "verify", reason: "New domain + job claims. Pehle official site se milaiye." },
+    chetana: { status: "risky", reason: "Naya domain + fake job offer signs. Link mat kholiye." },
     nextStep: "Company ki official website par jaake verify karein.",
   },
-};
-
-const modelLayerIcons: Record<AIndiaModelLayerId, typeof ShieldCheck> = {
-  "os-native-llm": Smartphone,
-  "indic-language": Languages,
-  speech: Mic,
-  "ocr-vision": FileSearch,
-  "embeddings-rag": DatabaseZap,
-  "search-citations": SearchCheck,
-  "safety-fraud": ShieldCheck,
-  "action-tools": Bot,
 };
 
 /* ── Task 4: two-tier proof component ── */
@@ -187,9 +172,9 @@ function PhoneDemo() {
           </button>
         </div>
         <div className={styles.phoneIntro} data-ain-motion="phone-item">
-          <h1>पूछो. आपकी भाषा में.</h1>
-          <h2>जवाब, source, aur ek safe agla kadam.</h2>
-          <p>Sovereign AI for India.</p>
+          <h1>पूछो. कुछ भी.</h1>
+          <h2>AI jo aapki bhasha bole.</h2>
+          <p>Homework, health, forms, shopping — jawab Hindi mein, source ke saath.</p>
         </div>
         <div className={styles.phoneSide} data-ain-motion="phone-item">
           <button
@@ -202,9 +187,9 @@ function PhoneDemo() {
             <Mic aria-hidden="true" size={84} strokeWidth={1.85} />
           </button>
           <h3>
-            {phase === "asking" ? demo.asking : phase === "answered" ? demo.answer : "दबाइए और पूछिए"}
+            {phase === "asking" ? demo.asking : phase === "answered" ? demo.answer : "कुछ भी पूछो"}
           </h3>
-          <p>{phase === "idle" ? "Press & ask" : phase === "asking" ? "Thinking..." : ""}</p>
+          <p>{phase === "idle" ? "Tap & ask anything" : phase === "asking" ? "Soch raha hoon..." : ""}</p>
         </div>
         <div className={styles.secondaryActions} data-ain-motion="phone-item">
           <button
@@ -214,7 +199,7 @@ function PhoneDemo() {
           >
             <Camera aria-hidden="true" size={35} />
             <b>फ़ोटो भेजो</b>
-            <span>Screenshot / form</span>
+            <span>Form / bill / document</span>
           </button>
           <button
             className={`${styles.actionTile} ${input === "message" && phase !== "idle" ? styles.actionTileActive : ""}`}
@@ -223,7 +208,7 @@ function PhoneDemo() {
           >
             <MessageSquareText aria-hidden="true" size={35} />
             <b>मैसेज भेजो</b>
-            <span>Link / job / UPI</span>
+            <span>Link / message / forward</span>
           </button>
         </div>
 
@@ -238,7 +223,7 @@ function PhoneDemo() {
             {/* Chetana rail — fires only when risk detected */}
             {demo.chetana && chetanaRailClass && railStatusClass && (
               <div className={chetanaRailClass}>
-                <h5>Chetana safety rail</h5>
+                <h5>Safety check</h5>
                 <div className={railStatusClass}>
                   <ShieldCheck size={14} />
                   {demo.chetana.status === "risky" ? "रुकिए" : "पहले मिलाइए"}
@@ -297,8 +282,8 @@ function CheckHabitSection() {
   return (
     <section className={styles.checkHabit} data-ain-section>
       <div className={styles.sectionHead}>
-        <p>Powered by Chetana</p>
-        <h2>Paise, OTP, ya link — risky lage toh AIndia rok deta hai.</h2>
+        <p>ChatGPT mein yeh nahi milega</p>
+        <h2>Risky lage toh AIndia rok deta hai — pehle.</h2>
       </div>
       <div className={styles.checkHabitGrid}>
         {[
@@ -326,29 +311,29 @@ function SovereignSection() {
   return (
     <section className={styles.sovereign} data-ain-section>
       <div className={styles.sectionHead}>
-        <p>Sovereign AI for India</p>
-        <h2>Sovereignty is control, not decoration.</h2>
+        <p>Why AIndia</p>
+        <h2>Your data stays on your phone. Your language comes first.</h2>
       </div>
       <div className={styles.sovereignGrid}>
         <article>
           <Languages aria-hidden="true" size={29} />
-          <h3>Start in the person&apos;s language.</h3>
-          <p>Detect script and speech first. English is a rail, not the default assumption.</p>
+          <h3>Apni bhasha mein.</h3>
+          <p>Hindi, English, aur jaldi aur bhi. AIndia aapki bhasha samajhta hai — English zaruri nahi.</p>
         </article>
         <article>
           <ShieldCheck aria-hidden="true" size={29} />
-          <h3>Safety before action.</h3>
-          <p>UPI, OTP, links, files, accounts, and sends pause for checks and approval.</p>
+          <h3>Pehle check, phir action.</h3>
+          <p>Payment, OTP, link, ya form — AIndia pehle check karta hai, phir aapko batata hai kya karein.</p>
         </article>
         <article>
           <Cpu aria-hidden="true" size={29} />
-          <h3>Frontier models are optional engines.</h3>
-          <p>Sarvam, Apple, Google, OpenAI, Anthropic, or local models can help. The harness decides the route.</p>
+          <h3>Phone par hi chalta hai.</h3>
+          <p>Internet slow ho ya na ho — basic checks aapke phone par local hote hain. Data bahar nahi jaata.</p>
         </article>
         <article>
           <Globe2 aria-hidden="true" size={29} />
-          <h3>Help, not extraction.</h3>
-          <p>The win is a safer payment, a clearer form, a message not clicked, or a shop task finished.</p>
+          <h3>Kaam ka jawab, gyaan nahi.</h3>
+          <p>Lamba essay nahi milega. Ek clear jawab, source ke saath, aur ek next step.</p>
         </article>
       </div>
     </section>
@@ -362,8 +347,8 @@ function ModeSection() {
   return (
     <section className={styles.modes} id="start">
       <div className={styles.sectionHead}>
-        <p>Kaam, not gyaan</p>
-        <h2>Everyday checks first. SMEs and institutions after habit.</h2>
+        <p>Kya check kar sakte ho</p>
+        <h2>Ghar ke sawaal se lekar dukaan ke kaam tak.</h2>
       </div>
       <div className={styles.modeGrid}>
         {aindiaModes.map((mode) => {
@@ -392,8 +377,8 @@ function ModeSection() {
           <ShieldCheck aria-hidden="true" size={40} strokeWidth={1.5} />
         </div>
         <div className={styles.chetanaBannerText}>
-          <h3>Chetana stays focused on safety</h3>
-          <p>When AIndia sees a suspicious message, link, UPI request, or payment screenshot, it routes the check into Chetana/Kavach. No over-smart answer, no silent action.</p>
+          <h3>Suspicious lagta hai? AIndia rokta hai.</h3>
+          <p>Koi bhi shaky message, link, UPI request, ya payment screenshot — AIndia pehle warning deta hai. Bina aapki permission koi action nahi hota.</p>
         </div>
       </div>
     </section>
@@ -406,8 +391,8 @@ function ModelMatrixSection() {
       <div className={styles.modelIntro}>
         <BrainCircuit aria-hidden="true" size={34} />
         <div>
-          <p>Perplexity for India</p>
-          <h2>Answer engine, not chatbot.</h2>
+          <p>Kaise kaam karta hai</p>
+          <h2>Sawaal poocho. Jawab source ke saath.</h2>
         </div>
         <ul>
           {aindiaMetaThesis.map((item) => (
@@ -424,24 +409,6 @@ function ModelMatrixSection() {
           </article>
         ))}
       </div>
-      <div className={styles.layerGrid}>
-        {aindiaModelLayers.map((layer) => {
-          const Icon = modelLayerIcons[layer.id];
-          return (
-            <article key={layer.id}>
-              <Icon aria-hidden="true" size={25} />
-              <h3>{layer.title}</h3>
-              <p>{layer.job}</p>
-              <b>{layer.localFirstPath}</b>
-              <ul>
-                {layer.candidates.slice(0, 3).map((candidate) => (
-                  <li key={candidate}>{candidate}</li>
-                ))}
-              </ul>
-            </article>
-          );
-        })}
-      </div>
     </section>
   );
 }
@@ -451,14 +418,14 @@ function StackSection() {
   return (
     <section className={styles.stack} id="safety" data-ain-section>
       <div className={styles.sectionHead}>
-        <p>India-specific intelligence</p>
-        <h2>Simple outside. Serious inside.</h2>
+        <p>Aapke phone ke liye</p>
+        <h2>Sasta phone. Slow internet. Phir bhi chalta hai.</h2>
       </div>
       <div className={styles.stackGrid}>
         <article>
           <Mic aria-hidden="true" size={28} />
-          <h3>Familiar Interface</h3>
-          <p>Voice, photo, WhatsApp-style input, big buttons, and very few words.</p>
+          <h3>Bole ya photo bhejo</h3>
+          <p>Mic dabao aur bolo, ya photo le lo. Type karna zaruri nahi.</p>
           <ul>
             {aindiaBootloader.wrapper.map((item) => (
               <li key={item}>
@@ -469,8 +436,8 @@ function StackSection() {
         </article>
         <article>
           <ShieldCheck aria-hidden="true" size={28} />
-          <h3>Safety First</h3>
-          <p>Safety checks happen before action. The answer is one next step, not a long essay.</p>
+          <h3>Pehle check, phir bataye</h3>
+          <p>Koi bhi action se pehle safety check hota hai. Lamba essay nahi — ek clear next step.</p>
           <ul>
             {aindiaBootloader.harness.map((item) => (
               <li key={item}>
@@ -481,8 +448,8 @@ function StackSection() {
         </article>
         <article>
           <LanguageIcon aria-hidden="true" size={28} />
-          <h3>Smart Routing</h3>
-          <p>Sarvam/local language first, then task mode, then safety check, then spoken next step.</p>
+          <h3>Internet na ho toh bhi</h3>
+          <p>Basic checks phone par hi hote hain. Internet aaye toh aur smart ho jaata hai.</p>
           <ul className={styles.steppedList}>
             {aindiaBootloader.bootSequence.slice(0, 5).map((item) => (
               <li key={item}>
@@ -498,10 +465,9 @@ function StackSection() {
       </div>
       <article className={styles.browserHelper}>
         <div>
-          <h3>Offline helper path</h3>
+          <h3>Offline mode</h3>
           <p>
-            AIndia should keep files in the browser and download a Sarvam-compatible helper pack after first use when the
-            device can support it. The app shell works first; the model helper arrives in the background.
+            Pehli baar use karne ke baad AIndia ek chhota helper pack download karta hai. Uske baad basic checks bina internet ke bhi chalte hain.
           </p>
         </div>
         <ul>
@@ -605,16 +571,16 @@ export default function AIndiaPage() {
         <PhoneDemo />
       </header>
 
-      <CheckHabitSection />
-      <SovereignSection />
       <ModeSection />
       <ModelMatrixSection />
+      <SovereignSection />
+      <CheckHabitSection />
       <StackSection />
 
       <section className={styles.finalCta}>
         <div>
           <ImagePlus aria-hidden="true" size={34} />
-          <h2>Sovereign AI, aapke haath mein.</h2>
+          <h2>Abhi try karo. Free hai.</h2>
           <p>Voice ya photo se poocho. Jawab, source, aur receipt — sab aapke phone par.</p>
         </div>
         <Link className={styles.finalButton} href="/intake?focus=aindia" data-analytics="aindia_start">
