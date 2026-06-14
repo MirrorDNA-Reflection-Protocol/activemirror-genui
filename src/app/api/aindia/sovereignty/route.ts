@@ -23,6 +23,8 @@ import {
 } from "@/lib/aindia/recursion";
 
 export function GET() {
+  const updated = aindiaMacAbsorption.verifiedAt.slice(0, 10);
+
   return NextResponse.json(
     {
       product: "AIndia",
@@ -61,7 +63,7 @@ export function GET() {
         },
       },
       researchSources: aindiaResearchSources,
-      updated: "2026-06-12",
+      updated,
     },
     {
       headers: {

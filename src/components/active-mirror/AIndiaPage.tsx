@@ -27,14 +27,22 @@ import {
   type AIndiaInputId,
   type AIndiaModeId,
 } from "@/lib/aindia/bootloader";
+import { answerGlyphIdsForRisk, getAIndiaGlyphs } from "@/lib/aindia/glyphs";
 import { aindiaAnswerEngineSteps, aindiaMetaThesis } from "@/lib/aindia/modelMatrix";
+import { aindiaReflectionEngineFormula, getAIndiaReflectiveTurnContract } from "@/lib/aindia/reflectiveTurn";
+import {
+  aindiaDeviceCapabilityPassport,
+  aindiaSupportStatusLabel,
+  createAIndiaTrustReceipt,
+  type AIndiaSupportStatus,
+} from "@/lib/aindia/deviceCapabilityPassport";
 import SiteTelemetry from "./SiteTelemetry";
+import TrustDrawer from "./TrustDrawer";
 import styles from "./AIndiaPage.module.css";
 
-/* ── Language support: AI4Bharat IndicConformer ASR covers all 22 scheduled Indian languages.
-   Sarvam speech APIs cover translation + TTS. All bootloader languages are ASR-ready.
-   Expand to full 22 as bootloader data grows. ── */
-const ASR_READY_CODES = new Set(["hi", "ta", "te", "mr", "kn", "bn", "en"]);
+/* ── Priority lanes have stronger demo/runtime evidence today; the rest stay scheduled-language lanes. ── */
+const PRIORITY_LANGUAGE_CODES = new Set(["hi", "hi-latn", "ta", "te", "mr", "kn", "bn", "en", "gu", "ml", "pa", "or"]);
+const reflectiveTurn = getAIndiaReflectiveTurnContract();
 
 /* ── Task 3: deterministic demo answers per input type ── */
 const demoAnswers: Record<
@@ -52,7 +60,7 @@ const demoAnswers: Record<
     asking: "सुन रहा हूं...",
     answer: "Jawab mil gaya.",
     answerHindi: "Vitamin D ke liye subah 10-11 baje 15-20 minute dhoop mein baithein. Supplements doctor se poocho.",
-    source: "WHO guidelines + ICMR",
+    source: "Demo health source pack",
     chetana: null,
     nextStep: "Nearest lab mein test book karein?",
   },
@@ -60,7 +68,7 @@ const demoAnswers: Record<
     asking: "फोटो पढ़ रहा हूं...",
     answer: "Form samajh gaya.",
     answerHindi: "Yeh Aadhaar update form hai. Section 2 mein apna naya address bharein. Proof mein bijli ka bill chalega.",
-    source: "UIDAI form guide",
+    source: "Demo UIDAI form source pack",
     chetana: null,
     nextStep: "Nearest Aadhaar centre ka address bhejein?",
   },
@@ -68,41 +76,30 @@ const demoAnswers: Record<
     asking: "मैसेज पढ़ रहा हूं...",
     answer: "Message padh liya.",
     answerHindi: "यह link एक job offer claim कर रहा है। Domain 3 दिन पहले register हुआ है।",
-    source: "Link analysis + WHOIS",
+    source: "Demo link risk rules",
     chetana: { status: "risky", reason: "Naya domain + fake job offer signs. Link mat kholiye." },
     nextStep: "Company ki official website par jaake verify karein.",
   },
 };
 
-/* ── Task 4: two-tier proof component ── */
-
-function ProofLine({ status = "safe" }: { status?: "safe" | "risky" | "verify" }) {
-  const [expanded, setExpanded] = useState(false);
-  const dotClass =
-    status === "risky" ? styles.proofDotRisky : status === "verify" ? styles.proofDotVerify : styles.proofDotSafe;
-
-  return (
-    <div>
-      <div
-        className={styles.proofLine}
-        onClick={() => setExpanded((v) => !v)}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => e.key === "Enter" && setExpanded((v) => !v)}
-      >
-        <span className={dotClass} />
-        ✓ Checked · kuch bahar nahi gaya
-      </div>
-      {expanded && (
-        <div className={styles.proofReceipt}>
-          <p>route: local-only → sarvam-asr → answer-engine</p>
-          <p>gates: 3/3 passed</p>
-          <p>hash: a3f8…c91d</p>
-        </div>
-      )}
-    </div>
-  );
-}
+const reflectionCompareRows = [
+  {
+    title: "Chat predicts",
+    body: "A normal assistant tries to produce the most likely answer from the prompt.",
+  },
+  {
+    title: "Reflection checks",
+    body: "Active Mirror asks what language, source, risk, consent, action, and receipt state the answer needs.",
+  },
+  {
+    title: "Chat continues",
+    body: "The conversation keeps expanding until the user extracts the useful step.",
+  },
+  {
+    title: "Reflection converges",
+    body: "AIndia compresses the turn into one answer, one source state, and one next step.",
+  },
+] as const;
 
 /* ── shared ── */
 
@@ -155,6 +152,17 @@ function PhoneDemo() {
       ? styles.railStatusRisky
       : styles.railStatusVerify
     : null;
+  const answerGlyphs = getAIndiaGlyphs(answerGlyphIdsForRisk(demo.chetana?.status));
+  const trustReceipt = useMemo(
+    () =>
+      createAIndiaTrustReceipt({
+        inputKind: input,
+        source: demo.source,
+        riskState: demo.chetana?.status ?? "safe",
+        nextStep: demo.nextStep,
+      }),
+    [demo, input],
+  );
 
   return (
     <section className={styles.phoneDemo} aria-label="AIndia voice and photo demo">
@@ -193,6 +201,7 @@ function PhoneDemo() {
         <div className={styles.secondaryActions} data-ain-motion="phone-item">
           <button
             className={`${styles.actionTile} ${input === "photo" && phase !== "idle" ? styles.actionTileActive : ""}`}
+            data-testid="aindia-photo-action"
             type="button"
             onClick={() => handleInput("photo")}
           >
@@ -202,6 +211,7 @@ function PhoneDemo() {
           </button>
           <button
             className={`${styles.actionTile} ${input === "message" && phase !== "idle" ? styles.actionTileActive : ""}`}
+            data-testid="aindia-message-action"
             type="button"
             onClick={() => handleInput("message")}
           >
@@ -219,17 +229,15 @@ function PhoneDemo() {
               <SearchCheck size={12} /> {demo.source}
             </div>
 
-            {/* Chetana rail — fires only when risk detected */}
+            {/* Safety graphic — user-facing first, runtime detail behind the proof drawer. */}
             {demo.chetana && chetanaRailClass && railStatusClass && (
               <div className={chetanaRailClass}>
-                <h5>Safety check</h5>
+                <h5>Risk check</h5>
                 <div className={railStatusClass}>
                   <ShieldCheck size={14} />
                   {demo.chetana.status === "risky" ? "रुकिए" : "पहले मिलाइए"}
                 </div>
                 <p className={styles.railReason}>{demo.chetana.reason}</p>
-                {/* Task 5: flag until Chetana API is wired */}
-                <span className={styles.chetanaFlag}>copy-only — API not wired yet</span>
               </div>
             )}
 
@@ -237,14 +245,25 @@ function PhoneDemo() {
               <ArrowRight size={14} /> {demo.nextStep}
             </div>
 
-            {/* Task 4: two-tier proof */}
-            <ProofLine status={demo.chetana?.status ?? "safe"} />
+            <details className={styles.checkDetails}>
+              <summary>Kaise check hua?</summary>
+              <div className={styles.glyphStrip} aria-label="AIndia reflective glyph state">
+                {answerGlyphs.map((glyph) => (
+                  <span className={styles.glyphChip} key={glyph.id} title={glyph.meaning}>
+                    <b aria-hidden="true">{glyph.symbol}</b>
+                    <span>{glyph.label}</span>
+                  </span>
+                ))}
+              </div>
+              <span className={styles.chetanaFlag}>source · risk · consent · next step</span>
+              <TrustDrawer receipts={[trustReceipt]} triggerLabel="Show receipt" />
+            </details>
           </div>
         )}
 
         <div className={styles.languagePills} id="languages" data-ain-motion="phone-item">
           {aindiaLanguages.map((language) => {
-            const ready = ASR_READY_CODES.has(language.code);
+            const priority = PRIORITY_LANGUAGE_CODES.has(language.code);
             return (
               <button
                 className={
@@ -254,13 +273,11 @@ function PhoneDemo() {
                 }
                 key={language.code}
                 type="button"
-                style={ready ? undefined : { opacity: 0.5 }}
-                title={ready ? language.label : `${language.label} — coming soon`}
+                style={priority ? undefined : { opacity: 0.72 }}
+                title={priority ? `${language.label} — priority rail` : `${language.label} — scheduled-language lane; model route varies`}
                 onClick={() => {
-                  if (ready) {
-                    setSampleText(language.code === "hi" ? "नमस्ते" : language.native);
-                    setPhase("idle");
-                  }
+                  setSampleText(language.code === "hi" ? "नमस्ते" : language.native);
+                  setPhase("idle");
                 }}
               >
                 {language.native}
@@ -288,14 +305,14 @@ function CheckHabitSection() {
   return (
     <section className={styles.checkHabit} data-ain-section>
       <div className={styles.sectionHead}>
-        <p>ChatGPT mein yeh nahi milega</p>
-        <h2>Risky lage toh AIndia rok deta hai — pehle.</h2>
+        <p>Chetana rail</p>
+        <h2>Most questions get an answer. Risky turns slow down.</h2>
       </div>
       <div className={styles.checkHabitGrid}>
         {[
-          { title: "Safe", hindi: "ठीक लग रहा है", body: "No obvious risk. Still confirm before money, identity, or account action." },
-          { title: "Risky", hindi: "रुकिए", body: "Payment, OTP, link, job, or sender looks suspicious. Do not act yet." },
-          { title: "Verify", hindi: "पहले मिलाइए", body: "bharosa nahi — pehle milaiye. Check bank app, official source, or someone trusted." },
+          { title: "Answer", hindi: "जवाब", body: "Normal questions get a short answer, source, and one next step." },
+          { title: "Risk", hindi: "रुकिए", body: "UPI, OTP, job, KYC, bank, or identity turns trigger the safety rail." },
+          { title: "Verify", hindi: "पहले मिलाइए", body: "When the source is weak, AIndia marks it unverified instead of sounding certain." },
         ].map((item) => (
           <article key={item.title}>
             <span>{item.title}</span>
@@ -306,8 +323,8 @@ function CheckHabitSection() {
       </div>
       <div className={styles.checkLine}>
         <ShieldCheck aria-hidden="true" size={22} />
-        <b>Pehle check karo.</b>
-        <span>Payment, reply, submit, ya trust karne se pehle.</span>
+        <b>Chetana is a rail, not the product.</b>
+        <span>AIndia answers first; safety interrupts only when risk appears.</span>
       </div>
     </section>
   );
@@ -353,8 +370,8 @@ function ModeSection() {
   return (
     <section className={styles.modes} id="start">
       <div className={styles.sectionHead}>
-        <p>Kya check kar sakte ho</p>
-        <h2>Ghar ke sawaal se lekar dukaan ke kaam tak.</h2>
+        <p>Kya pooch sakte ho</p>
+        <h2>Ghar ke sawaal se lekar dukaan ke kaam tak — poocho.</h2>
       </div>
       <div className={styles.modeGrid}>
         {aindiaModes.map((mode) => {
@@ -384,7 +401,7 @@ function ModeSection() {
         </div>
         <div className={styles.chetanaBannerText}>
           <h3>Suspicious lagta hai? AIndia rokta hai.</h3>
-          <p>Koi bhi shaky message, link, UPI request, ya payment screenshot — AIndia pehle warning deta hai. Bina aapki permission koi action nahi hota.</p>
+          <p>Chetana/Kavach is the safety rail inside AIndia. It appears only when the answer touches money, identity, risky links, or coercion.</p>
         </div>
       </div>
     </section>
@@ -394,14 +411,42 @@ function ModeSection() {
 function ModelMatrixSection() {
   return (
     <section className={styles.modelMatrix} data-ain-section>
+      <div className={styles.reflectionEngine}>
+        <span>Reflection Engine</span>
+        <h2>{aindiaReflectionEngineFormula.publicLine}</h2>
+        <p>{aindiaReflectionEngineFormula.productMeaning}</p>
+        <ul aria-label="Reflection engine loop">
+          {aindiaReflectionEngineFormula.cognitionLoop.map((item) => (
+            <li key={item}>
+              <Check aria-hidden="true" size={15} /> {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className={styles.reflectionCompare} aria-label="Reflection compared with normal chat">
+        <div>
+          <h3>Why this is not another chatbot</h3>
+          <p>
+            ChatGPT, Claude, Gemini, Sarvam, and local models can all be useful engines. Active Mirror is the rail that decides what should happen before their prediction becomes advice.
+          </p>
+        </div>
+        <div className={styles.reflectionCompareGrid}>
+          {reflectionCompareRows.map((row) => (
+            <article key={row.title}>
+              <h4>{row.title}</h4>
+              <p>{row.body}</p>
+            </article>
+          ))}
+        </div>
+      </div>
       <div className={styles.modelIntro}>
         <BrainCircuit aria-hidden="true" size={34} />
         <div>
           <p>Kaise kaam karta hai</p>
-          <h2>Sawaal poocho. Jawab source ke saath.</h2>
+          <h2>One assistant. Many rails. One reflective turn.</h2>
         </div>
         <ul>
-          {aindiaMetaThesis.map((item) => (
+          {[...reflectiveTurn.thesis.slice(0, 3), ...aindiaMetaThesis.slice(0, 3)].map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
@@ -425,7 +470,7 @@ function StackSection() {
     <section className={styles.stack} id="safety" data-ain-section>
       <div className={styles.sectionHead}>
         <p>Aapke phone ke liye</p>
-        <h2>Sasta phone. Slow internet. Phir bhi chalta hai.</h2>
+        <h2>Purana phone ya slow internet. Phir bhi kaam kare.</h2>
       </div>
       <div className={styles.stackGrid}>
         <article>
@@ -442,8 +487,8 @@ function StackSection() {
         </article>
         <article>
           <ShieldCheck aria-hidden="true" size={28} />
-          <h3>Pehle check, phir bataye</h3>
-          <p>Koi bhi action se pehle safety check hota hai. Lamba essay nahi — ek clear next step.</p>
+          <h3>Local supervisor pehle</h3>
+          <p>Chhota local model ya rules decide karte hain: local answer, source pack, safety rail, ya frontier fallback.</p>
           <ul>
             {aindiaBootloader.harness.map((item) => (
               <li key={item}>
@@ -467,7 +512,7 @@ function StackSection() {
       </div>
       <div className={styles.localRail}>
         <Volume2 aria-hidden="true" size={23} />
-        <span>Sarvam language rail, local-helper path, and Active Mirror safety checks</span>
+        <span>Local supervisor, Sarvam language rail, source packs, and Chetana safety when needed</span>
       </div>
       <article className={styles.browserHelper}>
         <div>
@@ -494,6 +539,51 @@ function StackSection() {
             <p>{step.body}</p>
           </article>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function capabilityClass(state: AIndiaSupportStatus) {
+  return `${styles.passportBadge} ${styles[`passport_${state}`]}`;
+}
+
+function DevicePassportSection() {
+  return (
+    <section className={styles.devicePassport} data-ain-section>
+      <div className={styles.sectionHead}>
+        <p>Device passport</p>
+        <h2>AIndia checks what this phone can do before promising where AI runs.</h2>
+      </div>
+      <div className={styles.passportGrid}>
+        {aindiaDeviceCapabilityPassport.capabilities.map((item) => (
+          <article key={item.id}>
+            <div className={capabilityClass(item.supportStatus)}>{aindiaSupportStatusLabel(item.supportStatus)}</div>
+            <h3>{item.label}</h3>
+            <p>{item.copySafeStatus}</p>
+            <small>{item.cannotPromise[0]}</small>
+          </article>
+        ))}
+      </div>
+      <div className={styles.shareRails}>
+        <div>
+          <h3>Share-target roadmap</h3>
+          <p>
+            The most useful India wedge is sharing a WhatsApp forward, risky link, form photo, or voice note into AIndia.
+            The public page shows the path; native wrappers make it reliable.
+          </p>
+        </div>
+        <div className={styles.shareRailList}>
+          {aindiaDeviceCapabilityPassport.shareTargetRoadmap.map((rail) => (
+            <article key={rail.id}>
+              <span className={capabilityClass(rail.phase === "now" ? "mvp-ready" : rail.phase === "next" ? "consented-fallback" : rail.phase === "native-wrapper" ? "native-wrapper-required" : "roadmap")}>
+                {rail.phase}
+              </span>
+              <b>{rail.copySafeLabel}</b>
+              <p>{rail.consentBoundary}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -582,12 +672,13 @@ export default function AIndiaPage() {
       <SovereignSection />
       <CheckHabitSection />
       <StackSection />
+      <DevicePassportSection />
 
       <section className={styles.finalCta}>
         <div>
           <ImagePlus aria-hidden="true" size={34} />
-          <h2>Abhi try karo. Free hai.</h2>
-          <p>Voice ya photo se poocho. Jawab, source, aur receipt — sab aapke phone par.</p>
+          <h2>Ek real message, form, ya photo se shuru karo.</h2>
+          <p>Voice ya photo se poocho. Jawab, source, risk check, aur next step saaf dikhega.</p>
         </div>
         <Link className={styles.finalButton} href="/intake?focus=aindia" data-analytics="aindia_start">
           AIndia try karo <ArrowRight aria-hidden="true" size={18} />

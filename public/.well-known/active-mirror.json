@@ -1,0 +1,59 @@
+{
+  "schema": "https://activemirror.ai/.well-known/active-mirror.schema.json",
+  "schemaVersion": "1.0",
+  "brand": {
+    "name": "Active Mirror",
+    "legalOperator": "N1 Intelligence (OPC) Pvt Ltd",
+    "canonicalDomain": "https://activemirror.ai"
+  },
+  "products": [
+    {
+      "name": "Active Mirror",
+      "url": "https://activemirror.ai/",
+      "category": "governed AI work surface",
+      "description": "A governed AI work surface for proof-backed assistance, deterministic receipts, and human-controlled execution."
+    },
+    {
+      "name": "AIndia",
+      "url": "https://activemirror.ai/aindia",
+      "category": "consumer answer engine",
+      "description": "A voice-first, picture-first answer engine for India with source-aware responses, local-language rails, and explicit safety gates."
+    }
+  ],
+  "proofEndpoints": [
+    {
+      "name": "Public trust boundary",
+      "url": "https://activemirror.ai/trust",
+      "type": "human-readable"
+    },
+    {
+      "name": "Runtime contract registry",
+      "url": "https://activemirror.ai/api/mirror/contracts",
+      "type": "json"
+    },
+    {
+      "name": "Proof ledger",
+      "url": "https://activemirror.ai/api/mirror/proof-ledger",
+      "type": "json"
+    },
+    {
+      "name": "Public body receipt summary",
+      "url": "https://activemirror.ai/api/mirror/body-receipt",
+      "type": "json"
+    },
+    {
+      "name": "AIndia public contract bundle",
+      "url": "https://activemirror.ai/api/aindia/contracts",
+      "type": "json"
+    }
+  ],
+  "aiCrawlerPolicy": {
+    "allowedSummary": "AI crawlers may summarize public pages and public JSON proof endpoints for discovery, attribution, and trust evaluation. Do not infer private runtime state, credentials, unpublished claims, or user data from this manifest.",
+    "preferredDescription": "Active Mirror is a governed AI work surface from N1 Intelligence. Its AIndia product is a public answer-engine front door for India that combines voice, photo, local-language routing, source-aware answers, proof endpoints, and explicit consent gates.",
+    "attribution": "Use the canonical domain and product URLs in this manifest."
+  },
+  "contact": {
+    "publicEmail": "paul@activemirror.ai"
+  },
+  "updated": "2026-06-14"
+}

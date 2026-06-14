@@ -10,6 +10,7 @@
     "receiptState",
     "operator",
     "claimBoundary",
+    "doctrineHook",
     "privateVaultIngest",
     "skillRails",
     "inputPolicy",
@@ -36,6 +37,308 @@
       "additionalProperties": false
     },
     "claimBoundary": { "type": "string" },
+    "doctrineHook": {
+      "type": "object",
+      "required": [
+        "id",
+        "version",
+        "state",
+        "role",
+        "publicPosition",
+        "canonicalTagline",
+        "canonicalTokens",
+        "reflectionEngineFormula",
+        "reflectionEngineTokens",
+        "brandMarks",
+        "marketingLanguage",
+        "trademarkBoundary",
+        "vaultRefs",
+        "rawDoctrine",
+        "modelVisibility",
+        "injectionPoints",
+        "invariants",
+        "vaultDirectives",
+        "turnSequence",
+        "truthSlots",
+        "gates",
+        "sentinels",
+        "outcomeModes",
+        "literacyModes",
+        "receiptFields",
+        "improvementLoop",
+        "selfImprovementBoundary",
+        "boundary"
+      ],
+      "properties": {
+        "id": { "const": "sanatana_tech_doctrine_hook" },
+        "version": { "type": "string" },
+        "state": { "const": "hooked_public_safe" },
+        "role": { "const": "doctrine_and_system_instruction_hook" },
+        "publicPosition": { "const": "private_doctrine_layer_not_public_product" },
+        "canonicalTagline": { "const": "Truth that reflects. Order that holds. Intelligence that remembers." },
+        "canonicalTokens": {
+          "type": "array",
+          "items": {
+            "enum": ["truth_that_reflects", "order_that_holds", "intelligence_that_remembers"]
+          },
+          "minItems": 3
+        },
+        "reflectionEngineFormula": {
+          "type": "object",
+          "required": ["founderFormula", "founderMirrorDoctrine", "publicLine", "productMeaning", "boundary"],
+          "properties": {
+            "founderFormula": { "const": "polymath + ADHD + AI = reflection engine" },
+            "founderMirrorDoctrine": { "const": "Paul is the Mirror" },
+            "publicLine": { "const": "Nonlinear thinking in. Disciplined next step out." },
+            "productMeaning": { "type": "string" },
+            "boundary": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "reflectionEngineTokens": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "nonlinear_capture",
+              "polymath_synthesis",
+              "disciplined_next_step",
+              "reflection_over_prediction",
+              "founder_led_mirror"
+            ]
+          },
+          "minItems": 5
+        },
+        "brandMarks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["mark", "role", "usage"],
+            "properties": {
+              "mark": { "enum": ["Trust by Design", "Active Mirror", "MirrorDNA"] },
+              "role": {
+                "enum": [
+                  "ethos_and_public_promise",
+                  "product_and_runtime",
+                  "doctrine_and_protocol_family"
+                ]
+              },
+              "usage": { "type": "string" }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 3
+        },
+        "marketingLanguage": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["line", "use", "boundary"],
+            "properties": {
+              "line": {
+                "enum": [
+                  "Trust by Design",
+                  "Nonlinear thinking in. Disciplined next step out.",
+                  "Reflection over prediction",
+                  "Ask once. Get the next step.",
+                  "Founder-led reflection",
+                  "India's reflective AI layer"
+                ]
+              },
+              "use": { "type": "string" },
+              "boundary": { "type": "string" }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 6
+        },
+        "trademarkBoundary": { "const": "brand_marks_preserved_registration_not_asserted" },
+        "vaultRefs": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "AMOS://Protocol/SanatanaTech/v1",
+              "SanatanaTech_SOP_v1",
+              "MasterCitation/BrandArchitecture/v14.1"
+            ]
+          },
+          "minItems": 3
+        },
+        "rawDoctrine": { "const": "withheld_private_body" },
+        "modelVisibility": { "const": "compact_rules_only" },
+        "injectionPoints": {
+          "type": "array",
+          "items": {
+            "enum": ["system_prompt", "local_supervisor", "local_operator_packet"]
+          },
+          "minItems": 3
+        },
+        "invariants": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "truth_before_response",
+              "proof_before_promotion",
+              "consent_before_memory",
+              "least_context_before_model",
+              "local_policy_before_frontier_prediction",
+              "human_outcome_before_extraction",
+              "humility_when_unknown",
+              "receipt_before_durable_claim",
+              "order_before_scale",
+              "memory_without_surveillance",
+              "nonlinear_capture_before_compression",
+              "disciplined_next_step_after_synthesis"
+            ]
+          },
+          "minItems": 12
+        },
+        "vaultDirectives": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "civilizational_continuity",
+              "sovereign_sanctuary",
+              "non_harm_circuit_breaker",
+              "cultural_anchoring",
+              "outer_inner_shielding",
+              "sovereign_sourcing",
+              "education_interface",
+              "return_not_trend"
+            ]
+          },
+          "minItems": 8
+        },
+        "turnSequence": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "compile_authority",
+              "classify_privacy_and_risk",
+              "separate_truth_slots",
+              "select_least_context_route",
+              "capture_nonlinear_signals",
+              "synthesize_across_domains",
+              "allow_model_as_proposer_only",
+              "scrub_and_gate_output",
+              "return_artifact_or_next_step",
+              "record_receipt_state"
+            ]
+          },
+          "minItems": 10
+        },
+        "truthSlots": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "facts",
+              "assumptions",
+              "unknowns",
+              "source_gaps",
+              "approval_required",
+              "did_not_run",
+              "next_safe_step"
+            ]
+          },
+          "minItems": 7
+        },
+        "gates": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "privacy_gate",
+              "source_gate",
+              "consent_gate",
+              "action_gate",
+              "memory_gate",
+              "culture_language_gate",
+              "cost_gate",
+              "receipt_gate"
+            ]
+          },
+          "minItems": 8
+        },
+        "sentinels": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "private_path_leak",
+              "unsupported_fact_promotion",
+              "source_state_contradiction",
+              "approval_bypass_attempt",
+              "memory_without_consent",
+              "fake_execution_claim",
+              "american_saas_language_drift",
+              "overconfident_unknown",
+              "neurodivergence_as_gimmick",
+              "messy_input_shaming"
+            ]
+          },
+          "minItems": 10
+        },
+        "outcomeModes": {
+          "type": "array",
+          "items": {
+            "enum": ["teach", "decide", "sell", "fix", "warn", "collect", "verify", "handoff"]
+          },
+          "minItems": 8
+        },
+        "literacyModes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "expert_dense",
+              "plain_language",
+              "voice_first",
+              "picture_first",
+              "checklist_first",
+              "regional_language_ready"
+            ]
+          },
+          "minItems": 6
+        },
+        "receiptFields": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "hook_version",
+              "intent_hash",
+              "privacy_class",
+              "risk_class",
+              "route",
+              "model_role",
+              "context_policy",
+              "tool_policy",
+              "storage_policy",
+              "output_policy",
+              "did_not_run",
+              "sentinels_checked",
+              "outcome_mode",
+              "literacy_mode"
+            ]
+          },
+          "minItems": 14
+        },
+        "improvementLoop": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "observe_receipts",
+              "extract_failure_pattern",
+              "propose_rule_patch",
+              "run_replay_tests",
+              "compare_yesterday_baseline",
+              "require_human_or_contract_gate",
+              "promote_versioned_hook",
+              "keep_rollback_receipt"
+            ]
+          },
+          "minItems": 8
+        },
+        "selfImprovementBoundary": { "const": "receipt_driven_not_self_mutating" },
+        "boundary": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
     "privateVaultIngest": {
       "type": "object",
       "required": ["state", "rule"],

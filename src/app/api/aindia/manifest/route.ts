@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 export function GET() {
   return NextResponse.json(
     {
-      name: "AIndia Check",
+      name: "AIndia Answers",
       short_name: "AIndia",
-      description: "Pehle check karo: voice and photo AI checks for messages, payments, forms, and screenshots in your language.",
+      description:
+        "Poocho kuch bhi: voice, photo, or message answers with source, safety checks, local-first routing, and one next step in your language.",
       start_url: "/aindia",
       scope: "/",
       display: "standalone",
@@ -34,23 +35,23 @@ export function GET() {
       ],
       shortcuts: [
         {
-          name: "Press to speak",
+          name: "Ask by voice",
           short_name: "Speak",
-          description: "Open AIndia voice input",
+          description: "Ask AIndia by voice through the reflective turn",
           url: "/aindia?mode=voice",
           icons: [{ src: "/mirror-icon-192.png", sizes: "192x192" }],
         },
         {
           name: "Send a photo",
           short_name: "Photo",
-          description: "Open AIndia photo helper",
+          description: "Ask about a form, bill, notice, or screenshot with source and safety rails",
           url: "/aindia?mode=photo",
           icons: [{ src: "/mirror-icon-192.png", sizes: "192x192" }],
         },
         {
-          name: "Check a message",
-          short_name: "Check",
-          description: "Open AIndia safety check",
+          name: "Ask about a message",
+          short_name: "Message",
+          description: "Understand a message, source it, and slow down risky action",
           url: "/aindia?mode=message",
           icons: [{ src: "/mirror-icon-192.png", sizes: "192x192" }],
         },

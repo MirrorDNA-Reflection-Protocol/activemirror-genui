@@ -135,8 +135,8 @@ function SovereigntyTestSection() {
           <p>active internet users in India, 2025</p>
         </article>
         <article>
-          <span>{aindiaAudienceMath.ruralActiveInternetUsersIndia2025}</span>
-          <p>rural active internet users, 2025</p>
+          <span>{aindiaAudienceMath.ruralShareOfInternetUsers2025}</span>
+          <p>rural share of internet users, 2025</p>
         </article>
         <article>
           <span>{aindiaAudienceMath.activeInternetUsersWhoAccessedIndicLanguages2024}</span>

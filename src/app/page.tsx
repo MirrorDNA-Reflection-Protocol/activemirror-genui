@@ -31,6 +31,8 @@ export default function Page() {
           "Sensitive-context approval boundaries",
           "Exportable briefs and work records",
           "Governed deployment planning",
+          "Truth, order, and consented memory promise layer",
+          "Indian language-ready workspaces and training surfaces",
         ],
         offers: {
           "@type": "Offer",

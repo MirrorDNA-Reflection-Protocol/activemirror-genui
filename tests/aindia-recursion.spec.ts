@@ -8,6 +8,56 @@ type AIndiaRail = {
 };
 
 test.describe('AIndia recursion contract', () => {
+  test('positions the public page as answer-engine first with Chetana as a rail', async ({ page, request }) => {
+    await page.goto('/aindia');
+    await expect(page.getByRole('heading', { name: /पूछो\. कुछ भी\./ })).toBeVisible();
+    await expect(page.getByText('Jawab source ke saath. Aapki bhasha mein.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Nonlinear thinking in. Disciplined next step out.' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'One assistant. Many rails. One reflective turn.' })).toBeVisible();
+    await expect(page.getByText('Why this is not another chatbot')).toBeVisible();
+    await expect(page.locator('#languages')).toContainText('Hinglish');
+    await expect(page.locator('#languages')).toContainText('ગુજરાતી');
+    await expect(page.locator('#languages')).toContainText('اردو');
+    await expect(page.locator('#languages')).toContainText('অসমীয়া');
+    await expect(page.getByText('Chetana is a rail, not the product.')).toBeVisible();
+    await expect(page.getByText('copy-only')).toHaveCount(0);
+
+    await page.getByTestId('aindia-message-action').click({ force: true });
+    await expect(page.getByText('Message padh liya.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Risk check' })).toBeVisible();
+    await page.getByText('Kaise check hua?').click();
+    const glyphState = page.getByLabel('AIndia reflective glyph state');
+    await expect(glyphState).toContainText('Reflect');
+    await expect(glyphState).toContainText('Risk');
+    await expect(glyphState).toContainText('Consent');
+    await page.getByRole('button', { name: 'Show receipt' }).click();
+    await expect(page.getByRole('dialog', { name: 'Trust receipts' })).toBeVisible();
+    await expect(page.getByText('No cloud call in this demo')).toBeVisible();
+    await expect(page.getByText('Public-safe demo receipt')).toBeVisible();
+    await page.getByRole('dialog', { name: 'Trust receipts' }).getByRole('button', { name: 'Close trust receipts' }).click();
+    await expect(page.getByRole('heading', { name: 'AIndia checks what this phone can do before promising where AI runs.' })).toBeVisible();
+    await expect(page.getByText('not callable from the PWA')).toBeVisible();
+    await expect(page.getByText('never claim background WhatsApp access')).toBeVisible();
+
+    const manifest = await request.get('/api/aindia/manifest');
+    expect(manifest.status()).toBe(200);
+    const manifestBody = await manifest.json();
+    expect(manifestBody.name).toBe('AIndia Answers');
+    expect(manifestBody.description).toContain('answers with source');
+
+    const glyphs = await request.get('/api/aindia/glyphs');
+    expect(glyphs.status()).toBe(200);
+    const glyphBody = await glyphs.json();
+    expect(glyphBody.protocol).toBe('aindia-glyph-grammar-v1');
+    expect(glyphBody.stance).toBe('reflection_over_prediction');
+    expect(glyphBody.boundary).toContain('not raw private chat');
+    expect(glyphBody.glyphs.map((glyph: { id: string }) => glyph.id)).toContain('reflect');
+    expect(glyphBody.glyphs.map((glyph: { id: string }) => glyph.id)).toContain('consent');
+    expect(glyphBody.reflectiveTurn.reflectionEngine.publicLine).toBe('Nonlinear thinking in. Disciplined next step out.');
+    expect(glyphBody.reflectiveTurn.reflectionEngine.humanAuthority).toContain('Paul is the human authority');
+    expect(glyphBody.mirrorGraph.mirrorGraphId).toBe('mirrorgraph:aindia:glyph-grammar:v1');
+  });
+
   test('keeps live-runtime claims bounded to verified rails', async ({ request }) => {
     const response = await request.get('/api/aindia/recursion');
     expect(response.status()).toBe(200);
@@ -34,6 +84,44 @@ test.describe('AIndia recursion contract', () => {
     const phoneMeshScenario = body.scenarios.find((scenario: { id: string }) => scenario.id === 'phone-mesh-first');
     expect(phoneMeshScenario.failureMode).toContain('Current phone backends are unreachable');
     expect(phoneMeshScenario.absorb).toContain('GrapheneOS-safe');
+  });
+
+  test('keeps aggregate API metadata tied to the verified recursion snapshot', async ({ request }) => {
+    const recursionResponse = await request.get('/api/aindia/recursion');
+    expect(recursionResponse.status()).toBe(200);
+    const recursionBody = await recursionResponse.json();
+    const verifiedDate = recursionBody.macAbsorption.verifiedAt.slice(0, 10);
+    const endpoints = ['/api/aindia/contracts', '/api/aindia/sovereignty', '/api/aindia/glyphs'];
+
+    for (const endpoint of endpoints) {
+      const response = await request.get(endpoint);
+      expect(response.status()).toBe(200);
+
+      const body = await response.json();
+      expect(body.updated).toBe(verifiedDate);
+
+      if (endpoint === '/api/aindia/glyphs') {
+        expect(body.protocol).toBe('aindia-glyph-grammar-v1');
+        expect(body.reflectiveTurn.ownedLayer).toContain('wrapper, harness, gates');
+        expect(body.mirrorGraph.nodes.length).toBeGreaterThan(0);
+        continue;
+      }
+
+      const recursion = body.sovereignty?.recursion ?? body.recursion;
+      const verifiedAt = recursion.macAbsorption.verifiedAt;
+      expect(verifiedAt.slice(0, 10)).toBe(verifiedDate);
+
+      const evidence = recursion.macAbsorption.evidence.join(' ');
+      expect(evidence).toContain('phone-mesh /health');
+      expect(evidence).toContain('Pixel and OnePlus inference backends are false');
+      expect(recursion.macAbsorption.activeConstraint).toContain('refresh model, phone-mesh, API, and browser checks');
+
+      if (endpoint === '/api/aindia/contracts') {
+        expect(body.reflectiveTurn.productRule).toContain('one simple assistant');
+        expect(body.reflectiveTurn.ownedLayer).toContain('wrapper, harness, gates');
+        expect(body.glyphGrammar.mirrorGraph.nodes.length).toBeGreaterThan(0);
+      }
+    }
   });
 
   test('claim guard requires receipts for current product-state claims', async ({ request }) => {

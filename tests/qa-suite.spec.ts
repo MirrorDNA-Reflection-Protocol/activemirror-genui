@@ -226,20 +226,30 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: /Show\s+the work\./i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /You ask\.\s+Active Mirror checks\./i })).toBeVisible();
     await expect(page.locator('.eyebrow').first()).toContainText('Trust by Design');
-    await expect(page.getByText(/Bring one important piece of work\. Leave with a reviewable AI workspace/)).toBeVisible();
+    await expect(page.getByText(/Most AI gives an answer\. Active Mirror checks/)).toBeVisible();
+    await expect(page.getByLabel('Choose your Active Mirror route')).toContainText('What do you need checked?');
+    await expect(page.getByLabel('Choose your Active Mirror route')).toContainText('Open AIndia');
+    await expect(page.getByLabel('Choose your Active Mirror route')).toContainText('Try workspace');
+    await expect(page.getByText('All the familiar AI work, wrapped with checks.')).toBeVisible();
+    await expect(page.getByLabel('Familiar AI abilities')).toContainText('images');
+    await expect(page.getByLabel('Familiar AI abilities')).toContainText('audio');
+    await expect(page.getByLabel('Familiar AI abilities')).toContainText('automations');
     await expect(page.getByText(/Made in India/).first()).toBeVisible();
     await expect(page.locator('#brief')).toContainText('Send data-sharing request to Vendor A');
     await expect(page.locator('#brief')).toContainText('nothing runs yet');
     await expect(page.locator('#walkthrough')).toContainText('20-second walkthrough');
     await expect(page.locator('video.proof-video')).toHaveAttribute('poster', '/media/show-the-work-poster.jpg');
     await expect(page.locator('video.proof-video source')).toHaveAttribute('src', '/media/show-the-work.mp4');
-    await expect(page.getByRole('link', { name: /Try the public workspace/i }).first()).toHaveAttribute('href', '/mirror');
-    await expect(page.getByRole('link', { name: /Bring one workflow/i }).first()).toHaveAttribute('href', '/intake?focus=pilot');
+    await expect(page.getByRole('link', { name: /Open AIndia/i }).first()).toHaveAttribute('href', '/aindia');
+    await expect(page.getByRole('link', { name: /Try workspace/i }).first()).toHaveAttribute('href', '/mirror');
     await expect(page.getByRole('heading', { name: /No pitch theatre\. A useful proof or a clear no\./i })).toBeVisible();
     await expect(page.getByText('A no-nonsense fit decision')).toBeVisible();
     await expect(page.getByText('Working workspace')).toBeVisible();
+    await expect(page.getByText('Truth that reflects.')).toBeVisible();
+    await expect(page.getByText('Order that holds.')).toBeVisible();
+    await expect(page.getByText('Intelligence that remembers.')).toBeVisible();
     await expect(page.getByRole('heading', { name: /The proof tells you what architecture the work deserves\./i })).toBeVisible();
     await expect(page.locator('#control-map')).toContainText('Active Mirror Control Map');
     await expect(page.locator('#control-map')).toContainText(/local runtime, cloud AI, human review, and proof record/i);
@@ -248,6 +258,11 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.locator('.wk').filter({ hasText: /^Companies$/ })).toBeVisible();
     await expect(page.locator('.wk').filter({ hasText: /^Public sector$/ })).toBeVisible();
     await expect(page.locator('.wk').filter({ hasText: /^National programs$/ })).toBeVisible();
+    await expect(page.locator('#where')).toContainText('All-India language lanes');
+    await expect(page.locator('#where')).toContainText('Hinglish');
+    await expect(page.locator('#where')).toContainText('Assamese');
+    await expect(page.locator('#where')).toContainText('Urdu');
+    await expect(page.locator('#where')).toContainText('Santhali');
     await expect(page.getByRole('heading', { name: /Pick the result you want first\./i })).toBeVisible();
     await expect(page.locator('#route').getByRole('link', { name: /See proof sprint sample/i })).toHaveAttribute('href', '/proof-sprint');
     await expect(page.locator('#route').getByRole('link', { name: /Review boundary/i })).toHaveAttribute('href', '/trust');
@@ -272,13 +287,16 @@ test.describe('Active Mirror work OS front door', () => {
     await page.setViewportSize({ width: 390, height: 820 });
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: /Show\s+the work\./i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /You ask\.\s+Active Mirror checks\./i })).toBeVisible();
     await expect(page.locator('.eyebrow').first()).toContainText('Trust by Design');
-    await expect(page.getByText(/Bring one important piece of work\. Leave with a reviewable AI workspace/)).toBeVisible();
+    await expect(page.getByText(/Reflection happens inside the system/)).toBeVisible();
+    await expect(page.getByLabel('Choose your Active Mirror route')).toContainText('Open AIndia');
     await expect(page.locator('#brief')).toBeVisible();
     await expect(page.locator('#walkthrough video')).toBeVisible();
     await expect(page.locator('#control-map')).toContainText('Active Mirror Control Map');
-    await expect(page.getByRole('link', { name: /Bring one workflow/i }).first()).toBeVisible();
+    await expect(page.locator('#where')).toContainText('All-India language lanes');
+    await expect(page.locator('#where')).toContainText('Hinglish');
+    await expect(page.getByRole('link', { name: /Open AIndia/i }).first()).toBeVisible();
     await expect(page.locator('#work-with-us')).toContainText('72-hour proof sprint');
 
     const mobileMetrics = await page.evaluate(() => {
@@ -309,11 +327,11 @@ test.describe('Active Mirror work OS front door', () => {
       return record.event === 'page_view' && record.target === 'public_site';
     })).toBeTruthy();
 
-    await page.getByRole('link', { name: /Bring one workflow/i }).first().click();
-    await expect(page).toHaveURL(/\/intake\?focus=pilot/);
+    await page.getByLabel('Choose your Active Mirror route').getByRole('link', { name: /Open AIndia/i }).click();
+    await expect(page).toHaveURL(/\/aindia/);
     await expect.poll(() => events.some((event) => {
       const record = event as { event?: string; target?: string };
-      return record.event === 'cta_click' && record.target === 'hero_bring_workflow';
+      return record.event === 'cta_click' && record.target === 'frontdoor_primary';
     })).toBeTruthy();
 
     const raw = JSON.stringify(events);
@@ -329,12 +347,12 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByText('ask first', { exact: true }).first()).toBeVisible();
 
     await page.goto('/proof-sprint');
-    await expect(page.getByRole('heading', { name: /See exactly what the proof sprint returns/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Send one messy AI workflow/i })).toBeVisible();
     await expect(page.getByText('Fit check')).toBeVisible();
     await expect(page.locator('.comparetable__row').filter({ hasText: 'Create the first working surface' })).toBeVisible();
-    await expect(page.getByText("deploy-or-don't decision")).toBeVisible();
+    await expect(page.getByText(/deploy or don't/i).first()).toBeVisible();
     await expect(page.getByText('public or sanitized inputs only')).toBeVisible();
-    await expect(page.getByRole('link', { name: /Submit workflow/i })).toHaveAttribute('href', '/intake?focus=pilot');
+    await expect(page.getByRole('link', { name: /Submit workflow/i })).toHaveAttribute('href', /\/intake\?focus=pilot/);
 
     await page.goto('/compare');
     await expect(page.getByRole('heading', { name: /A chatbot gives an answer/i })).toBeVisible();
@@ -447,11 +465,11 @@ test.describe('Active Mirror work OS front door', () => {
 
     await page.goto('/about');
 
-    await expect(page.getByRole('heading', { name: /Show\s+the work\./i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /You ask\.\s+Active Mirror checks\./i })).toBeVisible();
     await expect(page.locator('.eyebrow').first()).toContainText('Trust by Design');
-    await expect(page.getByText(/Bring one important piece of work\. Leave with a reviewable AI workspace/)).toBeVisible();
+    await expect(page.getByText(/Most AI gives an answer\. Active Mirror checks/)).toBeVisible();
     await expect(page.locator('#brief')).toContainText('Send data-sharing request to Vendor A');
-    await expect(page.getByRole('link', { name: /Try workspace/i }).first()).toHaveAttribute('href', '/mirror');
+    await expect(page.getByRole('link', { name: /Open AIndia/i }).first()).toHaveAttribute('href', '/aindia');
     await expect(page.locator('textarea, input')).toHaveCount(0);
     expect(modelCalls).toEqual([]);
   });

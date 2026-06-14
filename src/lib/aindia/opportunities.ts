@@ -4,9 +4,14 @@ export type AIndiaOpportunityId =
   | "sarvam-edge-switchboard"
   | "bhashini-public-service-connector"
   | "perplexity-india-answer-engine"
+  | "share-sheet-intake"
+  | "ivr-missed-call-mode"
   | "offline-source-packs"
+  | "community-source-pack-network"
   | "low-literacy-voice-mode"
+  | "human-language-review-loop"
   | "fraud-reporting-rail"
+  | "trust-receipt-share-card"
   | "digilocker-document-rail"
   | "ondc-sme-commerce-rail"
   | "local-embedding-store"
@@ -96,6 +101,33 @@ export const aindiaOpportunityBacklog: AIndiaOpportunity[] = [
     ],
   },
   {
+    id: "share-sheet-intake",
+    title: "Share-sheet intake",
+    whyItMatters: "Most real questions will start inside WhatsApp, SMS, camera roll, browser, or a screenshot, not inside the AIndia app.",
+    addNow: "Add a PWA/native share target contract: receive user-selected text, image, or link; classify as user-provided input; never read background chats.",
+    requires: "pwa",
+    priority: "today",
+    gate: "human_approved",
+    sourceUrls: [
+      "https://web.dev/articles/web-share-target",
+      "https://developer.android.com/training/sharing/receive",
+      "https://developer.apple.com/documentation/uikit/uiactivityviewcontroller",
+    ],
+  },
+  {
+    id: "ivr-missed-call-mode",
+    title: "IVR and missed-call mode",
+    whyItMatters: "A voice fallback can reach users who cannot install, type, read, or maintain data connectivity.",
+    addNow: "Define a call-mode contract: record consent, language, short query, callback answer, no silent retention, and escalation to a trusted person.",
+    requires: "backend",
+    priority: "next",
+    gate: "human_approved",
+    sourceUrls: [
+      "https://docs.sarvam.ai/",
+      "https://www.twilio.com/docs/voice",
+    ],
+  },
+  {
     id: "offline-source-packs",
     title: "Offline source packs",
     whyItMatters: "AIndia can answer common questions offline if it ships small, trusted packs for schemes, fraud, health basics, agriculture, SME forms, and repair steps.",
@@ -104,6 +136,20 @@ export const aindiaOpportunityBacklog: AIndiaOpportunity[] = [
     priority: "today",
     gate: "local_storage_ready",
     sourceUrls: ["https://web.dev/learn/pwa/service-workers", "https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API"],
+  },
+  {
+    id: "community-source-pack-network",
+    title: "Community source-pack network",
+    whyItMatters: "The durable asset is not only models; it is verified local knowledge: schemes, forms, clinic guidance, local commerce, fraud patterns, and repair steps.",
+    addNow: "Create a pack schema with source, language, district/state, reviewer, freshness, hash, risk class, and expiry.",
+    requires: "backend",
+    priority: "next",
+    gate: "receipt_written",
+    sourceUrls: [
+      "https://bhashini.gov.in/",
+      "https://www.india.gov.in/",
+      "https://data.gov.in/",
+    ],
   },
   {
     id: "low-literacy-voice-mode",
@@ -120,6 +166,19 @@ export const aindiaOpportunityBacklog: AIndiaOpportunity[] = [
     ],
   },
   {
+    id: "human-language-review-loop",
+    title: "Human language review loop",
+    whyItMatters: "Indian-language UX cannot be trusted by machine translation alone. Tone, register, dialect, and local risk language need native review.",
+    addNow: "Add review receipts for public scripts, source packs, micro-dramas, and high-risk answer templates before promotion.",
+    requires: "backend",
+    priority: "next",
+    gate: "receipt_written",
+    sourceUrls: [
+      "https://rajbhasha.gov.in/en/languages-included-eighth-schedule-indian-constitution",
+      "https://bhashini.gov.in/",
+    ],
+  },
+  {
     id: "fraud-reporting-rail",
     title: "Fraud reporting rail",
     whyItMatters: "AIndia should not just warn users; it should route suspected fraud to the right official reporting path when the user asks.",
@@ -131,6 +190,19 @@ export const aindiaOpportunityBacklog: AIndiaOpportunity[] = [
       "https://sancharsaathi.gov.in/sfc",
       "https://sachet.rbi.org.in/",
       "https://sachet.rbi.org.in/complaints/add",
+    ],
+  },
+  {
+    id: "trust-receipt-share-card",
+    title: "Shareable Trust by Design receipt",
+    whyItMatters: "A receipt must be useful to a parent, shopkeeper, field worker, or trusted helper. It should travel as a small card, not a technical log.",
+    addNow: "Add a receipt card format: what was checked, source state, risk state, what did not happen, and one next step, with QR/hash for replay.",
+    requires: "pwa",
+    priority: "today",
+    gate: "receipt_written",
+    sourceUrls: [
+      "https://developer.mozilla.org/en-US/docs/Web/API/Web_Share_API",
+      "https://web.dev/learn/pwa/service-workers",
     ],
   },
   {

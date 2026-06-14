@@ -4,6 +4,7 @@ import { aindiaClaimGuardRules } from "@/lib/aindia/claimGuard";
 import { aindiaContracts, aindiaDeviceRails, evaluateAIndiaGates } from "@/lib/aindia/contracts";
 import { aindiaDeterminismPrinciples } from "@/lib/aindia/determinismPrinciples";
 import { aindiaFiveYearBets, aindiaFuturePrimitives, aindiaFutureThesis, aindiaFutureThreats } from "@/lib/aindia/futureProof";
+import { aindiaGlyphGrammarVersion, aindiaGlyphs, getAIndiaGlyphMirrorGraph } from "@/lib/aindia/glyphs";
 import { aindiaHardeningControls } from "@/lib/aindia/hardening";
 import { aindiaAnswerEngineSteps, aindiaMetaThesis, aindiaModelLayers } from "@/lib/aindia/modelMatrix";
 import { aindiaOpportunityBacklog } from "@/lib/aindia/opportunities";
@@ -18,6 +19,7 @@ import {
   aindiaRecursionScenarios,
   aindiaRecursionWinner,
 } from "@/lib/aindia/recursion";
+import { getAIndiaReflectiveTurnContract } from "@/lib/aindia/reflectiveTurn";
 import { aindiaHooks, aindiaRuntimeLayers, aindiaWrappers } from "@/lib/aindia/runtime";
 import {
   aindiaDoctrine,
@@ -29,6 +31,8 @@ import {
 import { aindiaNativeCapabilities, aindiaWrapperMilestones } from "@/lib/aindia/wrapperProtocol";
 
 export function GET() {
+  const updated = aindiaMacAbsorption.verifiedAt.slice(0, 10);
+
   return NextResponse.json(
     {
       product: "AIndia",
@@ -72,6 +76,14 @@ export function GET() {
       bootloader: aindiaBootloader,
       offlineHelperPlan: aindiaOfflineHelperPlan,
       contracts: aindiaContracts,
+      reflectiveTurn: getAIndiaReflectiveTurnContract(),
+      glyphGrammar: {
+        protocol: "aindia-glyph-grammar-v1",
+        version: aindiaGlyphGrammarVersion,
+        stance: "reflection_over_prediction",
+        glyphs: aindiaGlyphs,
+        mirrorGraph: getAIndiaGlyphMirrorGraph(),
+      },
       determinism: {
         kernel: "deterministic-harness-v1",
         principles: aindiaDeterminismPrinciples,
@@ -105,7 +117,7 @@ export function GET() {
         sensitiveAction: true,
         receiptWritten: false,
       }),
-      updated: "2026-06-12",
+      updated,
     },
     {
       headers: {

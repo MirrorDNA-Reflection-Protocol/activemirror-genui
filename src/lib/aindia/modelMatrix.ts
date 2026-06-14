@@ -1,4 +1,5 @@
 export type AIndiaModelLayerId =
+  | "local-supervisor"
   | "os-native-llm"
   | "indic-language"
   | "speech"
@@ -23,6 +24,20 @@ export type AIndiaAnswerEngineStep = {
 };
 
 export const aindiaModelLayers: AIndiaModelLayer[] = [
+  {
+    id: "local-supervisor",
+    title: "Local supervisor model",
+    job: "A small local model or rules engine manages the route before any frontier model is allowed to help.",
+    candidates: [
+      "Tiny local classifier for language, intent, risk, and source need",
+      "Sarvam/Indic helper model when the device can support it",
+      "Rules plus embeddings when an LLM is too heavy",
+      "Frontier model only as a gated proposal engine",
+    ],
+    localFirstPath:
+      "Run the supervisor locally first. If it can answer from source packs or local files, no frontier route is needed. If it cannot, it prepares a consent envelope and sends only the minimum needed context.",
+    gate: "safety_checked",
+  },
   {
     id: "os-native-llm",
     title: "OS-native small LLMs",
@@ -91,7 +106,7 @@ export const aindiaModelLayers: AIndiaModelLayer[] = [
   {
     id: "search-citations",
     title: "Search with citations",
-    job: "Make a Perplexity-style answer engine for India: short answer, sources, spoken summary, local-language output.",
+    job: "Make a Perplexity-style answer engine for India: short answer, sources, spoken summary, local-language output, and one useful next step.",
     candidates: [
       "Web retrieval with source citation",
       "Government/scheme source packs",
@@ -135,6 +150,10 @@ export const aindiaAnswerEngineSteps: AIndiaAnswerEngineStep[] = [
     body: "Voice, photo, message, or one-line question in the user's script.",
   },
   {
+    title: "Let local judge first",
+    body: "A local supervisor detects language, intent, risk, and whether source packs can answer before any frontier route.",
+  },
+  {
     title: "Ground the answer",
     body: "Use local files, trusted source packs, government pages, or live search with visible citations.",
   },
@@ -152,6 +171,7 @@ export const aindiaMetaThesis = [
   "Reflection over prediction: the model may draft, but the harness checks what matters before the user acts.",
   "Help, not extraction: solve the turn without forcing photos, messages, documents, or identity into the cloud.",
   "AIndia is not a model lab. It is a sovereign harness over many models.",
+  "A small local supervisor can be useful even when it is not smarter than a frontier model, because it decides what should stay local and what needs consent.",
   "The app should feel like one blue microphone, but internally it is a router, policy engine, receipt writer, and language bridge.",
   "India does not need to beat frontier labs at frontier pretraining to win this layer; it needs ownership of the wrapper, local language rails, safety gates, distribution, data contracts, and trusted source packs.",
 ];

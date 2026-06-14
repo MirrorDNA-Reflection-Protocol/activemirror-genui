@@ -1,4 +1,8 @@
 import { requestIntent, workspaceProfile } from "./lingos";
+import {
+  getSanatanaTechHookStatus,
+  sanatanaTechLocalSupervisorPolicies,
+} from "./sanatanaTechHook";
 
 export const ACTIVE_MIRROR_LOCAL_SUPERVISOR_VERSION = "2026.06.08-local-supervisor-canonical-accuracy-v2";
 
@@ -16,6 +20,12 @@ export type LocalSupervisorDecision = {
   frontierRole: "proposer_only" | "not_called";
   localModelRole: "optional_advisory_classifier_only";
   deterministicAuthority: true;
+  doctrineHook: {
+    id: string;
+    version: string;
+    state: "hooked_public_safe";
+    role: "doctrine_and_system_instruction_hook";
+  };
   contextPolicy: string[];
   toolPolicy: string[];
   storagePolicy: string[];
@@ -36,6 +46,8 @@ const PRIVATE_ACTION_PATTERNS = [
 export function createLocalSupervisorDecision(prompt: string): LocalSupervisorDecision {
   const intent = requestIntent(prompt);
   const profile = workspaceProfile(prompt);
+  const doctrineHook = getSanatanaTechHookStatus();
+  const hookPolicies = sanatanaTechLocalSupervisorPolicies();
   const asksFrontierRoute = /\b(frontier model|model route|openai|gpt|claude|gemini)\b/i.test(prompt);
   const approvalsRequired = PRIVATE_ACTION_PATTERNS
     .filter(({ pattern }) => pattern.test(prompt))
@@ -57,7 +69,14 @@ export function createLocalSupervisorDecision(prompt: string): LocalSupervisorDe
     frontierRole: mode === "frontier_proposer" ? "proposer_only" : "not_called",
     localModelRole: "optional_advisory_classifier_only",
     deterministicAuthority: true,
+    doctrineHook: {
+      id: doctrineHook.id,
+      version: doctrineHook.version,
+      state: doctrineHook.state,
+      role: doctrineHook.role,
+    },
     contextPolicy: [
+      ...hookPolicies.contextPolicy,
       "public_prompt_only",
       "private_paths_redacted",
       "source_routes_not_promoted_to_facts",
@@ -65,12 +84,14 @@ export function createLocalSupervisorDecision(prompt: string): LocalSupervisorDe
       "frontier_receives_scoped_task_packet_only",
     ],
     toolPolicy: [
+      ...hookPolicies.toolPolicy,
       "no_tool_action_without_scoped_approval",
       "browser_lookup_prepared_until_opened",
       "files_devices_accounts_sends_blocked_by_default",
       "model_route_cannot_override_policy",
     ],
     storagePolicy: [
+      ...hookPolicies.storagePolicy,
       "session_state_ephemeral",
       "browser_cache_local_only",
       "kv_public_safe_receipts_only",
@@ -78,6 +99,7 @@ export function createLocalSupervisorDecision(prompt: string): LocalSupervisorDe
       "model_output_never_becomes_memory_without_canonical_promotion",
     ],
     outputPolicy: [
+      ...hookPolicies.outputPolicy,
       "facts_assumptions_unknowns_separated",
       "frontier_output_must_pass_public_scrub",
       "probabilistic_output_never_promotes_itself",

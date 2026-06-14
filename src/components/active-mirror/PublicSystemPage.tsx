@@ -129,6 +129,7 @@ function PublicNav() {
       </Link>
       <div className="proofnav__links">
         <Link href="/proof-sprint">Proof sprint</Link>
+        <Link href="/governance">Governance</Link>
         <Link href="/trust">Review</Link>
         <Link href="/glass">Evidence</Link>
         <Link href="/compare">Compare</Link>

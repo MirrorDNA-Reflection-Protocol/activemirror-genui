@@ -25,8 +25,14 @@ curl_code() {
 root_code="$(curl_code GET "$BASE_URL/")"
 [[ "$root_code" == "200" ]] || fail "root returned HTTP $root_code"
 grep -q "Trust by Design" "$TMP_DIR/body" || fail "root did not expose Trust by Design marker"
-grep -q "Show" "$TMP_DIR/body" || fail "root did not expose Show the work headline"
-grep -q "Bring one important piece of work. Leave with a reviewable AI workspace" "$TMP_DIR/body" || fail "root did not expose current buyer-facing offer"
+grep -q "You ask" "$TMP_DIR/body" || fail "root did not expose compressed public headline"
+grep -q "Most AI gives an answer. Active Mirror checks" "$TMP_DIR/body" || fail "root did not expose current public offer"
+grep -q "Choose your Active Mirror route" "$TMP_DIR/body" || fail "root did not expose route chooser"
+grep -q "Check a message, form, or photo" "$TMP_DIR/body" || fail "root did not expose AIndia front door"
+grep -q "Turn AI work into something reviewable" "$TMP_DIR/body" || fail "root did not expose team workspace front door"
+grep -q "No silent upload" "$TMP_DIR/body" || fail "root did not expose upload boundary"
+grep -q "Sources and gaps shown" "$TMP_DIR/body" || fail "root did not expose source-gap boundary"
+grep -q "All the familiar AI work, wrapped with checks" "$TMP_DIR/body" || fail "root did not expose wrapped-AI capability line"
 grep -q "Get the thing, not a chat transcript" "$TMP_DIR/body" || fail "root did not expose results section"
 grep -q "Send data-sharing request to Vendor A" "$TMP_DIR/body" || fail "root did not expose approval gate demo"
 grep -q "20-second walkthrough" "$TMP_DIR/body" || fail "root did not expose walkthrough video section"
@@ -37,6 +43,11 @@ grep -q "Active Mirror Control Map" "$TMP_DIR/body" || fail "root did not expose
 grep -q "/intake?focus=architecture" "$TMP_DIR/body" || fail "root did not expose architecture review path"
 grep -q "Pick the result you want first" "$TMP_DIR/body" || fail "root did not expose start section"
 
+manifest_code="$(curl_code GET "$BASE_URL/.well-known/active-mirror.json")"
+[[ "$manifest_code" == "200" ]] || fail "public Active Mirror manifest returned HTTP $manifest_code"
+grep -q '"name": "AIndia"' "$TMP_DIR/body" || fail "public manifest did not expose AIndia"
+grep -q "voice-first, picture-first answer engine for India" "$TMP_DIR/body" || fail "public manifest did not expose AIndia positioning"
+
 video_code="$(curl_code GET "$BASE_URL/media/show-the-work.mp4")"
 [[ "$video_code" == "200" ]] || fail "walkthrough video returned HTTP $video_code"
 poster_code="$(curl_code GET "$BASE_URL/media/show-the-work-poster.jpg")"
@@ -46,10 +57,25 @@ mirror_code="$(curl_code GET "$BASE_URL/mirror")"
 [[ "$mirror_code" == "200" ]] || fail "mirror route returned HTTP $mirror_code"
 grep -q 'data-testid="work-os-stage"' "$TMP_DIR/body" || fail "mirror route did not expose Work OS stage"
 
-for route in trust compare glass intake; do
+for route in trust compare glass intake aindia governance mirrorprod-india; do
   route_code="$(curl_code GET "$BASE_URL/$route")"
   [[ "$route_code" == "200" ]] || fail "$route route returned HTTP $route_code"
 done
+
+ail_india_code="$(curl_code GET "$BASE_URL/ail-india")"
+[[ "$ail_india_code" == "307" || "$ail_india_code" == "308" ]] || fail "ail-india alias returned HTTP $ail_india_code instead of redirect"
+ail_india_location="$(curl -sS --max-time "${ACTIVEMIRROR_HEALTH_TIMEOUT:-25}" -I "$BASE_URL/ail-india" | tr -d '\r' | awk 'BEGIN{IGNORECASE=1} /^location:/ {print $2; exit}')"
+[[ "$ail_india_location" == "/aindia" || "$ail_india_location" == "$BASE_URL/aindia" ]] || fail "ail-india alias redirected to $ail_india_location"
+
+aindia_code="$(curl_code GET "$BASE_URL/aindia")"
+[[ "$aindia_code" == "200" ]] || fail "AIndia route returned HTTP $aindia_code"
+grep -q "Jawab source ke saath" "$TMP_DIR/body" || fail "AIndia route did not expose source-aware answer positioning"
+grep -q "Device passport" "$TMP_DIR/body" || fail "AIndia route did not expose device capability passport"
+
+governance_code="$(curl_code GET "$BASE_URL/governance")"
+[[ "$governance_code" == "200" ]] || fail "governance route returned HTTP $governance_code"
+grep -q "AI result is not enough. Show the route." "$TMP_DIR/body" || fail "governance route did not expose route-control headline"
+grep -q "Five things a buyer should inspect" "$TMP_DIR/body" || fail "governance route did not expose buyer inspection model"
 
 system_code="$(curl_code GET "$BASE_URL/api/mirror/system")"
 [[ "$system_code" == "200" ]] || fail "system endpoint returned HTTP $system_code"

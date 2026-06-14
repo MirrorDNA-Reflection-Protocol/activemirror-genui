@@ -3,9 +3,12 @@ import Link from "next/link";
 import {
   ArrowRight,
   BadgeCheck,
-  Camera,
+  BookOpen,
   ClipboardCheck,
+  FileCheck2,
+  GraduationCap,
   Languages,
+  ListChecks,
   Mail,
   Megaphone,
   MessageCircle,
@@ -13,9 +16,9 @@ import {
 } from "lucide-react";
 import styles from "./MirrorProdIndiaPage.module.css";
 
-const title = "MirrorProd India - Professional Videos Without Shoots";
+const title = "MirrorProd India - Micro-Drama Training Packs";
 const description =
-  "MirrorProd India creates founder videos, product ads, awareness campaigns, explainers, reels, and shorts without a traditional video shoot.";
+  "MirrorProd India turns SOPs, product notes, policies, and rough ideas into micro-drama training videos and educational material packs for Indian teams.";
 
 const mailHref =
   "mailto:hello@activemirror.ai?subject=MirrorProd%20India%20sample%20concept&body=I%20want%20a%20MirrorProd%20India%20sample%20concept%20for%3A%0A%0ABusiness%20or%20brand%3A%0AGoal%3A%0ALanguage%3A%0AReference%20links%3A";
@@ -25,27 +28,33 @@ const whatsappHref =
 
 const useCases = [
   {
-    icon: Megaphone,
-    title: "Product ads and launch reels",
-    body: "Turn a product, offer, or campaign idea into short-form creative directions that are ready for review.",
+    icon: GraduationCap,
+    title: "Micro-drama training",
+    body: "Convert one policy, SOP, or mistake pattern into a short episode series that teaches behaviour, not just information.",
   },
   {
-    icon: Camera,
-    title: "Founder and spokesperson videos",
-    body: "Create a professional video path from a photo, a rough script, or a message without booking a crew.",
+    icon: BookOpen,
+    title: "Customer education",
+    body: "Explain products, services, warranties, safety steps, finance terms, or app flows in a format people can watch and remember.",
+  },
+  {
+    icon: ListChecks,
+    title: "Frontline enablement",
+    body: "Create role-wise checklists, manager notes, quizzes, posters, and captions from the same source material.",
   },
   {
     icon: Languages,
     title: "India-language variants",
-    body: "Shape the same message for English, Hinglish, Hindi, Marathi, Tamil, Telugu, and regional buyer contexts.",
+    body: "Adapt the lesson for English, Hinglish, Hindi, Marathi, Tamil, Telugu, Gujarati, Kannada, and regional buyer contexts.",
   },
 ];
 
 const flow = [
-  ["01", "Brief", "Capture the goal, audience, channel, tone, and proof points."],
-  ["02", "Script", "Convert the raw idea into a tight message and visual plan."],
-  ["03", "Review", "Check claims, language, brand fit, and delivery before production."],
-  ["04", "Package", "Prepare the output for reels, shorts, ads, status, or sales follow-up."],
+  ["01", "Source", "Start from an SOP, product sheet, policy, deck, photo, or rough voice note."],
+  ["02", "Lesson", "Lock the learner, behaviour change, proof points, language, and risk boundary."],
+  ["03", "Drama", "Write the short scenes, conflict, correction, recap, and cliffhanger or recall beat."],
+  ["04", "Materials", "Generate quiz, poster, captions, manager checklist, and handoff notes."],
+  ["05", "Gate", "Review claims, safety, language, brand fit, consent, and render route before production."],
 ];
 
 const languages = ["English", "Hinglish", "Hindi", "Marathi", "Tamil", "Telugu", "Gujarati", "Kannada"];
@@ -55,7 +64,7 @@ export const metadata: Metadata = {
   description,
   alternates: { canonical: "https://activemirror.ai/mirrorprod-india" },
   openGraph: {
-    title: "MirrorProd India | Professional videos without shoots",
+    title: "MirrorProd India | Micro-drama training packs",
     description,
     url: "https://activemirror.ai/mirrorprod-india",
     siteName: "Active Mirror",
@@ -65,13 +74,13 @@ export const metadata: Metadata = {
         url: "/og-mirrorprod.png",
         width: 1200,
         height: 630,
-        alt: "MirrorProd India landing page for professional videos without shoots",
+        alt: "MirrorProd India landing page for micro-drama training packs",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MirrorProd India | Professional videos without shoots",
+    title: "MirrorProd India | Micro-drama training packs",
     description,
     images: ["/og-mirrorprod.png"],
   },
@@ -82,7 +91,7 @@ export default function MirrorProdIndiaPage() {
     "@context": "https://schema.org",
     "@type": "Service",
     name: "MirrorProd India",
-    serviceType: "AI-assisted video production and creative brief service",
+    serviceType: "Micro-drama training video and educational material service",
     description,
     url: "https://activemirror.ai/mirrorprod-india",
     areaServed: { "@type": "Country", name: "India" },
@@ -117,10 +126,10 @@ export default function MirrorProdIndiaPage() {
       <section className={styles.hero}>
         <div className={styles.heroInner}>
           <p className={styles.eyebrow}>MirrorProd India</p>
-          <h1>Professional videos without shoots</h1>
+          <h1>Training videos people actually finish</h1>
           <p className={styles.heroText}>
-            Founder videos, product ads, awareness campaigns, explainers, reels, and shorts for Indian brands and teams
-            without cameras, crews, or acting skills.
+            Turn SOPs, product notes, policies, and rough explanations into short micro-drama lessons, quizzes, posters,
+            captions, and language variants for Indian teams and customers.
           </p>
           <div className={styles.ctaRow}>
             <a className={styles.primaryCta} href={mailHref}>
@@ -138,22 +147,22 @@ export default function MirrorProdIndiaPage() {
       <section className={styles.summaryStrip} aria-label="MirrorProd India summary">
         <div className={styles.summaryItem}>
           <span>Input</span>
-          <b>Photo, product shot, script, or rough idea</b>
+          <b>SOP, product note, policy, deck, or voice note</b>
         </div>
         <div className={styles.summaryItem}>
           <span>Output</span>
-          <b>Review-ready video direction and production brief</b>
+          <b>Micro-drama lesson plus educational material pack</b>
         </div>
         <div className={styles.summaryItem}>
-          <span>Channels</span>
-          <b>Reels, shorts, ads, status, explainers</b>
+          <span>Use</span>
+          <b>Staff training, customer education, onboarding</b>
         </div>
       </section>
 
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <p>What it restores</p>
-          <h2>A fast creative route for teams that need the video before they can sell the idea.</h2>
+          <p>The wedge</p>
+          <h2>Micro-drama learning for businesses that cannot afford slow training systems.</h2>
         </div>
         <div className={styles.grid}>
           {useCases.map((item) => {
@@ -171,8 +180,8 @@ export default function MirrorProdIndiaPage() {
 
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <p>Brief flow</p>
-          <h2>The work starts with a locked brief, not a vague prompt.</h2>
+          <p>Training flow</p>
+          <h2>The work starts with a source and a behaviour goal, not a vague prompt.</h2>
         </div>
         <div className={styles.flow}>
           {flow.map(([number, heading, body]) => (
@@ -191,12 +200,36 @@ export default function MirrorProdIndiaPage() {
       </section>
 
       <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <p>What makes it different</p>
+          <h2>A governed story engine before any render tool.</h2>
+        </div>
+        <div className={styles.differenceGrid}>
+          <article>
+            <FileCheck2 aria-hidden="true" size={28} />
+            <h3>Claim-checked</h3>
+            <p>Facts, assumptions, unknowns, and review needs stay visible before the script becomes a video.</p>
+          </article>
+          <article>
+            <Megaphone aria-hidden="true" size={28} />
+            <h3>Drama with a job</h3>
+            <p>Every episode teaches one action: prevent a mistake, sell better, explain a step, or onboard faster.</p>
+          </article>
+          <article>
+            <ClipboardCheck aria-hidden="true" size={28} />
+            <h3>Materials included</h3>
+            <p>The pack includes scripts, captions, quiz questions, poster copy, manager notes, and render prompts.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className={styles.section}>
         <div className={styles.closing}>
           <BadgeCheck aria-hidden="true" size={34} />
-          <h2>Send the raw idea. Get a video concept that can be reviewed, edited, and produced.</h2>
+          <h2>Send one messy training problem. Get a reviewable micro-drama learning pack.</h2>
           <p>
-            MirrorProd India is back on the live Active Mirror origin at this route. The next step is a compact sample
-            brief with the target audience, proof points, language, and channel.
+            MirrorProd India is a production-control layer for training and educational content. The next step is a
+            compact sample pack with the learner, behaviour goal, proof points, language, scenes, quiz, and render route.
           </p>
           <div className={styles.ctaRow}>
             <a className={styles.primaryCta} href={mailHref}>

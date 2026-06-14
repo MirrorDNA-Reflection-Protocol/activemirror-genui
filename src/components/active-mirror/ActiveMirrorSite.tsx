@@ -10,6 +10,48 @@ const outcomes = [
   ["EVIDENCE", "Know what to trust.", "Sources, assumptions, and gaps stay separate so your team can review the work quickly."],
 ];
 
+const promiseTokens = [
+  ["TRUTH THAT REFLECTS", "Truth that reflects.", "The workspace separates facts, assumptions, unknowns, and source gaps before it turns a model answer into action."],
+  ["ORDER THAT HOLDS", "Order that holds.", "Every useful output is routed through boundaries, gates, approvals, receipts, and a deploy-or-don't path."],
+  ["INTELLIGENCE THAT REMEMBERS", "Intelligence that remembers.", "Continuity comes from consented receipts and owned context, not surveillance, silent retention, or vague memory."],
+];
+
+const frontDoorRoutes = [
+  {
+    label: "For people",
+    title: "Check a message, form, or photo.",
+    body: "AIndia checks it for you in your language, then gives source, risk, and one next step.",
+    action: "Open AIndia",
+    href: "/aindia",
+    accent: "primary",
+  },
+  {
+    label: "For teams",
+    title: "Turn AI work into something reviewable.",
+    body: "Active Mirror checks the work for your team: sources, assumptions, approval gates, and the next action.",
+    action: "Try workspace",
+    href: "/mirror",
+    accent: "secondary",
+  },
+] as const;
+
+const productionRoutes = [
+  ["AIndia", "Consumer India helper", "Voice/photo/message checks in Indian languages.", "/aindia"],
+  ["Active Mirror", "Reviewable workspaces", "Serious AI work with sources, gates, and receipts.", "/mirror"],
+  ["Media", "Training and launch packs", "Scripts, images, audio, and video briefs behind approval gates.", "/mirrorprod-india"],
+] as const;
+
+const familiarAiAbilities = [
+  "chat",
+  "search",
+  "documents",
+  "images",
+  "audio",
+  "video briefs",
+  "automations",
+  "local files",
+] as const;
+
 const fitSteps = [
   ["1", "Send one workflow your current AI cannot safely finish.", "A concrete process with a real owner, deadline, and review need."],
   ["2", "We scope it first. If it fits, we build a working proof in 72 hours.", "If it is not a fit, we say so plainly."],
@@ -42,6 +84,33 @@ const whereItHelps = [
   ["Companies", "Move faster without losing control.", "Repeatable workflows, review before action, private context only when approved, and outputs teams can reuse."],
   ["Public sector", "Use AI with local trust and public accountability.", "Language, data boundaries, review trails, and service workflows that can be inspected before they affect citizens."],
   ["National programs", "Build capacity instead of depending on one vendor.", "A path to local models, local workflows, local records, and national-language use cases without pretending models are magic."],
+];
+
+const productLanguageModes = ["English", "Hinglish", "Hindi", "Marathi", "Tamil", "Telugu", "Kannada", "Bengali", "Gujarati"];
+
+const indiaLanguageBaseline = [
+  "Assamese",
+  "Bengali",
+  "Bodo",
+  "Dogri",
+  "Gujarati",
+  "Hindi",
+  "Kannada",
+  "Kashmiri",
+  "Konkani",
+  "Malayalam",
+  "Manipuri",
+  "Marathi",
+  "Maithili",
+  "Nepali",
+  "Odia",
+  "Punjabi",
+  "Sanskrit",
+  "Santhali",
+  "Sindhi",
+  "Tamil",
+  "Telugu",
+  "Urdu",
 ];
 
 const differenceRows = [
@@ -313,6 +382,55 @@ function BriefDemo() {
   );
 }
 
+function FrontDoorPanel() {
+  return (
+    <div className="frontdoor" aria-label="Choose your Active Mirror route">
+      <div className="frontdoor__head">
+        <span>Start here</span>
+        <h2>What do you need checked?</h2>
+      </div>
+      <div className="frontdoor__routes">
+        {frontDoorRoutes.map((route) => (
+          <Link
+            className={`frontdoor__route frontdoor__route--${route.accent}`}
+            href={route.href}
+            key={route.title}
+            data-analytics={`frontdoor_${route.accent}`}
+          >
+            <span>{route.label}</span>
+            <h3>{route.title}</h3>
+            <p>{route.body}</p>
+            <b>{route.action} <span aria-hidden="true">→</span></b>
+          </Link>
+        ))}
+      </div>
+      <div className="frontdoor__trust" aria-label="Trust by Design checks">
+        <span>No silent upload</span>
+        <span>Sources and gaps shown</span>
+        <span>Approval before action</span>
+      </div>
+      <div className="frontdoor__abilities" aria-label="Familiar AI abilities">
+        <p>All the familiar AI work, wrapped with checks.</p>
+        <div>
+          {familiarAiAbilities.map((ability) => <span key={ability}>{ability}</span>)}
+        </div>
+      </div>
+      <div className="frontdoor__family" aria-label="Active Mirror product routes">
+        {productionRoutes.map(([name, title, body, href]) => (
+          <Link href={href} key={name}>
+            <span>{name}</span>
+            <b>{title}</b>
+            <small>{body}</small>
+          </Link>
+        ))}
+      </div>
+      <Link className="frontdoor__proof" href="/intake?focus=pilot" data-analytics="frontdoor_proof_sprint">
+        Need this for a company workflow? Scope a 72-hour proof sprint.
+      </Link>
+    </div>
+  );
+}
+
 export default function ActiveMirrorSite() {
   useHomepageMotion();
 
@@ -336,13 +454,13 @@ export default function ActiveMirrorSite() {
         <div className="wrap nav">
           <a className="brand" href="#hero"><span className="glyph">⟡</span>Active Mirror</a>
           <div className="nav-links">
+            <Link href="/aindia">AIndia</Link>
             <a href="#what-it-does">Results</a>
             <a href="#proof">Proof</a>
-            <a href="#work-with-us">Start</a>
           </div>
           <div className="nav-cta">
-            <span className="nav-note">review before action</span>
-            <Link className="btn btn-ghost btn-sm" href="/mirror" data-analytics="nav_try_workspace">Try workspace <span className="arr">→</span></Link>
+            <span className="nav-note">reflection before prediction</span>
+            <Link className="btn btn-ghost btn-sm" href="/aindia" data-analytics="nav_open_aindia">Open AIndia <span className="arr">→</span></Link>
           </div>
         </div>
       </header>
@@ -353,17 +471,13 @@ export default function ActiveMirrorSite() {
           <div className="hero-copy">
             <p className="eyebrow">Trust by Design · N1 Intelligence</p>
             <h1 className="h-display">
-              <span className="mask-line"><span className="mi">Show</span></span>
-              <span className="mask-line"><span className="mi">the <em>work.</em></span></span>
+              <span className="mask-line"><span className="mi">You ask.</span></span>
+              <span className="mask-line"><span className="mi">Active Mirror <em>checks.</em></span></span>
             </h1>
-            <p className="lede hero-sub">Bring one important piece of work. Leave with a reviewable AI workspace and a control map for local, cloud, human review, and proof.</p>
-            <div className="hero-ctas">
-              <Link className="btn btn-primary" href="/intake?focus=pilot" data-analytics="hero_bring_workflow">Bring one workflow <span className="arr">→</span></Link>
-              <Link className="btn btn-ghost" href="/mirror" data-analytics="hero_try_workspace">Try the public workspace</Link>
-            </div>
-            <p className="hero-fine">We scope it first. If it fits, <b>a working proof in 72 hours.</b> If not, a clear no.</p>
+            <p className="lede hero-sub">Most AI gives an answer. Active Mirror checks the language, source, risk, consent, and next step before the answer becomes advice.</p>
+            <p className="hero-fine">Reflection happens inside the system. <b>You just get the useful next move.</b></p>
           </div>
-          <BriefDemo />
+          <FrontDoorPanel />
         </div>
       </section>
 
@@ -400,6 +514,9 @@ export default function ActiveMirrorSite() {
             </div>
           </div>
         </div>
+        <div className="wrap walkthrough-proof rv">
+          <BriefDemo />
+        </div>
       </section>
 
       <section id="what-it-does" className="band" data-rail-section="results">
@@ -410,6 +527,15 @@ export default function ActiveMirrorSite() {
             {outcomes.map(([tag, title, body]) => (
               <div className="out-card rv" key={title}>
                 <span className="chip chip-cat">{tag}</span>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="promise-grid rv" aria-label="Active Mirror promise">
+            {promiseTokens.map(([tag, title, body]) => (
+              <div className="promise-card" key={tag}>
+                <span>{tag}</span>
                 <h3>{title}</h3>
                 <p>{body}</p>
               </div>
@@ -522,6 +648,27 @@ export default function ActiveMirrorSite() {
                 <p>{body}</p>
               </div>
             ))}
+          </div>
+          <div className="language-panel rv" aria-label="India language coverage">
+            <div className="language-panel__copy">
+              <span className="language-k">Language layer</span>
+              <h3>All-India language lanes, with review gates.</h3>
+              <p>
+                Active Mirror can prepare workspaces, scripts, captions, micro-lessons, and support surfaces for English, Hinglish,
+                and the 22 scheduled languages of India. Production use stays source-checked and native-review gated.
+              </p>
+            </div>
+            <div>
+              <span className="language-label">First product modes</span>
+              <div className="language-list" aria-label="First product language modes">
+                {productLanguageModes.map((language) => <span className="language-chip" key={language}>{language}</span>)}
+              </div>
+              <span className="language-label language-label--spaced">India baseline</span>
+              <div className="language-list language-list--muted" aria-label="Scheduled languages baseline">
+                {indiaLanguageBaseline.map((language) => <span className="language-chip" key={language}>{language}</span>)}
+              </div>
+              <p className="language-note">Language-ready means governed drafts and assets can be made. Sensitive advice, public claims, legal/medical/financial use, and government workflows still require source evidence and human review.</p>
+            </div>
           </div>
         </div>
       </section>

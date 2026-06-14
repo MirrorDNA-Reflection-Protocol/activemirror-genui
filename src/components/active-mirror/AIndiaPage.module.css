@@ -317,6 +317,7 @@
 .opportunities,
 .modelMatrix,
 .stack,
+.devicePassport,
 .finalCta {
   margin: 48px clamp(18px, 3.5vw, 42px) 0;
 }
@@ -2241,6 +2242,117 @@
   gap: 18px;
 }
 
+.reflectionEngine,
+.reflectionCompare {
+  display: grid;
+  gap: 18px;
+  padding: 30px;
+  border: 1px solid var(--ain-line);
+  border-radius: 8px;
+  background: var(--ain-ink);
+  color: var(--ain-paper-2);
+}
+
+.reflectionEngine span {
+  width: fit-content;
+  color: var(--ain-gold);
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.reflectionEngine h2 {
+  max-width: 760px;
+  margin: 0;
+  color: var(--ain-paper-2);
+  font-size: clamp(34px, 5vw, 62px);
+  line-height: 1.02;
+}
+
+.reflectionEngine p,
+.reflectionCompare p {
+  max-width: 860px;
+  margin: 0;
+  color: var(--ain-line);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.reflectionEngine ul {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reflectionEngine li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: var(--ain-paper-2);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.reflectionEngine li svg {
+  flex: none;
+  color: var(--ain-safe);
+}
+
+.reflectionCompare {
+  grid-template-columns: minmax(260px, 0.42fr) 1fr;
+  background: var(--ain-paper-2);
+  color: var(--ain-ink);
+}
+
+.reflectionCompare h3 {
+  margin: 0 0 10px;
+  color: var(--ain-ink);
+  font-size: clamp(28px, 3vw, 42px);
+  line-height: 1.05;
+}
+
+.reflectionCompare p {
+  color: var(--ain-muted);
+}
+
+.reflectionCompareGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--ain-line);
+  border-radius: 8px;
+  background: var(--ain-line);
+}
+
+.reflectionCompareGrid article {
+  min-height: 148px;
+  padding: 20px;
+  background: var(--ain-paper);
+}
+
+.reflectionCompareGrid h4 {
+  margin: 0 0 8px;
+  color: var(--ain-ink);
+  font-size: 20px;
+  line-height: 1.12;
+}
+
+.reflectionCompareGrid p {
+  margin: 0;
+  color: var(--ain-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
 .modelIntro {
   display: grid;
   grid-template-columns: 52px minmax(260px, 0.5fr) 1fr;
@@ -2387,6 +2499,112 @@
   color: var(--ain-safe);
 }
 
+.devicePassport {
+  display: grid;
+  gap: 22px;
+}
+
+.passportGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.passportGrid article,
+.shareRailList article {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 210px;
+  padding: 22px;
+  border: 1px solid var(--ain-line);
+  border-radius: 8px;
+  background: var(--ain-paper-2);
+}
+
+.passportGrid h3,
+.shareRails h3 {
+  margin: 0;
+  color: var(--ain-ink);
+  font-size: 22px;
+  line-height: 1.12;
+}
+
+.passportGrid p,
+.shareRails p {
+  margin: 0;
+  color: var(--ain-muted);
+  font-size: 15px;
+  line-height: 1.48;
+}
+
+.passportGrid small {
+  display: block;
+  margin-top: 4px;
+  color: var(--ain-gold-deep);
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.38;
+}
+
+.passportBadge {
+  width: fit-content;
+  min-height: 28px;
+  padding: 5px 10px 4px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.passport_mvp-ready {
+  background: rgba(19, 128, 83, 0.1);
+  color: var(--ain-safe);
+}
+
+.passport_capability-check-required,
+.passport_limited-browser-support,
+.passport_native-wrapper-required {
+  background: rgba(17, 92, 255, 0.1);
+  color: var(--ain-verify);
+}
+
+.passport_consented-fallback,
+.passport_roadmap {
+  background: rgba(199, 154, 58, 0.14);
+  color: var(--ain-gold-deep);
+}
+
+.shareRails {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.42fr) 1fr;
+  gap: 18px;
+  align-items: start;
+  padding: 26px;
+  border: 1px solid var(--ain-line);
+  border-radius: 8px;
+  background: var(--ain-paper);
+}
+
+.shareRailList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.shareRailList article {
+  min-height: 150px;
+  padding: 18px;
+  background: var(--ain-paper-2);
+}
+
+.shareRailList b {
+  color: var(--ain-ink);
+  font-size: 17px;
+  line-height: 1.18;
+}
+
 .finalCta {
   display: flex;
   align-items: center;
@@ -2465,6 +2683,63 @@
 
 .sourceChip svg {
   color: var(--ain-gold);
+}
+
+.glyphStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px solid var(--ain-line);
+  border-radius: 8px;
+  background: var(--ain-paper-2);
+}
+
+.glyphChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--ain-paper);
+  color: var(--ain-muted);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.glyphChip b {
+  color: var(--ain-gold);
+  font-family: "Apple Symbols", "Noto Sans Symbols 2", "Noto Sans Devanagari", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.checkDetails {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--ain-line);
+  border-radius: 8px;
+  background: var(--ain-paper-2);
+}
+
+.checkDetails summary {
+  color: var(--ain-ink);
+  font-size: 13px;
+  font-weight: 850;
+  cursor: pointer;
+  list-style-position: outside;
+}
+
+.checkDetails[open] {
+  box-shadow: inset 0 0 0 1px rgba(199, 154, 58, 0.2);
+}
+
+.checkDetails[open] summary {
+  margin-bottom: 8px;
 }
 
 .chetanaRail {
@@ -2591,6 +2866,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  width: fit-content;
   padding: 4px 10px;
   border: 1px dashed var(--ain-line);
   border-radius: 6px;
@@ -2647,10 +2923,19 @@
   .chetanaBanner,
   .gatePanel,
   .determinismPanel,
+  .reflectionCompare,
   .modelIntro,
   .browserHelper,
+  .shareRails,
   .offlineSteps {
     grid-template-columns: 1fr;
+  }
+
+  .reflectionEngine ul,
+  .reflectionCompareGrid,
+  .passportGrid,
+  .shareRailList {
+    grid-template-columns: 1fr 1fr;
   }
 
   .languageStrip {
@@ -2703,6 +2988,18 @@
 
   .phoneIntro h2 {
     font-size: 24px;
+  }
+
+  .reflectionEngine,
+  .reflectionCompare {
+    padding: 24px;
+  }
+
+  .reflectionEngine ul,
+  .reflectionCompareGrid,
+  .passportGrid,
+  .shareRailList {
+    grid-template-columns: 1fr;
   }
 
   .phoneIntro p {

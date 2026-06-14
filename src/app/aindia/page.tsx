@@ -3,7 +3,7 @@ import AIndiaPage from "@/components/active-mirror/AIndiaPage";
 import { aindiaBootloader } from "@/lib/aindia/bootloader";
 
 const description =
-  "AIndia — poocho kuch bhi, jawab source ke saath. Voice, photo, ya text mein — Hindi aur sabhi Indian languages mein.";
+  "AIndia — poocho kuch bhi, jawab source ke saath. Voice, photo, ya text mein — aapki bhasha mein.";
 
 export const metadata: Metadata = {
   title: "AIndia — Jawab Source Ke Saath",
@@ -43,14 +43,15 @@ export default function AIndiaRoute() {
     areaServed: "India",
     description,
     featureList: [
-      "Ask by voice, photo, or text in any Indian language",
-      "Answer engine with source citations for every response",
-      "All 22 scheduled Indian languages via AI4Bharat and Sarvam",
+      "Ask by voice, photo, or text in Indian languages",
+      "Answer engine with visible source citations",
+      "22-language roadmap through AI4Bharat and Sarvam rails",
+      "Local supervisor decides whether local, source-pack, safety, or frontier route is allowed",
       "Safety rail flags risky payments, links, and scams before action",
       "Data stays on device — cloud only with explicit consent",
-      "Works offline after first use",
+      "Offline app shell and helper-pack path where the device supports it",
       "Two-tier proof: plain check line + expandable technical receipt",
-      "DPDP Act compliant — consent gates, local receipts, erasure support",
+      "DPDP-aligned consent gates, local receipts, and erasure support roadmap",
     ],
     softwareHelp: {
       "@type": "CreativeWork",

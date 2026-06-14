@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { getSanatanaTechHookStatus, type SanatanaTechHookStatus } from "./sanatanaTechHook";
 
 export const ACTIVE_MIRROR_LOCAL_OPERATOR_VERSION = "2026.06.10-local-operator-compiler-v1";
 export const ACTIVE_MIRROR_LOCAL_OPERATOR_SCHEMA_VERSION =
@@ -97,6 +98,7 @@ export type LocalOperatorPacket = {
     frontierModelRole: "scoped_proposer_only";
   };
   claimBoundary: string;
+  doctrineHook: SanatanaTechHookStatus;
   privateVaultIngest: {
     state: "private_body_required";
     rule: string;
@@ -325,6 +327,7 @@ export function compileLocalOperatorPacket(input: unknown): {
 
   const prompt = safeText(input.prompt, "").slice(0, 600);
   if (!prompt) return { ok: false, error: "prompt_required" };
+  const doctrineHook = getSanatanaTechHookStatus();
 
   const rawRecords = Array.isArray(input.records) ? input.records.slice(0, 48) : [];
   const normalized = rawRecords.map((item, index) => normalizeRecord(item as LocalOperatorRecordInput, index));
@@ -382,6 +385,7 @@ export function compileLocalOperatorPacket(input: unknown): {
     },
     claimBoundary:
       "This is a deterministic public-safe operator packet. It compiles approved records into a scoped context envelope; it does not train a model, read the private vault, or grant action authority.",
+    doctrineHook,
     privateVaultIngest: {
       state: "private_body_required",
       rule: "The public website may receive sanitized records or signed body receipts only. Raw vault reads stay on the private body.",
