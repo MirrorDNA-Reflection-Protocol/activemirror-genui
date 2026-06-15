@@ -144,6 +144,8 @@ try {
       route: compactText.includes("Jawab source ke saath. Aapki bhasha mein.") &&
         compactText.includes("Trust receipts") &&
         compactText.includes("No cloud call in this demo") &&
+        compactText.includes("Learns from receipts. Does not mutate itself.") &&
+        compactText.includes("No silent training.") &&
         compactText.includes("Device passport") &&
         compactText.includes("फ़ोटो भेजो") &&
         compactText.includes("मैसेज भेजो") &&

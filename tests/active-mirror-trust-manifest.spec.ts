@@ -17,7 +17,7 @@ test.describe('Active Mirror trust manifest', () => {
     );
     expect(body.aiCrawlerPolicy.allowedSummary).toContain('AI crawlers may summarize public pages');
     expect(body.aiCrawlerPolicy.preferredDescription).toContain('governed AI work surface');
-    expect(body.updated).toBe('2026-06-14');
+    expect(body.updated).toBe('2026-06-15');
 
     const proofUrls = body.proofEndpoints.map((endpoint: { url: string }) => endpoint.url);
     expect(proofUrls).toEqual(
@@ -27,6 +27,7 @@ test.describe('Active Mirror trust manifest', () => {
         'https://activemirror.ai/api/mirror/proof-ledger',
         'https://activemirror.ai/api/mirror/body-receipt',
         'https://activemirror.ai/api/aindia/contracts',
+        'https://activemirror.ai/api/aindia/learning',
       ]),
     );
 

@@ -14,6 +14,9 @@ test.describe('AIndia recursion contract', () => {
     await expect(page.getByText('Jawab source ke saath. Aapki bhasha mein.')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Nonlinear thinking in. Disciplined next step out.' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'One assistant. Many rails. One reflective turn.' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Learns from receipts. Does not mutate itself.' })).toBeVisible();
+    await expect(page.getByText('No silent training.')).toBeVisible();
+    await expect(page.getByText('No public claim without receipt.')).toBeVisible();
     await expect(page.getByText('Why this is not another chatbot')).toBeVisible();
     await expect(page.locator('#languages')).toContainText('Hinglish');
     await expect(page.locator('#languages')).toContainText('ગુજરાતી');
@@ -67,11 +70,19 @@ test.describe('AIndia recursion contract', () => {
     expect(body.updated).toBe(body.macAbsorption.verifiedAt.slice(0, 10));
     expect(body.macAbsorption.localModels).toContain('hf.co/mradermacher/sarvam-translate-i1-GGUF:Q4_K_M');
     expect(body.macAbsorption.activeConstraint).toContain('refresh model, phone-mesh, API, and browser checks');
+    expect(body.selfLearning.boundary.mode).toBe('receipt_driven_not_self_mutating');
+    expect(body.selfLearning.boundary.cannotDo).toContain('deploy or restart production from the learning loop');
+    expect(body.selfLearning.receipt.schemaVersion).toBe('aindia.self_learning_recursion.v1');
+    expect(body.selfLearning.receipt.promotionRule).toContain('source receipt');
+    expect(body.selfLearning.promotionGates).toContain('deploy_gate_for_production');
+    expect(body.selfLearning.signals.map((signal: { class: string }) => signal.class)).toEqual(
+      expect.arrayContaining(['learning', 'hypothesis', 'risk', 'opportunity', 'ignore']),
+    );
 
     const evidence = body.macAbsorption.evidence.join(' ');
     expect(evidence).toContain('127.0.0.1:11434');
     expect(evidence).toContain('phone-mesh /health');
-    expect(evidence).toContain('Pixel and OnePlus inference backends are false');
+    expect(evidence).toContain('mac-ollama, Pixel, and OnePlus inference backends are false');
 
     const rails = new Map<string, AIndiaRail>(
       body.macAbsorption.rails.map((rail: AIndiaRail) => [rail.title, rail]),
@@ -91,7 +102,7 @@ test.describe('AIndia recursion contract', () => {
     expect(recursionResponse.status()).toBe(200);
     const recursionBody = await recursionResponse.json();
     const verifiedDate = recursionBody.macAbsorption.verifiedAt.slice(0, 10);
-    const endpoints = ['/api/aindia/contracts', '/api/aindia/sovereignty', '/api/aindia/glyphs'];
+    const endpoints = ['/api/aindia/contracts', '/api/aindia/sovereignty', '/api/aindia/glyphs', '/api/aindia/learning'];
 
     for (const endpoint of endpoints) {
       const response = await request.get(endpoint);
@@ -107,19 +118,29 @@ test.describe('AIndia recursion contract', () => {
         continue;
       }
 
+      if (endpoint === '/api/aindia/learning') {
+        expect(body.protocol).toBe('aindia-self-learning-recursion-v1');
+        expect(body.boundary.publicLine).toBe('Learns from receipts. Does not mutate itself.');
+        expect(body.boundary.cannotDo).toContain('train on private user content without explicit consent');
+        expect(body.promotionGates).toContain('lint_typecheck_build_passed');
+        expect(body.receipt.boundary).toBe('receipt_driven_not_self_mutating');
+        continue;
+      }
+
       const recursion = body.sovereignty?.recursion ?? body.recursion;
       const verifiedAt = recursion.macAbsorption.verifiedAt;
       expect(verifiedAt.slice(0, 10)).toBe(verifiedDate);
 
       const evidence = recursion.macAbsorption.evidence.join(' ');
       expect(evidence).toContain('phone-mesh /health');
-      expect(evidence).toContain('Pixel and OnePlus inference backends are false');
+      expect(evidence).toContain('mac-ollama, Pixel, and OnePlus inference backends are false');
       expect(recursion.macAbsorption.activeConstraint).toContain('refresh model, phone-mesh, API, and browser checks');
 
       if (endpoint === '/api/aindia/contracts') {
         expect(body.reflectiveTurn.productRule).toContain('one simple assistant');
         expect(body.reflectiveTurn.ownedLayer).toContain('wrapper, harness, gates');
         expect(body.glyphGrammar.mirrorGraph.nodes.length).toBeGreaterThan(0);
+        expect(body.sovereignty.recursion.selfLearning.boundary.mode).toBe('receipt_driven_not_self_mutating');
       }
     }
   });

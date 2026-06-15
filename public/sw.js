@@ -1,5 +1,5 @@
 const VERSION = "active-mirror-control-v7";
-const SHELL_URLS = ["/aindia", "/api/aindia/manifest", "/api/aindia/claim-guard", "/api/aindia/contracts", "/api/aindia/wrappers", "/api/aindia/determinism", "/api/aindia/founder-relay", "/api/aindia/sovereignty", "/api/aindia/recursion", "/manifest.json"];
+const SHELL_URLS = ["/aindia", "/api/aindia/manifest", "/api/aindia/claim-guard", "/api/aindia/contracts", "/api/aindia/wrappers", "/api/aindia/determinism", "/api/aindia/founder-relay", "/api/aindia/sovereignty", "/api/aindia/recursion", "/api/aindia/learning", "/manifest.json"];
 const SHELL_SET = new Set(SHELL_URLS);
 
 function isSameOrigin(request) {

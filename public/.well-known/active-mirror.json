@@ -45,6 +45,11 @@
       "name": "AIndia public contract bundle",
       "url": "https://activemirror.ai/api/aindia/contracts",
       "type": "json"
+    },
+    {
+      "name": "AIndia self-learning recursion boundary",
+      "url": "https://activemirror.ai/api/aindia/learning",
+      "type": "json"
     }
   ],
   "aiCrawlerPolicy": {
@@ -55,5 +60,5 @@
   "contact": {
     "publicEmail": "paul@activemirror.ai"
   },
-  "updated": "2026-06-14"
+  "updated": "2026-06-15"
 }

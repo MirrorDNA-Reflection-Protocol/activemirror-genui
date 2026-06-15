@@ -38,6 +38,30 @@ export type AIndiaHundredRecursion = {
   score: number;
 };
 
+export type AIndiaLearningSignalClass =
+  | "learning"
+  | "hypothesis"
+  | "regression"
+  | "risk"
+  | "opportunity"
+  | "ignore";
+
+export type AIndiaLearningSignal = {
+  id: string;
+  class: AIndiaLearningSignalClass;
+  source: string;
+  evidence: string;
+  decision: string;
+  nextAction: string;
+  promotionState: "absorbed" | "queued" | "blocked" | "discarded";
+};
+
+export type AIndiaLearningStep = {
+  step: string;
+  rule: string;
+  blockedIf: string;
+};
+
 export const aindiaRecursionScoreLabels: AIndiaRecursionMetric[] = [
   "trust",
   "latency",
@@ -56,14 +80,14 @@ export const aindiaPerfectionDoctrine = {
 };
 
 export const aindiaMacAbsorption = {
-  verifiedAt: "2026-06-13T14:10:02+05:30",
+  verifiedAt: "2026-06-15T10:49:53+05:30",
   body:
     "MacBook Pro is the canonical builder/runtime body. The M4 mini is the control plane. Phones are limbs, not sovereign runtimes.",
   evidence: [
     "Ollama direct check at 127.0.0.1:11434 returned Sarvam, embeddinggemma, ministral, qwen3-coder, mirrorstudent, and phi4-mini models.",
-    "phone-mesh /health returned router ok with grapheneos_mode=true and aicore_supported=false.",
-    "phone-mesh /health reported Pixel and OnePlus inference backends are false; mac route through mesh also reported false, so phone-mesh is not a proof rail.",
-    "Codex and Claude cognitive adapters returned ok=true and ready=true on ports 8926 and 8927.",
+    "phone-mesh /health answered on 8875 with router ok, grapheneos_mode=true, aicore_supported=false, and checked=2026-06-15T05:19:48Z.",
+    "phone-mesh /health reported mac-ollama, Pixel, and OnePlus inference backends are false; ADB listed no attached devices, so phone-mesh is not a proof rail.",
+    "agent_session_bridge self-check returned ok=true with warnings; Codex and Claude cognitive adapters were ready on ports 8926 and 8927.",
   ],
   localModels: [
     "hf.co/mradermacher/sarvam-translate-i1-GGUF:Q4_K_M",
@@ -95,7 +119,7 @@ export const aindiaMacAbsorption = {
     {
       title: "Phone mesh",
       status: "partial",
-      observed: "The router answers on 8875, but mac-ollama, Pixel, and OnePlus inference backends are false and ADB has no attached devices in this pass.",
+      observed: "The router answers on 8875 with a current health payload, but mac-ollama, Pixel, and OnePlus inference backends are false, and ADB has no attached devices in this pass.",
       useInAIndia: "Keep phone mesh as a declared optional rail; do not make it a proof dependency until live backend health passes.",
     },
     {
@@ -286,4 +310,139 @@ export const aindiaForeverLoop = {
   guardrail:
     "Each pass may apply one bounded improvement only after typecheck, lint, build, API proof, and browser proof. No autonomous deploys or runtime-topology mutations.",
   receipt: "Local Codex automation: aindia-recursion-loop",
+};
+
+export const aindiaSelfLearningBoundary = {
+  mode: "receipt_driven_not_self_mutating",
+  publicLine: "Learns from receipts. Does not mutate itself.",
+  canLearnFrom: [
+    "public canary receipts",
+    "route health receipts",
+    "claim-guard failures",
+    "user-approved feedback",
+    "source-pack freshness checks",
+    "browser and device capability reports",
+  ],
+  cannotDo: [
+    "train on private user content without explicit consent",
+    "silently profile a user",
+    "rewrite doctrine or public copy without review",
+    "promote a model, route, or claim without a receipt",
+    "deploy or restart production from the learning loop",
+  ],
+  mutationBoundary:
+    "The loop can propose bounded changes. Only verified code, source packs, rules, or copy can be promoted, and production still requires deploy gate approval.",
+};
+
+export const aindiaLearningCycle: AIndiaLearningStep[] = [
+  {
+    step: "Collect",
+    rule: "Read receipts, canaries, claim-guard output, source-pack freshness, and user-approved feedback.",
+    blockedIf: "The signal contains private raw content, unapproved user data, or unverifiable hearsay.",
+  },
+  {
+    step: "Classify",
+    rule: "Mark each signal as learning, hypothesis, regression, risk, opportunity, ignore.",
+    blockedIf: "The signal is only a vanity metric or a claim without evidence.",
+  },
+  {
+    step: "Simulate",
+    rule: "Score the candidate against trust, latency, sovereignty, determinism, cheap-device fit, and proof.",
+    blockedIf: "The candidate depends on unreachable phones, unsupported OS APIs, or silent upload.",
+  },
+  {
+    step: "Propose",
+    rule: "Create one reversible improvement slice with expected proof and rollback.",
+    blockedIf: "The proposal changes runtime topology, production, or model training without explicit approval.",
+  },
+  {
+    step: "Gate",
+    rule: "Require claim guard, source receipt, privacy boundary, tests, and browser proof before promotion.",
+    blockedIf: "Any gate fails or evidence is stale.",
+  },
+  {
+    step: "Promote",
+    rule: "Promote only the bounded artifact: rule, source pack, UI copy, API contract, or test.",
+    blockedIf: "Promotion would change production without deploy gate approval.",
+  },
+  {
+    step: "Receipt",
+    rule: "Write a public-safe receipt stating what changed, what was blocked, and what remains a hypothesis.",
+    blockedIf: "The receipt would expose private files, raw chats, tokens, or internal topology.",
+  },
+];
+
+export const aindiaLearningPromotionGates = [
+  "source_receipt_present",
+  "private_data_absent",
+  "claim_guard_passed",
+  "cheap_device_budget_named",
+  "language_boundary_checked",
+  "risk_gate_checked",
+  "lint_typecheck_build_passed",
+  "api_and_browser_proof_passed",
+  "human_approval_for_public_claims",
+  "deploy_gate_for_production",
+] as const;
+
+export const aindiaLearningSignals: AIndiaLearningSignal[] = [
+  {
+    id: "public-aindia-canary",
+    class: "learning",
+    source: "public browser canary and route health",
+    evidence: "The deployed canary exercised /aindia, trust receipt flow, /governance, manifest, service worker, and /mirror controls.",
+    decision: "Keep AIndia public proof tied to browser behavior, not route status alone.",
+    nextAction: "Retain the AIndia checks in browser-canary and healthcheck before any future deploy.",
+    promotionState: "absorbed",
+  },
+  {
+    id: "phone-mesh-not-proof",
+    class: "risk",
+    source: "phone-mesh and ADB body checks",
+    evidence: "Phone mesh responds, but mac-ollama, Pixel, and OnePlus inference backends are false; ADB lists no attached devices.",
+    decision: "Do not make phone inference a current product promise.",
+    nextAction: "Keep it as an optional rail until fresh backend health and device proof pass.",
+    promotionState: "blocked",
+  },
+  {
+    id: "cheap-device-answer-budget",
+    class: "hypothesis",
+    source: "AIndia audience and low-end-device constraint",
+    evidence: "The target workflow needs short answers, local rules, and minimal typing before heavy model calls.",
+    decision: "Prefer one answer, one source state, one next step.",
+    nextAction: "Measure answer-card render time and token budget on a cheap Android wrapper before claiming support.",
+    promotionState: "queued",
+  },
+  {
+    id: "share-to-aindia",
+    class: "opportunity",
+    source: "device passport share-target roadmap",
+    evidence: "Most real checks begin in WhatsApp, SMS, browser, camera roll, or screenshots, not inside a blank chatbot.",
+    decision: "Support user-initiated share paths while refusing background chat access.",
+    nextAction: "Implement PWA share target first, then Android share intent and iOS share extension behind capability passports.",
+    promotionState: "queued",
+  },
+  {
+    id: "viral-without-proof",
+    class: "ignore",
+    source: "unreceipted marketing pressure",
+    evidence: "Virality, broad AI-race claims, or competitor anxiety do not prove a user need or runtime capability.",
+    decision: "Ignore as a promotion input until tied to search, canary, user, or source evidence.",
+    nextAction: "Convert the claim into a measurable experiment or discard it.",
+    promotionState: "discarded",
+  },
+];
+
+export const aindiaLearningReceipt = {
+  schemaVersion: "aindia.self_learning_recursion.v1",
+  receiptId: `AIN-LEARN-${aindiaMacAbsorption.verifiedAt.slice(0, 10).replace(/-/g, "")}`,
+  updated: aindiaMacAbsorption.verifiedAt.slice(0, 10),
+  boundary: aindiaSelfLearningBoundary.mode,
+  signalCount: aindiaLearningSignals.length,
+  absorbed: aindiaLearningSignals.filter((signal) => signal.promotionState === "absorbed").length,
+  blocked: aindiaLearningSignals.filter((signal) => signal.promotionState === "blocked").length,
+  queued: aindiaLearningSignals.filter((signal) => signal.promotionState === "queued").length,
+  discarded: aindiaLearningSignals.filter((signal) => signal.promotionState === "discarded").length,
+  promotionRule:
+    "A learning can become product truth only when it has a source receipt, passes claim guard, preserves privacy, fits cheap-device constraints, and passes lint/typecheck/build/API/browser proof.",
 };

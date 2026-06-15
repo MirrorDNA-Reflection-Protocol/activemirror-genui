@@ -13,11 +13,16 @@ import {
   aindiaForeverLoop,
   aindiaHundredRecursions,
   aindiaHundredRecursionSummary,
+  aindiaLearningCycle,
+  aindiaLearningPromotionGates,
+  aindiaLearningReceipt,
+  aindiaLearningSignals,
   aindiaMacAbsorption,
   aindiaPerfectionDoctrine,
   aindiaRecursionLoop,
   aindiaRecursionScenarios,
   aindiaRecursionWinner,
+  aindiaSelfLearningBoundary,
 } from "@/lib/aindia/recursion";
 import { getAIndiaReflectiveTurnContract } from "@/lib/aindia/reflectiveTurn";
 import { aindiaHooks, aindiaRuntimeLayers, aindiaWrappers } from "@/lib/aindia/runtime";
@@ -67,6 +72,13 @@ export function GET() {
           winner: aindiaRecursionWinner,
           loop: aindiaRecursionLoop,
           foreverLoop: aindiaForeverLoop,
+          selfLearning: {
+            boundary: aindiaSelfLearningBoundary,
+            cycle: aindiaLearningCycle,
+            promotionGates: aindiaLearningPromotionGates,
+            signals: aindiaLearningSignals,
+            receipt: aindiaLearningReceipt,
+          },
           hundredRecursions: {
             summary: aindiaHundredRecursionSummary,
             ledger: aindiaHundredRecursions,

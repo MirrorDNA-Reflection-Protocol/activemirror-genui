@@ -317,6 +317,7 @@
 .opportunities,
 .modelMatrix,
 .stack,
+.selfLearning,
 .devicePassport,
 .finalCta {
   margin: 48px clamp(18px, 3.5vw, 42px) 0;
@@ -2605,6 +2606,163 @@
   line-height: 1.18;
 }
 
+.selfLearning {
+  display: grid;
+  gap: 18px;
+}
+
+.learningPanel {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.42fr) 1fr;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.learningDoctrine,
+.learningLoop article,
+.learningSignals article {
+  border: 1px solid var(--ain-line);
+  border-radius: 8px;
+  background: var(--ain-paper-2);
+}
+
+.learningDoctrine {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  padding: 26px;
+}
+
+.learningDoctrine svg {
+  color: var(--ain-gold);
+}
+
+.learningDoctrine h3 {
+  margin: 0;
+  color: var(--ain-ink);
+  font-size: 28px;
+  line-height: 1.08;
+}
+
+.learningDoctrine p {
+  margin: 0;
+  color: var(--ain-muted);
+  font-size: 16px;
+  line-height: 1.52;
+}
+
+.learningReceipt {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--ain-ink);
+  color: var(--ain-paper-2);
+}
+
+.learningReceipt span {
+  color: var(--ain-gold);
+  font-family: var(--ain-mono);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.learningReceipt b {
+  font-size: 15px;
+}
+
+.learningReceipt small {
+  color: var(--ain-line);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.learningLoop,
+.learningSignals {
+  display: grid;
+  gap: 12px;
+}
+
+.learningLoop {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.learningLoop article,
+.learningSignals article {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 220px;
+  padding: 18px;
+}
+
+.learningLoop span,
+.learningSignals span {
+  display: inline-grid;
+  place-items: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(199, 154, 58, 0.14);
+  color: var(--ain-gold-deep);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.learningLoop h3,
+.learningSignals h3 {
+  margin: 0;
+  color: var(--ain-ink);
+  font-size: 20px;
+  line-height: 1.12;
+}
+
+.learningLoop p,
+.learningSignals p {
+  margin: 0;
+  color: var(--ain-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.learningLoop small,
+.learningSignals small {
+  color: var(--ain-gold-deep);
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1.36;
+}
+
+.learningSignals {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.learningGates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--ain-line);
+  border-bottom: 1px solid var(--ain-line);
+  color: var(--ain-muted);
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.learningGates b {
+  color: var(--ain-ink);
+}
+
+.learningGates span {
+  display: inline-flex;
+}
+
 .finalCta {
   display: flex;
   align-items: center;
@@ -2926,6 +3084,8 @@
   .reflectionCompare,
   .modelIntro,
   .browserHelper,
+  .learningPanel,
+  .learningLoop,
   .shareRails,
   .offlineSteps {
     grid-template-columns: 1fr;
@@ -2933,6 +3093,7 @@
 
   .reflectionEngine ul,
   .reflectionCompareGrid,
+  .learningSignals,
   .passportGrid,
   .shareRailList {
     grid-template-columns: 1fr 1fr;
@@ -2997,6 +3158,7 @@
 
   .reflectionEngine ul,
   .reflectionCompareGrid,
+  .learningSignals,
   .passportGrid,
   .shareRailList {
     grid-template-columns: 1fr;

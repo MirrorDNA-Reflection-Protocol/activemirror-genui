@@ -29,6 +29,13 @@ import {
 } from "@/lib/aindia/bootloader";
 import { answerGlyphIdsForRisk, getAIndiaGlyphs } from "@/lib/aindia/glyphs";
 import { aindiaAnswerEngineSteps, aindiaMetaThesis } from "@/lib/aindia/modelMatrix";
+import {
+  aindiaLearningCycle,
+  aindiaLearningPromotionGates,
+  aindiaLearningReceipt,
+  aindiaLearningSignals,
+  aindiaSelfLearningBoundary,
+} from "@/lib/aindia/recursion";
 import { aindiaReflectionEngineFormula, getAIndiaReflectiveTurnContract } from "@/lib/aindia/reflectiveTurn";
 import {
   aindiaDeviceCapabilityPassport,
@@ -589,6 +596,57 @@ function DevicePassportSection() {
   );
 }
 
+function SelfLearningSection() {
+  const visibleSignals = aindiaLearningSignals.slice(0, 4);
+
+  return (
+    <section className={styles.selfLearning} data-ain-section>
+      <div className={styles.sectionHead}>
+        <p>Self-learning recursion</p>
+        <h2>{aindiaSelfLearningBoundary.publicLine}</h2>
+      </div>
+      <div className={styles.learningPanel}>
+        <article className={styles.learningDoctrine}>
+          <BrainCircuit aria-hidden="true" size={34} />
+          <h3>Better than yesterday, without silent mutation.</h3>
+          <p>{aindiaSelfLearningBoundary.mutationBoundary}</p>
+          <div className={styles.learningReceipt}>
+            <span>{aindiaLearningReceipt.receiptId}</span>
+            <b>{aindiaLearningReceipt.boundary}</b>
+            <small>{aindiaLearningReceipt.promotionRule}</small>
+          </div>
+        </article>
+        <div className={styles.learningLoop} aria-label="AIndia self-learning recursion loop">
+          {aindiaLearningCycle.slice(0, 5).map((step, index) => (
+            <article key={step.step}>
+              <span>{index + 1}</span>
+              <h3>{step.step}</h3>
+              <p>{step.rule}</p>
+              <small>Blocks: {step.blockedIf}</small>
+            </article>
+          ))}
+        </div>
+      </div>
+      <div className={styles.learningSignals} aria-label="AIndia learning signal classifier">
+        {visibleSignals.map((signal) => (
+          <article key={signal.id}>
+            <span>{signal.class}</span>
+            <h3>{signal.id.replace(/-/g, " ")}</h3>
+            <p>{signal.decision}</p>
+            <small>{signal.nextAction}</small>
+          </article>
+        ))}
+      </div>
+      <div className={styles.learningGates}>
+        <b>No silent training.</b>
+        <span>No private profile.</span>
+        <span>No public claim without receipt.</span>
+        <span>{aindiaLearningPromotionGates.slice(0, 4).join(" · ")}</span>
+      </div>
+    </section>
+  );
+}
+
 /* ── main page ── */
 
 export default function AIndiaPage() {
@@ -672,6 +730,7 @@ export default function AIndiaPage() {
       <SovereignSection />
       <CheckHabitSection />
       <StackSection />
+      <SelfLearningSection />
       <DevicePassportSection />
 
       <section className={styles.finalCta}>

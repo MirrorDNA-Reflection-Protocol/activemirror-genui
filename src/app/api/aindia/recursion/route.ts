@@ -5,10 +5,15 @@ import {
   aindiaForeverLoop,
   aindiaHundredRecursions,
   aindiaHundredRecursionSummary,
+  aindiaLearningCycle,
+  aindiaLearningPromotionGates,
+  aindiaLearningReceipt,
+  aindiaLearningSignals,
   aindiaRecursionLoop,
   aindiaRecursionScenarios,
   aindiaRecursionScoreLabels,
   aindiaRecursionWinner,
+  aindiaSelfLearningBoundary,
 } from "@/lib/aindia/recursion";
 
 export function GET() {
@@ -25,6 +30,13 @@ export function GET() {
       winner: aindiaRecursionWinner,
       loop: aindiaRecursionLoop,
       foreverLoop: aindiaForeverLoop,
+      selfLearning: {
+        boundary: aindiaSelfLearningBoundary,
+        cycle: aindiaLearningCycle,
+        promotionGates: aindiaLearningPromotionGates,
+        signals: aindiaLearningSignals,
+        receipt: aindiaLearningReceipt,
+      },
       hundredRecursions: {
         summary: aindiaHundredRecursionSummary,
         ledger: aindiaHundredRecursions,

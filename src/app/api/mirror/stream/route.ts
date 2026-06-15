@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { streamObject } from "ai";
-import { openai } from "@ai-sdk/openai";
 import { mirrorSurfaceSchema } from "@/lib/mirror/schema";
 import { LRUCache } from "lru-cache";
 import crypto from "crypto";
@@ -34,11 +33,15 @@ import {
   ACTIVE_MIRROR_WRAPPER_STACK,
 } from "@/lib/mirror/contracts/activeMirrorBootloader";
 import { createLocalSupervisorDecision } from "@/lib/mirror/localSupervisor";
+import {
+  configuredWorkOsModelRoutes,
+  recordModelRouteFailure,
+  recordModelRouteSuccess,
+} from "@/lib/mirror/modelHealth";
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const FREE_TURN_COOKIE = "am_free_turns";
 const MAX_BODY_BYTES = Number(process.env.MIRROR_MAX_BODY_BYTES || 16_384);
-const OPENAI_MODEL = process.env.MIRROR_OPENAI_MODEL || process.env.OPENAI_FREE_MODEL || "gpt-5.5";
 const ALLOWED_HOST_SUFFIXES = [".activemirror.ai", ".pages.dev"];
 const ALLOWED_EXACT_HOSTS = new Set(["activemirror.ai", "localhost", "127.0.0.1", "::1"]);
 
@@ -1732,10 +1735,12 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    // If no OpenAI key, fall back to mock
-    if (!process.env.OPENAI_API_KEY) {
+    const modelRoute = configuredWorkOsModelRoutes()[0];
+
+    if (!modelRoute) {
       return ndjsonResponse(createSoftwareWorkspaceStream(lastUserMessage.content), setCookie);
     }
+    const { model, provider, modelId } = modelRoute;
 
     const SYSTEM_PROMPT = buildMirrorSystemPrompt(
       FREE_TURNS_UNLOCKED ? FREE_TURN_LIMIT : Math.max(FREE_TURN_LIMIT - nextTurnState.used, 0),
@@ -1745,7 +1750,7 @@ export async function POST(request: NextRequest) {
     let result: MirrorStreamResult;
     try {
       result = await streamObject({
-        model: openai(OPENAI_MODEL),
+        model,
         system: SYSTEM_PROMPT,
         messages,
         schema: mirrorSurfaceSchema,
@@ -1753,6 +1758,7 @@ export async function POST(request: NextRequest) {
         maxOutputTokens: Number(process.env.MIRROR_MAX_OUTPUT_TOKENS || 1200),
       }) as unknown as MirrorStreamResult;
     } catch (llmError) {
+      recordModelRouteFailure(provider, modelId, llmError);
       console.error("[Mirror] LLM call failed, falling back to mock:", llmError);
       return ndjsonResponse(createSoftwareWorkspaceStream(lastUserMessage.content), setCookie);
     }
@@ -1790,6 +1796,7 @@ export async function POST(request: NextRequest) {
         const emittedNodeIds = new Set<string>();
         const lastNodeBody: Record<string, string> = {};
         const lastNodeTitle: Record<string, string> = {};
+        let modelRouteRecordedHealthy = false;
 
         try {
           yieldEnvelope({
@@ -1988,6 +1995,10 @@ export async function POST(request: NextRequest) {
 
           for await (const partial of result.partialObjectStream) {
             if (streamClosed) break;
+            if (!modelRouteRecordedHealthy) {
+              recordModelRouteSuccess(provider, modelId);
+              modelRouteRecordedHealthy = true;
+            }
             // Stream only complete public status lines, never partial model thought fragments.
             if (partial.thought_process) {
               for (const thought of partial.thought_process) {
@@ -2052,10 +2063,15 @@ export async function POST(request: NextRequest) {
             }
           }
 
+          if (streamClosed) return;
+          if (!modelRouteRecordedHealthy) {
+            recordModelRouteSuccess(provider, modelId);
+          }
           yieldEnvelope({ envelope: "beginRendering", surface_id });
           closeStream();
         } catch (err) {
           if (streamClosed) return;
+          recordModelRouteFailure(provider, modelId, err);
           console.error("[Mirror] Stream error:", err);
           yieldEnvelope({
             envelope: "surfaceUpdate",

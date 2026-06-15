@@ -1,6 +1,6 @@
 # AIndia Recursion Harness
 
-Verified from this Mac: 2026-06-12 IST
+Verified from this Mac: 2026-06-15 10:49 IST
 
 ## Rule
 
@@ -18,8 +18,10 @@ Live body truth:
 - Ollama is live on `127.0.0.1:11434`.
 - Local models installed: Sarvam translate GGUF, embeddinggemma, ministral, qwen3-coder, mirrorstudent, phi4-mini.
 - Codex and Claude cognitive adapters are healthy on `8926` and `8927`.
-- `phone-mesh` listens on `8875`, but current Pixel and OnePlus backends are unreachable.
-- The previous `localhost:3457/aindia` target is stale until this worktree server is restarted.
+- `phone-mesh` answers on `8875` with `grapheneos_mode=true`, `aicore_supported=false`, and `checked=2026-06-15T05:19:48Z`.
+- `phone-mesh` currently reports `mac-ollama`, Pixel, and OnePlus inference backends as false, so it is not a proof rail.
+- `adb devices -l` lists no attached Android devices in this pass.
+- No Next dev server was already listening during this pass; Playwright should own its test server unless a fresh `PLAYWRIGHT_BASE_URL` is provided.
 
 ## Absorbed Decision
 

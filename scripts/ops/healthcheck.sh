@@ -108,6 +108,12 @@ grep -q "active-mirror-proof-ledger-export.schema.json" "$TMP_DIR/body" || fail 
 grep -q "active-mirror-decision-critique-stream.schema.json" "$TMP_DIR/body" || fail "contracts endpoint did not expose critique stream schema"
 grep -q "active-mirror-local-operator-packet.schema.json" "$TMP_DIR/body" || fail "contracts endpoint did not expose local operator schema"
 
+aindia_learning_code="$(curl_code GET "$BASE_URL/api/aindia/learning")"
+[[ "$aindia_learning_code" == "200" ]] || fail "AIndia learning endpoint returned HTTP $aindia_learning_code"
+grep -q "aindia-self-learning-recursion-v1" "$TMP_DIR/body" || fail "AIndia learning endpoint did not expose protocol"
+grep -q "receipt_driven_not_self_mutating" "$TMP_DIR/body" || fail "AIndia learning endpoint did not expose mutation boundary"
+grep -q "deploy_gate_for_production" "$TMP_DIR/body" || fail "AIndia learning endpoint did not expose deploy gate"
+
 operator_code="$(curl_code GET "$BASE_URL/api/mirror/local-operator")"
 [[ "$operator_code" == "200" ]] || fail "local operator endpoint returned HTTP $operator_code"
 grep -q "local-operator-compiler" "$TMP_DIR/body" || fail "local operator endpoint did not expose compiler version"
