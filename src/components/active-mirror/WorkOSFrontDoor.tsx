@@ -639,6 +639,7 @@ function Workpiece({ artifact, memoryMode, seedState, onOpenSheet }: { artifact:
   const [approved, setApproved] = useState(false);
   const assumptions = artifact.assumptions || [];
   const unknowns = artifact.unknowns || [];
+  const showProofSprintHandoff = shouldShowProofSprintHandoff(artifact);
 
   return (
     <div className="work refresh" data-testid="workpiece">
@@ -674,9 +675,23 @@ function Workpiece({ artifact, memoryMode, seedState, onOpenSheet }: { artifact:
           </button>
         ) : null}
       </div>
-      <ProofSprintHandoff />
+      {showProofSprintHandoff ? <ProofSprintHandoff /> : null}
     </div>
   );
+}
+
+function shouldShowProofSprintHandoff(artifact: WorkArtifact) {
+  const artifactText = [
+    artifact.type,
+    artifact.title,
+    artifact.summary,
+    artifact.nextAction,
+    ...artifact.blocks.flatMap((block) => [block.heading, ...block.items]),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return /\b(proof sprint|workspace proof|vendor evidence|evidence workspace|source route|deployment boundary|team workflow)\b/.test(artifactText);
 }
 
 function ProofSprintHandoff() {
