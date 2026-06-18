@@ -154,6 +154,45 @@ test.describe('Active Mirror work OS front door', () => {
     await expect(page.getByText('ProofLedgerEntry')).toBeVisible();
   });
 
+  test('work os API keeps chat reply compact and sends the artifact separately', async ({ page }) => {
+    const response = await page.request.post('/api/mirror/work-os', {
+      data: {
+        messages: [{ role: 'user', content: 'Create a small business launch plan for a bakery in Goa' }],
+        prompt: 'Create a small business launch plan for a bakery in Goa',
+        turn: 1,
+        currentArtifact: null,
+        mirrorSeed: null,
+        memoryMode: 'ephemeral',
+      },
+    });
+
+    expect(response.ok()).toBeTruthy();
+    const events = (await response.text())
+      .trim()
+      .split('\n')
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as { type: string; text?: string; artifact?: unknown });
+    const reply = events
+      .filter((event) => event.type === 'reply_delta')
+      .map((event) => event.text ?? '')
+      .join('');
+    const artifactEvents = events.filter((event) => event.type === 'artifact');
+
+    expect(reply.length).toBeLessThanOrEqual(180);
+    expect(['{', '}', '[', ']', '|'].some((marker) => reply.includes(marker))).toBe(false);
+    expect(reply).not.toContain('**');
+    expect(reply).not.toMatch(/\b(objective|targetMarket|keyActivities|timeline|executive summary|market analysis)\b/i);
+    expect(artifactEvents).toHaveLength(1);
+    expect(artifactEvents[0].artifact).toMatchObject({
+      title: expect.any(String),
+      blocks: expect.any(Array),
+      assumptions: expect.any(Array),
+      unknowns: expect.any(Array),
+      nextAction: expect.any(String),
+    });
+    expect(events.at(-1)).toMatchObject({ type: 'done' });
+  });
+
   test('typed sensitive prompt routes away from the hosted-model path honestly', async ({ page }) => {
     await page.goto('/mirror?qa=1');
 

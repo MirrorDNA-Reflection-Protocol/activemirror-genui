@@ -26,4 +26,13 @@ test.describe('model route normalization', () => {
     expect(modelHealth).toContain('"gpt-4.1-mini"');
     expect(streamRoute).not.toContain('OPENAI_FREE_MODEL');
   });
+
+  test('work os chat reply is derived from the validated turn, not a free-form artifact stream', () => {
+    const workOsRoute = readFileSync(join(repoRoot, 'src/app/api/mirror/work-os/route.ts'), 'utf8');
+
+    expect(workOsRoute).not.toContain('streamText');
+    expect(workOsRoute).toContain('schema: turnSchema');
+    expect(workOsRoute).toContain('compactWorkOsReply');
+    expect(workOsRoute).toContain('Never put markdown, lists, JSON, or artifact body text in reply.');
+  });
 });

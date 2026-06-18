@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { generateObject, streamText } from "ai";
+import { generateObject } from "ai";
 import { z } from "zod";
 import {
   configuredWorkOsModelRoutes,
@@ -8,25 +8,32 @@ import {
   recordModelRouteSuccess,
   type ModelRouteCandidate,
 } from "@/lib/mirror/modelHealth";
+import {
+  compactWorkOsReply,
+  MAX_WORK_OS_ARTIFACT_FIELD_CHARS,
+  MAX_WORK_OS_ARTIFACT_ITEM_CHARS,
+  MAX_WORK_OS_ARTIFACT_TITLE_CHARS,
+  MAX_WORK_OS_PROOF_LABEL_CHARS,
+} from "@/lib/mirror/workOsReply";
 
 const artifactBlockSchema = z.object({
-  heading: z.string().min(1),
+  heading: z.string().min(1).max(MAX_WORK_OS_ARTIFACT_TITLE_CHARS),
   type: z.enum(["checklist", "steps", "list", "fields"]),
-  items: z.array(z.string().min(1)).min(1).max(10),
+  items: z.array(z.string().min(1).max(MAX_WORK_OS_ARTIFACT_ITEM_CHARS)).min(1).max(10),
 });
 
 const artifactSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1).max(MAX_WORK_OS_ARTIFACT_TITLE_CHARS),
   type: z.enum(["plan", "brief", "outline", "draft", "checklist", "note"]),
-  summary: z.string().min(1),
+  summary: z.string().min(1).max(MAX_WORK_OS_ARTIFACT_FIELD_CHARS),
   blocks: z.array(artifactBlockSchema).min(1).max(5),
-  assumptions: z.array(z.string()),
-  unknowns: z.array(z.string()),
-  nextAction: z.string(),
+  assumptions: z.array(z.string().min(1).max(MAX_WORK_OS_PROOF_LABEL_CHARS)).max(6),
+  unknowns: z.array(z.string().min(1).max(MAX_WORK_OS_PROOF_LABEL_CHARS)).max(6),
+  nextAction: z.string().max(MAX_WORK_OS_PROOF_LABEL_CHARS),
 });
 
 const turnSchema = z.object({
-  reply: z.string().min(1),
+  reply: z.string().min(1).max(MAX_WORK_OS_ARTIFACT_FIELD_CHARS),
   artifact: artifactSchema.nullable(),
 });
 
@@ -401,49 +408,41 @@ function fallbackTurn(input: z.infer<typeof requestSchema>, routeReason: string)
 async function modelTurn(input: z.infer<typeof requestSchema>, model: NonNullable<ReturnType<typeof chooseRoute>["model"]>) {
   const prompt = contextPrompt(input);
 
-  const replyResult = streamText({
+  const result = await withTimeout(generateObject({
     model,
-    system: `${SYSTEM_PROMPT} Return only the 1-2 sentence reply. Do not return the artifact.`,
-    prompt,
-  });
-
-  let reply = "";
-  for await (const delta of replyResult.textStream) {
-    reply += delta;
-  }
-
-  const artifactResult = await withTimeout(generateObject({
-    model,
-    schema: turnSchema.pick({ artifact: true }),
-    system: `${SYSTEM_PROMPT} Return only the structured artifact object or null inside the artifact key.`,
+    schema: turnSchema,
+    system: `${SYSTEM_PROMPT} Return only one JSON object matching the schema. Keep reply under 160 characters. The reply must be a plain one-line intro or one question. Never put markdown, lists, JSON, or artifact body text in reply.`,
     prompt,
   }));
+  const turn = turnSchema.parse(result.object);
 
-  return turnSchema.parse({
-    reply: reply.trim() || "Done.",
-    artifact: artifactResult.object.artifact,
-  });
+  return {
+    reply: compactWorkOsReply(turn.reply, turn.artifact, Boolean(input.currentArtifact)),
+    artifact: turn.artifact,
+  };
 }
 
 function enqueue(controller: ReadableStreamDefaultController<Uint8Array>, event: Record<string, unknown>) {
   controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
 }
 
-async function emitFallback(controller: ReadableStreamDefaultController<Uint8Array>, turn: WorkTurn) {
-  const parts = turn.reply.split(/(\s+)/);
+async function emitReply(controller: ReadableStreamDefaultController<Uint8Array>, turn: WorkTurn, delayMs: number, refined: boolean) {
+  const reply = compactWorkOsReply(turn.reply, turn.artifact, refined);
+  const parts = reply.split(/(\s+)/);
   for (const part of parts) {
     enqueue(controller, { type: "reply_delta", text: part });
-    await new Promise((resolve) => setTimeout(resolve, 14));
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
   }
+}
+
+async function emitFallback(controller: ReadableStreamDefaultController<Uint8Array>, turn: WorkTurn, refined = false) {
+  await emitReply(controller, turn, 14, refined);
   enqueue(controller, { type: "artifact", artifact: turn.artifact });
   enqueue(controller, { type: "done" });
 }
 
-async function emitModel(controller: ReadableStreamDefaultController<Uint8Array>, turn: WorkTurn) {
-  for (const part of turn.reply.split(/(\s+)/)) {
-    enqueue(controller, { type: "reply_delta", text: part });
-    await new Promise((resolve) => setTimeout(resolve, 10));
-  }
+async function emitModel(controller: ReadableStreamDefaultController<Uint8Array>, turn: WorkTurn, refined = false) {
+  await emitReply(controller, turn, 10, refined);
   enqueue(controller, { type: "artifact", artifact: turn.artifact });
   enqueue(controller, { type: "done" });
 }
@@ -499,9 +498,9 @@ export async function POST(request: NextRequest) {
           }
         }
         if (!turn) turn = fallbackTurn(input, route.reason);
-        await emitModel(controller, turn);
+        await emitModel(controller, turn, Boolean(input.currentArtifact));
       } catch {
-        await emitFallback(controller, fallbackTurn(input, route.reason));
+        await emitFallback(controller, fallbackTurn(input, route.reason), Boolean(input.currentArtifact));
       } finally {
         controller.close();
       }
