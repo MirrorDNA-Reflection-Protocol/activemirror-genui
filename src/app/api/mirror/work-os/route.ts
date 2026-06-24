@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { generateObject } from "ai";
+import type { LanguageModel } from "ai";
 import { z } from "zod";
 import {
   configuredWorkOsModelRoutes,
@@ -50,6 +51,14 @@ const requestSchema = z.object({
 
 type WorkTurn = z.infer<typeof turnSchema>;
 type WorkArtifact = z.infer<typeof artifactSchema>;
+type RouteResult = {
+  label: string;
+  model: LanguageModel | null;
+  provider: ModelRouteCandidate["provider"] | null;
+  modelId: string | null;
+  reason: string;
+  fallbacks: ModelRouteCandidate[];
+};
 
 const encoder = new TextEncoder();
 const MODEL_TIMEOUT_MS = Number(process.env.ACTIVE_MIRROR_WORK_OS_MODEL_TIMEOUT_MS || 14_000);
@@ -68,7 +77,7 @@ const SYSTEM_PROMPT = [
   "Always include assumptions, unknowns, and nextAction in the artifact. Use empty arrays or an empty string when none apply.",
 ].join(" ");
 
-function chooseRoute(prompt: string) {
+async function chooseRoute(prompt: string): Promise<RouteResult> {
   if (isSensitiveModelPrompt(prompt)) {
     return {
       label: "local · gated",
@@ -80,7 +89,7 @@ function chooseRoute(prompt: string) {
     };
   }
 
-  const configuredRoutes = configuredWorkOsModelRoutes();
+  const configuredRoutes = await configuredWorkOsModelRoutes();
   const [primary, ...fallbacks] = configuredRoutes;
   if (primary) {
     return { ...primary, fallbacks };
@@ -405,7 +414,7 @@ function fallbackTurn(input: z.infer<typeof requestSchema>, routeReason: string)
   };
 }
 
-async function modelTurn(input: z.infer<typeof requestSchema>, model: NonNullable<ReturnType<typeof chooseRoute>["model"]>) {
+async function modelTurn(input: z.infer<typeof requestSchema>, model: NonNullable<RouteResult["model"]>) {
   const prompt = contextPrompt(input);
 
   const result = await withTimeout(generateObject({
@@ -455,7 +464,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "invalid_work_os_turn" }, { status: 400 });
   }
 
-  const route = chooseRoute(input.prompt);
+  const route = await chooseRoute(input.prompt);
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       enqueue(controller, { type: "route", route: route.label, reason: route.reason });
@@ -463,8 +472,14 @@ export async function POST(request: NextRequest) {
         const forcedTurn = deterministicTurn(input);
         let turn: WorkTurn | null = forcedTurn;
         if (!turn && route.model) {
-          const candidates = [
-            route,
+          const candidates: ModelRouteCandidate[] = [
+            {
+              provider: route.provider!,
+              label: route.label,
+              modelId: route.modelId!,
+              model: route.model,
+              reason: route.reason,
+            },
             ...route.fallbacks,
           ];
           for (const [index, candidate] of candidates.entries()) {

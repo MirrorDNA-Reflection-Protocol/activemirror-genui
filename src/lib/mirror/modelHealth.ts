@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
-import { anthropic } from "@ai-sdk/anthropic";
+import { createRequire } from "node:module";
 import { google } from "@ai-sdk/google";
 import { openai } from "@ai-sdk/openai";
 import type { LanguageModel } from "ai";
@@ -67,6 +67,16 @@ function providerBlockedByHealth(observed?: ObservedProviderState) {
   return observed?.status === "degraded" && ["credential_rejected", "usage_limited", "rate_limited"].includes(observed.errorClass || "");
 }
 
+async function loadAnthropicModel(modelId: string) {
+  try {
+    const require = createRequire(import.meta.url);
+    const mod = require("@ai-sdk/anthropic") as { anthropic?: (id: string) => LanguageModel };
+    return typeof mod.anthropic === "function" ? mod.anthropic(modelId) : null;
+  } catch {
+    return null;
+  }
+}
+
 function readState(): ObservedState {
   try {
     if (!existsSync(STATE_PATH)) return {};
@@ -101,7 +111,7 @@ export function isSensitiveModelPrompt(prompt: string) {
   return /\b(private|secret|credential|password|vault|local only|sovereign|sarvam|hindi|tamil|telugu|kannada|malayalam|marathi|bengali|pan|aadhaar|account|bank|device|files?|email inbox|calendar)\b/i.test(prompt);
 }
 
-export function configuredWorkOsModelRoutes() {
+export async function configuredWorkOsModelRoutes() {
   const routes: ModelRouteCandidate[] = [];
   const observed = readState();
 
@@ -118,13 +128,16 @@ export function configuredWorkOsModelRoutes() {
 
   if (process.env.ANTHROPIC_API_KEY && envEnabled("ACTIVE_MIRROR_ENABLE_ANTHROPIC", false) && !providerBlockedByHealth(observed.anthropic)) {
     const modelId = process.env.ANTHROPIC_MODEL || process.env.ACTIVE_MIRROR_ANTHROPIC_MODEL || "claude-sonnet-4-5";
-    routes.push({
-      provider: "anthropic",
-      label: `anthropic · ${modelId.replace(/^claude-/, "")}`,
-      modelId,
-      model: anthropic(modelId),
-      reason: routes.length ? "quality fallback route" : "primary quality route",
-    });
+    const model = await loadAnthropicModel(modelId);
+    if (model) {
+      routes.push({
+        provider: "anthropic",
+        label: `anthropic · ${modelId.replace(/^claude-/, "")}`,
+        modelId,
+        model,
+        reason: routes.length ? "quality fallback route" : "primary quality route",
+      });
+    }
   }
 
   if (process.env.GOOGLE_GENERATIVE_AI_API_KEY && envEnabled("ACTIVE_MIRROR_ENABLE_GEMINI", false) && !providerBlockedByHealth(observed.gemini)) {
@@ -309,7 +322,11 @@ export function getModelHealthSnapshot(): ModelHealthSnapshot {
     schemaVersion: "active_mirror.model_health.v1",
     generatedAt: new Date().toISOString(),
     claimBoundary: "Public-safe route health only. No secrets, prompt text, private files, account data, or raw provider responses are exposed.",
-    activePublicOrder: configuredWorkOsModelRoutes().map((route) => route.label),
+    activePublicOrder: [
+      ...(process.env.OPENAI_API_KEY && envEnabled("ACTIVE_MIRROR_ENABLE_OPENAI", true) ? ["openai"] : []),
+      ...(process.env.ANTHROPIC_API_KEY && envEnabled("ACTIVE_MIRROR_ENABLE_ANTHROPIC", false) ? ["anthropic"] : []),
+      ...(process.env.GOOGLE_GENERATIVE_AI_API_KEY && envEnabled("ACTIVE_MIRROR_ENABLE_GEMINI", false) ? ["gemini"] : []),
+    ],
     sensitiveRoute: "local · gated",
     providers,
   };

@@ -1735,7 +1735,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    const modelRoute = configuredWorkOsModelRoutes()[0];
+    const modelRoute = (await configuredWorkOsModelRoutes())[0];
 
     if (!modelRoute) {
       return ndjsonResponse(createSoftwareWorkspaceStream(lastUserMessage.content), setCookie);
