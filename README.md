@@ -1,4 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Active Mirror GenUI
+
+## Canonical Status
+
+- Status: reference/prototype repo for GenUI and runtime experiments.
+- Canonical product/front-door repo: `/Users/mirror-pro/repos/activemirror-journey`
+- Canonical remote: `MirrorDNA-Reflection-Protocol/activemirror-genui`
+- Active lane: Active Mirror only
+
+New public homepage, BrainScan, Mirror Seed, and consumer reflection work should start in `/Users/mirror-pro/repos/activemirror-journey`. This repo remains useful for Next.js GenUI experiments and migration candidates.
+
+## Product Lock
+
+The public product should be understandable without internal language:
+
+> Start with one real thing. Get one useful next move. Keep control of what is remembered or shared.
+
+The technical trust thesis is:
+
+> One kernel. Many models. Same rules every turn.
+
+Do not lead consumer pages with provider names, receipt machinery, route internals, or architecture diagrams. Use those on trust/system pages when they help a buyer verify the claim.
+
+Core build-scope docs:
+
+- [MirrorOS build scope](docs/MIRROROS_BUILD_SCOPE.md)
+- [Build-pack intake](docs/BUILD_PACK_INTAKE_2026-06-25.md)
+- [SWFI separation rule](docs/SWFI_SEPARATION_RULE.md)
+- [Repo canonicalization](docs/REPO_CANONICALIZATION_2026-06-25.md)
+- [Pending migrations](docs/PENDING_MIGRATIONS_2026-06-25.md)
 
 ## Getting Started
 
@@ -6,28 +35,29 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Common checks:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run typecheck
+npm run build
+npm run ops:browser-canary
+```
 
-## Learn More
+## Repository Hygiene
 
-To learn more about Next.js, take a look at the following resources:
+- Keep SWFI and other client work out of this repo.
+- Do not expose provider keys in browser code.
+- Migrate old homepage/design work into this repo deliberately; do not keep editing duplicate repos.
+- Preserve legacy repos until their useful source has been reviewed and migrated.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Framework Note
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project uses Next.js. This local Next version has breaking changes; read `node_modules/next/dist/docs/` before relying on framework assumptions.
 
 ## Deploy on Vercel
 
